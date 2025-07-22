@@ -184,12 +184,12 @@ const GamePage = () => {
               </CardHeader>
               <CardContent>
                 {/* Number Grid */}
-                <div className="grid grid-cols-4 gap-3 mb-6">
+                <div className="grid grid-cols-4 gap-2 mb-4">
                   {generateNumberGrid().map((number) => (
                     <GameCard
                       key={number}
                       variant={getNumberVariant(number)}
-                      className="aspect-square text-xl font-bold cursor-pointer"
+                      className="h-12 w-12 text-sm font-bold cursor-pointer"
                       onClick={() => handleNumberSelect(number)}
                     >
                       {number}
