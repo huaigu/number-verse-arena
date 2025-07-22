@@ -11,7 +11,7 @@ import { Trophy, Users, Clock, Home, RotateCcw } from "lucide-react"
 const mockGameData = {
   roomId: "ROOM001",
   totalPlayers: 6,
-  currentPlayers: 4,
+  currentPlayers: 3,
   numberRange: { min: 1, max: 16 },
   prize: 1000,
   timeLeft: 45,
@@ -19,11 +19,26 @@ const mockGameData = {
   mySelection: 7
 }
 
+// Mock player data with wallet addresses
 const mockPlayers = [
-  { id: 1, name: "David Renald", avatar: "👨‍💼", score: 4291, rank: 1 },
-  { id: 2, name: "Donita Alla", avatar: "👩‍💼", score: 3321, rank: 2 },
-  { id: 3, name: "Steven Craig", avatar: "👨‍💻", score: 2826, rank: 3 },
-  { id: 4, name: "You", avatar: "🎮", score: 1200, rank: 4 }
+  { 
+    id: 1, 
+    walletAddress: "0xA7B8C9D1E2F3456789", 
+    selectedNumber: 7, 
+    isCurrentUser: true 
+  },
+  { 
+    id: 2, 
+    walletAddress: "0xB4E7F2A8C5D1234567", 
+    selectedNumber: 3, 
+    isCurrentUser: false 
+  },
+  { 
+    id: 3, 
+    walletAddress: "0xC8F1B5E9A3D7891234", 
+    selectedNumber: 12, 
+    isCurrentUser: false 
+  }
 ]
 
 const GamePage = () => {
@@ -83,69 +98,64 @@ const GamePage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Side - Leaderboard */}
+          {/* Left Side - Player Slots */}
           <div className="lg:col-span-1">
             <Card className="shadow-card">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Trophy className="w-5 h-5 text-primary" />
-                  <span>Leaderboard</span>
+                  <Users className="w-5 h-5 text-primary" />
+                  <span>Players ({mockGameData.currentPlayers}/{mockGameData.totalPlayers})</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {/* Top 3 Podium */}
-                  <div className="flex items-end justify-center space-x-2 mb-6">
-                    {/* 2nd Place */}
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-gradient-secondary rounded-xl flex items-center justify-center text-2xl mb-2">
-                        {mockPlayers[1].avatar}
-                      </div>
-                      <div className="w-16 h-12 bg-secondary rounded-t-lg flex items-center justify-center font-bold text-lg">
-                        2
-                      </div>
-                      <p className="text-xs mt-1 truncate w-16">{mockPlayers[1].name}</p>
-                      <p className="text-xs text-muted-foreground">{mockPlayers[1].score.toLocaleString()}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Current User (Always First) */}
+                  {mockPlayers.find(p => p.isCurrentUser) && (
+                    <div className="text-center p-3 bg-primary/10 rounded-lg border-2 border-primary/30">
+                      <Avatar className="w-12 h-12 mx-auto mb-2 ring-2 ring-primary">
+                        <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                          {mockPlayers.find(p => p.isCurrentUser)?.walletAddress.slice(2, 4).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="text-xs font-medium text-primary">You</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {mockPlayers.find(p => p.isCurrentUser)?.walletAddress.slice(0, 6)}...
+                      </p>
+                      {mockPlayers.find(p => p.isCurrentUser)?.selectedNumber && (
+                        <div className="mt-1 text-xs bg-primary text-primary-foreground rounded px-2 py-1">
+                          #{mockPlayers.find(p => p.isCurrentUser)?.selectedNumber}
+                        </div>
+                      )}
                     </div>
-
-                    {/* 1st Place */}
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center text-3xl mb-2 animate-pulse-glow">
-                        {mockPlayers[0].avatar}
-                      </div>
-                      <div className="w-20 h-16 bg-primary rounded-t-lg flex items-center justify-center font-bold text-xl text-primary-foreground">
-                        1
-                      </div>
-                      <p className="text-sm mt-1 font-semibold truncate w-20">{mockPlayers[0].name}</p>
-                      <p className="text-xs text-muted-foreground">{mockPlayers[0].score.toLocaleString()}</p>
-                    </div>
-
-                    {/* 3rd Place */}
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-gradient-secondary rounded-xl flex items-center justify-center text-2xl mb-2">
-                        {mockPlayers[2].avatar}
-                      </div>
-                      <div className="w-16 h-10 bg-accent rounded-t-lg flex items-center justify-center font-bold text-lg">
-                        3
-                      </div>
-                      <p className="text-xs mt-1 truncate w-16">{mockPlayers[2].name}</p>
-                      <p className="text-xs text-muted-foreground">{mockPlayers[2].score.toLocaleString()}</p>
-                    </div>
-                  </div>
+                  )}
 
                   {/* Other Players */}
-                  {mockPlayers.slice(3).map((player, index) => (
-                    <div key={player.id} className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
-                      <div className="w-8 h-8 bg-gradient-secondary rounded-lg flex items-center justify-center font-bold">
-                        {player.rank}
-                      </div>
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback>{player.avatar}</AvatarFallback>
+                  {mockPlayers.filter(p => !p.isCurrentUser).map((player) => (
+                    <div key={player.id} className="text-center p-3 bg-muted/50 rounded-lg">
+                      <Avatar className="w-12 h-12 mx-auto mb-2">
+                        <AvatarFallback className="bg-gradient-secondary text-secondary-foreground font-bold">
+                          {player.walletAddress.slice(2, 4).toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{player.name}</p>
-                        <p className="text-sm text-muted-foreground">{player.score.toLocaleString()} Points</p>
+                      <p className="text-xs font-medium">Player</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {player.walletAddress.slice(0, 6)}...
+                      </p>
+                      {player.selectedNumber && (
+                        <div className="mt-1 text-xs bg-secondary text-secondary-foreground rounded px-2 py-1">
+                          #{player.selectedNumber}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Empty Slots */}
+                  {Array.from({ length: mockGameData.totalPlayers - mockGameData.currentPlayers }).map((_, index) => (
+                    <div key={`empty-${index}`} className="text-center p-3 border-2 border-dashed border-muted rounded-lg">
+                      <div className="w-12 h-12 mx-auto mb-2 bg-muted/30 rounded-full flex items-center justify-center">
+                        <Users className="w-6 h-6 text-muted-foreground/50" />
                       </div>
+                      <p className="text-xs text-muted-foreground">Empty Slot</p>
                     </div>
                   ))}
                 </div>
