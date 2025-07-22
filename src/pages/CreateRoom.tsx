@@ -157,7 +157,10 @@ const CreateRoom = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Max Number</Label>
+                    <Label className="flex items-center space-x-2">
+                      <Target className="w-4 h-4" />
+                      <span>Max Number</span>
+                    </Label>
                     <Input
                       type="number"
                       value={roomSettings.maxNumber}
