@@ -14,10 +14,11 @@ const CreateRoom = () => {
   const { toast } = useToast()
   
   const [roomSettings, setRoomSettings] = useState({
+    roomName: "",
     maxPlayers: 6,
     minNumber: 1,
     maxNumber: 16,
-    prize: 1000,
+    entryFee: 0.1, // ETH
     timeLimit: 60
   })
 
@@ -42,17 +43,17 @@ const CreateRoom = () => {
     {
       name: "Quick Game",
       description: "4 players, fast start",
-      settings: { maxPlayers: 4, minNumber: 1, maxNumber: 9, prize: 500, timeLimit: 30 }
+      settings: { roomName: "Quick Game", maxPlayers: 4, minNumber: 1, maxNumber: 9, entryFee: 0.05, timeLimit: 30 }
     },
     {
       name: "Standard Game",
       description: "6 players standard",
-      settings: { maxPlayers: 6, minNumber: 1, maxNumber: 16, prize: 1000, timeLimit: 60 }
+      settings: { roomName: "Standard Game", maxPlayers: 6, minNumber: 1, maxNumber: 16, entryFee: 0.1, timeLimit: 60 }
     },
     {
       name: "Challenge Mode",
       description: "8 players, high difficulty",
-      settings: { maxPlayers: 8, minNumber: 1, maxNumber: 25, prize: 2000, timeLimit: 90 }
+      settings: { roomName: "Challenge Mode", maxPlayers: 8, minNumber: 1, maxNumber: 25, entryFee: 0.2, timeLimit: 90 }
     }
   ]
 
@@ -109,6 +110,17 @@ const CreateRoom = () => {
                 <CardDescription>Adjust game parameters to fit your needs</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Room Name */}
+                <div className="space-y-2">
+                  <Label>Room Name</Label>
+                  <Input
+                    type="text"
+                    placeholder="Enter room name"
+                    value={roomSettings.roomName}
+                    onChange={(e) => setRoomSettings(prev => ({ ...prev, roomName: e.target.value }))}
+                  />
+                </div>
+
                 {/* Max Players */}
                 <div className="space-y-3">
                   <Label className="flex items-center space-x-2">
@@ -156,23 +168,23 @@ const CreateRoom = () => {
                   </div>
                 </div>
 
-                {/* Prize */}
+                {/* Entry Fee */}
                 <div className="space-y-3">
                   <Label className="flex items-center space-x-2">
                     <Trophy className="w-4 h-4" />
-                    <span>Reward Points: {roomSettings.prize.toLocaleString()}</span>
+                    <span>Entry Fee: {roomSettings.entryFee} ETH</span>
                   </Label>
                   <Slider
-                    value={[roomSettings.prize]}
-                    onValueChange={([value]) => setRoomSettings(prev => ({ ...prev, prize: value }))}
-                    max={5000}
-                    min={100}
-                    step={100}
+                    value={[roomSettings.entryFee]}
+                    onValueChange={([value]) => setRoomSettings(prev => ({ ...prev, entryFee: value }))}
+                    max={1}
+                    min={0.01}
+                    step={0.01}
                     className="w-full"
                   />
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>100</span>
-                    <span>5,000</span>
+                    <span>0.01 ETH</span>
+                    <span>1 ETH</span>
                   </div>
                 </div>
 
@@ -227,9 +239,9 @@ const CreateRoom = () => {
                   <div className="text-center p-4 bg-game-grid rounded-lg">
                     <Trophy className="w-6 h-6 mx-auto mb-2 text-primary-foreground" />
                     <div className="text-2xl font-bold text-primary-foreground">
-                      {roomSettings.prize.toLocaleString()}
+                      {roomSettings.entryFee} ETH
                     </div>
-                    <div className="text-sm text-primary-foreground/70">Reward Points</div>
+                    <div className="text-sm text-primary-foreground/70">Entry Fee</div>
                   </div>
 
                   <div className="text-center p-4 bg-accent rounded-lg">
