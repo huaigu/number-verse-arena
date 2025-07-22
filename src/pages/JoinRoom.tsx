@@ -13,11 +13,11 @@ const mockRooms = [
   {
     id: "ROOM001",
     name: "Quick Battle",
-    currentPlayers: 3,
+    currentPlayers: 0,
     maxPlayers: 6,
     numberRange: "1-16",
-    prize: 1000,
-    timeLeft: 45,
+    entryFee: 0.1,
+    timeLeft: 180,
     status: "waiting"
   },
   {
@@ -26,9 +26,9 @@ const mockRooms = [
     currentPlayers: 2,
     maxPlayers: 4,
     numberRange: "1-9",
-    prize: 500,
+    entryFee: 0.05,
     timeLeft: 120,
-    status: "waiting"
+    status: "started"
   },
   {
     id: "ROOM003",
@@ -36,9 +36,9 @@ const mockRooms = [
     currentPlayers: 6,
     maxPlayers: 8,
     numberRange: "1-25",
-    prize: 2000,
+    entryFee: 0.2,
     timeLeft: 30,
-    status: "starting"
+    status: "started"
   },
   {
     id: "ROOM004",
@@ -46,9 +46,19 @@ const mockRooms = [
     currentPlayers: 8,
     maxPlayers: 8,
     numberRange: "1-20",
-    prize: 1500,
+    entryFee: 0.15,
     timeLeft: 0,
-    status: "full"
+    status: "finished"
+  },
+  {
+    id: "ROOM005",
+    name: "Speed Run",
+    currentPlayers: 4,
+    maxPlayers: 6,
+    numberRange: "1-12",
+    entryFee: 0.08,
+    timeLeft: 0,
+    status: "finished"
   }
 ]
 
@@ -82,19 +92,19 @@ const JoinRoom = () => {
   }
 
   const handleJoinRoom = (roomId: string, status: string) => {
-    if (status === "full") {
+    if (status === "finished") {
       toast({
-        title: "Room is full",
-        description: "Please choose another room",
+        title: "Game finished",
+        description: "This room has already finished",
         variant: "destructive"
       })
       return
     }
 
-    if (status === "starting") {
+    if (status === "started") {
       toast({
-        title: "Game is about to start",
-        description: "Joining room...",
+        title: "Game in progress",
+        description: "Joining ongoing game...",
       })
     }
 
@@ -107,10 +117,10 @@ const JoinRoom = () => {
     switch (status) {
       case "waiting":
         return <Badge variant="secondary">Waiting</Badge>
-      case "starting":
-        return <Badge className="bg-warning text-warning-foreground">Starting Soon</Badge>
-      case "full":
-        return <Badge variant="destructive">Full</Badge>
+      case "started":
+        return <Badge className="bg-warning text-warning-foreground">Started</Badge>
+      case "finished":
+        return <Badge variant="destructive">Finished</Badge>
       default:
         return <Badge variant="outline">Unknown</Badge>
     }
@@ -120,9 +130,9 @@ const JoinRoom = () => {
     switch (status) {
       case "waiting":
         return "border-secondary"
-      case "starting":
+      case "started":
         return "border-warning"
-      case "full":
+      case "finished":
         return "border-destructive"
       default:
         return "border-border"
@@ -203,7 +213,7 @@ const JoinRoom = () => {
                     <div
                       key={room.id}
                       className={`p-4 border-2 rounded-lg transition-all duration-300 ${getStatusColor(room.status)} ${
-                        room.status !== "full" ? "hover:shadow-card cursor-pointer hover:-translate-y-1" : "opacity-60"
+                        room.status !== "finished" ? "hover:shadow-card cursor-pointer hover:-translate-y-1" : "opacity-60"
                       }`}
                       onClick={() => handleJoinRoom(room.id, room.status)}
                     >
@@ -230,7 +240,7 @@ const JoinRoom = () => {
                         
                         <div className="flex items-center space-x-2 text-sm">
                           <Trophy className="w-4 h-4 text-muted-foreground" />
-                          <span>{room.prize.toLocaleString()}</span>
+                          <span>{room.entryFee} ETH</span>
                         </div>
                         
                         <div className="flex items-center space-x-2 text-sm">
