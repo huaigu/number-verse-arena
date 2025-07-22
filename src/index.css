@@ -2,41 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Unique Number Game Design System - Warm Orange/Gold Theme */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Main background - warm cream */
+    --background: 44 35% 94%;
+    --foreground: 25 25% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Cards and surfaces */
+    --card: 43 50% 92%;
+    --card-foreground: 25 25% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover styling */
+    --popover: 43 50% 92%;
+    --popover-foreground: 25 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - rich orange/gold */
+    --primary: 35 85% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 35 85% 45%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - lighter orange */
+    --secondary: 40 70% 75%;
+    --secondary-foreground: 25 25% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted tones */
+    --muted: 42 40% 85%;
+    --muted-foreground: 25 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - golden yellow */
+    --accent: 48 85% 65%;
+    --accent-foreground: 25 25% 15%;
 
-    --destructive: 0 84.2% 60.2%;
+    /* Game specific colors */
+    --game-grid: 38 80% 50%;
+    --game-selected: 15 85% 55%;
+    --game-available: 42 75% 70%;
+    --game-disabled: 42 20% 80%;
+
+    /* Status colors */
+    --success: 142 76% 36%;
+    --success-foreground: 355 100% 97%;
+    --warning: 48 96% 53%;
+    --warning-foreground: 25 25% 15%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders and inputs */
+    --border: 42 30% 80%;
+    --input: 42 30% 80%;
+    --ring: 35 85% 55%;
 
-    --radius: 0.5rem;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(35, 85%, 55%), hsl(48, 85%, 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(40, 70%, 75%), hsl(42, 75%, 70%));
+    --gradient-background: linear-gradient(180deg, hsl(44, 35%, 94%), hsl(42, 40%, 90%));
+
+    /* Shadows */
+    --shadow-game: 0 4px 20px hsl(35, 85%, 55% / 0.2);
+    --shadow-card: 0 2px 10px hsl(25, 25%, 15% / 0.1);
+    --shadow-float: 0 8px 30px hsl(35, 85%, 55% / 0.3);
+
+    /* Border radius */
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
