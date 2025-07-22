@@ -13,7 +13,7 @@ const mockGameData = {
   totalPlayers: 6,
   currentPlayers: 3,
   numberRange: { min: 1, max: 16 },
-  prize: 1000,
+  entryFeeETH: 0.1,
   timeLeft: 45,
   selectedNumbers: [3, 7, 12],
   mySelection: 7
@@ -44,6 +44,7 @@ const mockPlayers = [
 const GamePage = () => {
   const navigate = useNavigate()
   const [selectedNumber, setSelectedNumber] = useState<number | null>(mockGameData.mySelection)
+  const [hasConfirmedChoice, setHasConfirmedChoice] = useState(false)
   const [gameStarted, setGameStarted] = useState(true)
 
   const generateNumberGrid = () => {
@@ -184,12 +185,12 @@ const GamePage = () => {
               </CardHeader>
               <CardContent>
                 {/* Number Grid */}
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="grid grid-cols-4 gap-3 mb-6">
                   {generateNumberGrid().map((number) => (
                     <GameCard
                       key={number}
                       variant={getNumberVariant(number)}
-                      className="h-12 w-12 text-sm font-bold cursor-pointer"
+                      className="aspect-square text-lg font-bold cursor-pointer"
                       onClick={() => handleNumberSelect(number)}
                     >
                       {number}
@@ -200,22 +201,22 @@ const GamePage = () => {
                 {/* Game Info */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <Card className="bg-gradient-secondary">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-secondary-foreground">
+                    <CardContent className="p-3 text-center">
+                      <div className="text-lg font-bold text-secondary-foreground">
                         {selectedNumber || "-"}
                       </div>
-                      <div className="text-sm text-secondary-foreground/70">
+                      <div className="text-xs text-secondary-foreground/70">
                         My Choice
                       </div>
                     </CardContent>
                   </Card>
 
                   <Card className="bg-gradient-primary">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-primary-foreground">
-                        {mockGameData.prize.toLocaleString()}
+                    <CardContent className="p-3 text-center">
+                      <div className="text-lg font-bold text-primary-foreground">
+                        {(mockGameData.totalPlayers * mockGameData.entryFeeETH).toFixed(1)} ETH
                       </div>
-                      <div className="text-sm text-primary-foreground/70">
+                      <div className="text-xs text-primary-foreground/70">
                         Reward Points
                       </div>
                     </CardContent>
@@ -223,25 +224,28 @@ const GamePage = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4">
-                  <GradientButton 
-                    variant="game" 
-                    size="lg"
-                    disabled={!selectedNumber}
-                    className="w-full"
-                  >
-                    Confirm Choice
-                  </GradientButton>
-                  
-                  <GradientButton 
-                    variant="outline" 
-                    size="lg"
-                    onClick={() => setSelectedNumber(null)}
-                    className="w-full"
-                  >
-                    Clear Choice
-                  </GradientButton>
-                </div>
+                {!hasConfirmedChoice && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <GradientButton 
+                      variant="game" 
+                      size="sm"
+                      disabled={!selectedNumber}
+                      className="w-full"
+                      onClick={() => setHasConfirmedChoice(true)}
+                    >
+                      Confirm Choice
+                    </GradientButton>
+                    
+                    <GradientButton 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setSelectedNumber(null)}
+                      className="w-full"
+                    >
+                      Clear Choice
+                    </GradientButton>
+                  </div>
+                )}
 
                 {/* Game Status */}
                 {selectedNumber && (
