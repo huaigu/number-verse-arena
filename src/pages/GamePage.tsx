@@ -63,10 +63,10 @@ const GamePage = () => {
               onClick={() => navigate("/")}
             >
               <Home className="w-4 h-4 mr-2" />
-              首页
+              Home
             </GradientButton>
             <Badge variant="secondary" className="text-lg px-4 py-2">
-              房间: {mockGameData.roomId}
+              Room: {mockGameData.roomId}
             </Badge>
           </div>
           
@@ -77,7 +77,7 @@ const GamePage = () => {
             </div>
             <GradientButton variant="secondary" size="sm">
               <RotateCcw className="w-4 h-4 mr-2" />
-              重置
+              Reset
             </GradientButton>
           </div>
         </div>
@@ -89,7 +89,7 @@ const GamePage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Trophy className="w-5 h-5 text-primary" />
-                  <span>排行榜</span>
+                  <span>Leaderboard</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -160,14 +160,14 @@ const GamePage = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center space-x-2">
                     <Users className="w-5 h-5 text-primary" />
-                    <span>游戏区域</span>
+                    <span>Game Area</span>
                   </CardTitle>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-primary">
                       {mockGameData.currentPlayers}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      / {mockGameData.totalPlayers} 人
+                      / {mockGameData.totalPlayers} players
                     </div>
                   </div>
                 </div>
@@ -195,7 +195,7 @@ const GamePage = () => {
                         {selectedNumber || "-"}
                       </div>
                       <div className="text-sm text-secondary-foreground/70">
-                        我的选择
+                        My Choice
                       </div>
                     </CardContent>
                   </Card>
@@ -206,7 +206,7 @@ const GamePage = () => {
                         {mockGameData.prize.toLocaleString()}
                       </div>
                       <div className="text-sm text-primary-foreground/70">
-                        奖励积分
+                        Reward Points
                       </div>
                     </CardContent>
                   </Card>
@@ -220,7 +220,7 @@ const GamePage = () => {
                     disabled={!selectedNumber}
                     className="w-full"
                   >
-                    确认选择
+                    Confirm Choice
                   </GradientButton>
                   
                   <GradientButton 
@@ -229,7 +229,7 @@ const GamePage = () => {
                     onClick={() => setSelectedNumber(null)}
                     className="w-full"
                   >
-                    清除选择
+                    Clear Choice
                   </GradientButton>
                 </div>
 
@@ -237,9 +237,9 @@ const GamePage = () => {
                 {selectedNumber && (
                   <div className="mt-4 p-4 bg-accent/20 rounded-lg text-center">
                     <p className="text-accent-foreground">
-                      已选择数字 <span className="font-bold text-lg">{selectedNumber}</span>
+                      Selected number <span className="font-bold text-lg">{selectedNumber}</span>
                       {mockGameData.selectedNumbers.includes(selectedNumber) && selectedNumber !== mockGameData.mySelection && 
-                        <span className="text-destructive ml-2">(已被选择)</span>
+                        <span className="text-destructive ml-2">(already taken)</span>
                       }
                     </p>
                   </div>

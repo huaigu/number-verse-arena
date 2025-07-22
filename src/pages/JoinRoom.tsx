@@ -12,7 +12,7 @@ import { ArrowLeft, Users, Target, Trophy, Timer, Search } from "lucide-react"
 const mockRooms = [
   {
     id: "ROOM001",
-    name: "快速对战",
+    name: "Quick Battle",
     currentPlayers: 3,
     maxPlayers: 6,
     numberRange: "1-16",
@@ -22,7 +22,7 @@ const mockRooms = [
   },
   {
     id: "ROOM002", 
-    name: "新手友好",
+    name: "Beginner Friendly",
     currentPlayers: 2,
     maxPlayers: 4,
     numberRange: "1-9",
@@ -32,7 +32,7 @@ const mockRooms = [
   },
   {
     id: "ROOM003",
-    name: "挑战模式",
+    name: "Challenge Mode",
     currentPlayers: 6,
     maxPlayers: 8,
     numberRange: "1-25",
@@ -42,7 +42,7 @@ const mockRooms = [
   },
   {
     id: "ROOM004",
-    name: "经典模式",
+    name: "Classic Mode",
     currentPlayers: 8,
     maxPlayers: 8,
     numberRange: "1-20",
@@ -62,7 +62,7 @@ const JoinRoom = () => {
   const handleJoinByCode = async () => {
     if (!roomCode.trim()) {
       toast({
-        title: "请输入房间代码",
+        title: "Please enter room code",
         variant: "destructive"
       })
       return
@@ -73,8 +73,8 @@ const JoinRoom = () => {
     // Simulate API call
     setTimeout(() => {
       toast({
-        title: "成功加入房间！",
-        description: `房间ID: ${roomCode}`,
+        title: "Successfully joined room!",
+        description: `Room ID: ${roomCode}`,
       })
       navigate(`/game?room=${roomCode}`)
       setIsJoining(false)
@@ -84,8 +84,8 @@ const JoinRoom = () => {
   const handleJoinRoom = (roomId: string, status: string) => {
     if (status === "full") {
       toast({
-        title: "房间已满",
-        description: "请选择其他房间",
+        title: "Room is full",
+        description: "Please choose another room",
         variant: "destructive"
       })
       return
@@ -93,8 +93,8 @@ const JoinRoom = () => {
 
     if (status === "starting") {
       toast({
-        title: "游戏即将开始",
-        description: "正在加入房间...",
+        title: "Game is about to start",
+        description: "Joining room...",
       })
     }
 
@@ -106,13 +106,13 @@ const JoinRoom = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "waiting":
-        return <Badge variant="secondary">等待中</Badge>
+        return <Badge variant="secondary">Waiting</Badge>
       case "starting":
-        return <Badge className="bg-warning text-warning-foreground">即将开始</Badge>
+        return <Badge className="bg-warning text-warning-foreground">Starting Soon</Badge>
       case "full":
-        return <Badge variant="destructive">已满</Badge>
+        return <Badge variant="destructive">Full</Badge>
       default:
-        return <Badge variant="outline">未知</Badge>
+        return <Badge variant="outline">Unknown</Badge>
     }
   }
 
@@ -140,9 +140,9 @@ const JoinRoom = () => {
             onClick={() => navigate("/")}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
+            Back
           </GradientButton>
-          <h1 className="text-3xl font-bold text-foreground">加入游戏房间</h1>
+          <h1 className="text-3xl font-bold text-foreground">Join Game Room</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -152,16 +152,16 @@ const JoinRoom = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Search className="w-5 h-5" />
-                  <span>房间代码</span>
+                  <span>Room Code</span>
                 </CardTitle>
-                <CardDescription>输入6位房间代码直接加入</CardDescription>
+                <CardDescription>Enter 6-digit room code to join directly</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="roomCode">房间代码</Label>
+                  <Label htmlFor="roomCode">Room Code</Label>
                   <Input
                     id="roomCode"
-                    placeholder="例如: ABC123"
+                    placeholder="e.g: ABC123"
                     value={roomCode}
                     onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                     maxLength={6}
@@ -174,7 +174,7 @@ const JoinRoom = () => {
                   onClick={handleJoinByCode}
                   disabled={isJoining || roomCode.length < 6}
                 >
-                  {isJoining ? "加入中..." : "加入房间"}
+                  {isJoining ? "Joining..." : "Join Room"}
                 </GradientButton>
 
                 <div className="pt-4 border-t">
@@ -183,7 +183,7 @@ const JoinRoom = () => {
                     className="w-full"
                     onClick={() => navigate("/create-room")}
                   >
-                    创建新房间
+                    Create New Room
                   </GradientButton>
                 </div>
               </CardContent>
@@ -194,8 +194,8 @@ const JoinRoom = () => {
           <div className="lg:col-span-2">
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle>可用房间</CardTitle>
-                <CardDescription>选择一个房间快速加入游戏</CardDescription>
+                <CardTitle>Available Rooms</CardTitle>
+                <CardDescription>Choose a room to quickly join the game</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -235,7 +235,7 @@ const JoinRoom = () => {
                         
                         <div className="flex items-center space-x-2 text-sm">
                           <Timer className="w-4 h-4 text-muted-foreground" />
-                          <span>{room.timeLeft > 0 ? `${room.timeLeft}s` : "已开始"}</span>
+                          <span>{room.timeLeft > 0 ? `${room.timeLeft}s` : "Started"}</span>
                         </div>
                       </div>
 
@@ -253,12 +253,12 @@ const JoinRoom = () => {
                 {mockRooms.length === 0 && (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🎮</div>
-                    <h3 className="text-xl font-semibold mb-2">暂无可用房间</h3>
+                    <h3 className="text-xl font-semibold mb-2">No Available Rooms</h3>
                     <p className="text-muted-foreground mb-4">
-                      当前没有开放的游戏房间，创建一个新房间开始游戏吧！
+                      Currently no open game rooms available. Create a new room to start playing!
                     </p>
                     <GradientButton onClick={() => navigate("/create-room")}>
-                      创建房间
+                      Create Room
                     </GradientButton>
                   </div>
                 )}

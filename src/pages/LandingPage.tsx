@@ -9,23 +9,23 @@ const LandingPage = () => {
   const features = [
     {
       icon: Users,
-      title: "多人游戏",
-      description: "创建房间，邀请好友一起参与数字选择游戏"
+      title: "Multiplayer",
+      description: "Create rooms and invite friends to play the number selection game together"
     },
     {
       icon: Target,
-      title: "策略选择",
-      description: "选择独特数字，避免与他人重复，争夺奖励"
+      title: "Strategic Choice",
+      description: "Choose unique numbers, avoid duplicates with others, and compete for rewards"
     },
     {
       icon: Trophy,
-      title: "排行榜",
-      description: "实时查看积分排名，成为最强玩家"
+      title: "Leaderboard",
+      description: "View real-time score rankings and become the top player"
     },
     {
       icon: Gamepad2,
-      title: "简单易玩",
-      description: "规则简单，上手容易，适合所有年龄段"
+      title: "Easy to Play",
+      description: "Simple rules, easy to learn, suitable for all ages"
     }
   ]
 
@@ -44,7 +44,7 @@ const LandingPage = () => {
             variant="outline" 
             onClick={() => navigate("/game")}
           >
-            进入游戏
+            Enter Game
           </GradientButton>
         </div>
       </header>
@@ -53,14 +53,14 @@ const LandingPage = () => {
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 animate-slide-in">
-            独特数字游戏
+            Unique Number Game
             <span className="block text-2xl md:text-4xl text-primary mt-2">
-              挑战你的策略思维
+              Challenge Your Strategic Thinking
             </span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            在这个刺激的多人游戏中，选择你的独特数字，避免与他人重复，赢取丰厚奖励！
+            In this exciting multiplayer game, choose your unique number, avoid duplicates with others, and win generous rewards!
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -69,14 +69,14 @@ const LandingPage = () => {
               onClick={() => navigate("/create-room")}
               className="animate-pulse-glow"
             >
-              创建房间
+              Create Room
             </GradientButton>
             <GradientButton 
               variant="secondary" 
               size="xl"
               onClick={() => navigate("/join-room")}
             >
-              加入房间
+              Join Room
             </GradientButton>
           </div>
         </div>
@@ -85,7 +85,7 @@ const LandingPage = () => {
       {/* Features */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center text-foreground mb-12">
-          游戏特色
+          Game Features
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -114,7 +114,7 @@ const LandingPage = () => {
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-foreground mb-12">
-            游戏规则
+            How to Play
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -122,9 +122,9 @@ const LandingPage = () => {
               <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
                 1
               </div>
-              <h3 className="text-xl font-semibold mb-2">创建或加入房间</h3>
+              <h3 className="text-xl font-semibold mb-2">Create or Join Room</h3>
               <p className="text-muted-foreground">
-                设置游戏参数（人数、数字范围、奖励）或加入现有房间
+                Set game parameters (players, number range, rewards) or join existing rooms
               </p>
             </div>
             
@@ -132,9 +132,9 @@ const LandingPage = () => {
               <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
                 2
               </div>
-              <h3 className="text-xl font-semibold mb-2">选择独特数字</h3>
+              <h3 className="text-xl font-semibold mb-2">Choose Unique Number</h3>
               <p className="text-muted-foreground">
-                在指定范围内选择一个数字，记住：选择独特才能获胜
+                Select a number within the specified range. Remember: choose uniquely to win
               </p>
             </div>
             
@@ -142,9 +142,9 @@ const LandingPage = () => {
               <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
                 3
               </div>
-              <h3 className="text-xl font-semibold mb-2">赢取奖励</h3>
+              <h3 className="text-xl font-semibold mb-2">Win Rewards</h3>
               <p className="text-muted-foreground">
-                独特数字的玩家获得奖励，重复选择的玩家无法获得积分
+                Players with unique numbers get rewards, duplicate choices earn no points
               </p>
             </div>
           </div>
@@ -155,7 +155,7 @@ const LandingPage = () => {
       <footer className="bg-card py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <p className="text-muted-foreground">
-            © 2024 Unique Number Game. 挑战你的策略思维，享受游戏乐趣！
+            © 2024 Unique Number Game. Challenge your strategic thinking and enjoy the fun!
           </p>
         </div>
       </footer>

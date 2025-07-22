@@ -30,8 +30,8 @@ const CreateRoom = () => {
     setTimeout(() => {
       const roomId = Math.random().toString(36).substr(2, 6).toUpperCase()
       toast({
-        title: "房间创建成功！",
-        description: `房间ID: ${roomId}`,
+        title: "Room created successfully!",
+        description: `Room ID: ${roomId}`,
       })
       navigate(`/game?room=${roomId}`)
       setIsCreating(false)
@@ -40,18 +40,18 @@ const CreateRoom = () => {
 
   const presets = [
     {
-      name: "快速游戏",
-      description: "4人小局，快速开始",
+      name: "Quick Game",
+      description: "4 players, fast start",
       settings: { maxPlayers: 4, minNumber: 1, maxNumber: 9, prize: 500, timeLimit: 30 }
     },
     {
-      name: "标准游戏",
-      description: "6人标准局",
+      name: "Standard Game",
+      description: "6 players standard",
       settings: { maxPlayers: 6, minNumber: 1, maxNumber: 16, prize: 1000, timeLimit: 60 }
     },
     {
-      name: "挑战模式",
-      description: "8人大局，高难度",
+      name: "Challenge Mode",
+      description: "8 players, high difficulty",
       settings: { maxPlayers: 8, minNumber: 1, maxNumber: 25, prize: 2000, timeLimit: 90 }
     }
   ]
@@ -67,9 +67,9 @@ const CreateRoom = () => {
             onClick={() => navigate("/")}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
+            Back
           </GradientButton>
-          <h1 className="text-3xl font-bold text-foreground">创建游戏房间</h1>
+          <h1 className="text-3xl font-bold text-foreground">Create Game Room</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -78,8 +78,8 @@ const CreateRoom = () => {
             {/* Quick Presets */}
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle>快速设置</CardTitle>
-                <CardDescription>选择预设配置快速开始游戏</CardDescription>
+                <CardTitle>Quick Setup</CardTitle>
+                <CardDescription>Choose preset configurations to start quickly</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {presets.map((preset, index) => (
@@ -94,7 +94,7 @@ const CreateRoom = () => {
                         <p className="text-sm text-muted-foreground">{preset.description}</p>
                       </div>
                       <Badge variant="secondary">
-                        {preset.settings.maxPlayers}人
+                        {preset.settings.maxPlayers} players
                       </Badge>
                     </div>
                   </div>
@@ -105,15 +105,15 @@ const CreateRoom = () => {
             {/* Custom Settings */}
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle>自定义设置</CardTitle>
-                <CardDescription>调整游戏参数以适合你的需求</CardDescription>
+                <CardTitle>Custom Settings</CardTitle>
+                <CardDescription>Adjust game parameters to fit your needs</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Max Players */}
                 <div className="space-y-3">
                   <Label className="flex items-center space-x-2">
                     <Users className="w-4 h-4" />
-                    <span>最大玩家数量: {roomSettings.maxPlayers}</span>
+                    <span>Max Players: {roomSettings.maxPlayers}</span>
                   </Label>
                   <Slider
                     value={[roomSettings.maxPlayers]}
@@ -124,8 +124,8 @@ const CreateRoom = () => {
                     className="w-full"
                   />
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>2人</span>
-                    <span>10人</span>
+                    <span>2 players</span>
+                    <span>10 players</span>
                   </div>
                 </div>
 
@@ -134,7 +134,7 @@ const CreateRoom = () => {
                   <div className="space-y-2">
                     <Label className="flex items-center space-x-2">
                       <Target className="w-4 h-4" />
-                      <span>最小数字</span>
+                      <span>Min Number</span>
                     </Label>
                     <Input
                       type="number"
@@ -145,7 +145,7 @@ const CreateRoom = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>最大数字</Label>
+                    <Label>Max Number</Label>
                     <Input
                       type="number"
                       value={roomSettings.maxNumber}
@@ -160,7 +160,7 @@ const CreateRoom = () => {
                 <div className="space-y-3">
                   <Label className="flex items-center space-x-2">
                     <Trophy className="w-4 h-4" />
-                    <span>奖励积分: {roomSettings.prize.toLocaleString()}</span>
+                    <span>Reward Points: {roomSettings.prize.toLocaleString()}</span>
                   </Label>
                   <Slider
                     value={[roomSettings.prize]}
@@ -180,7 +180,7 @@ const CreateRoom = () => {
                 <div className="space-y-3">
                   <Label className="flex items-center space-x-2">
                     <Timer className="w-4 h-4" />
-                    <span>时间限制: {roomSettings.timeLimit}秒</span>
+                    <span>Time Limit: {roomSettings.timeLimit} seconds</span>
                   </Label>
                   <Slider
                     value={[roomSettings.timeLimit]}
@@ -191,8 +191,8 @@ const CreateRoom = () => {
                     className="w-full"
                   />
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>15秒</span>
-                    <span>5分钟</span>
+                    <span>15 sec</span>
+                    <span>5 min</span>
                   </div>
                 </div>
               </CardContent>
@@ -203,8 +203,8 @@ const CreateRoom = () => {
           <div className="space-y-6">
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle>房间预览</CardTitle>
-                <CardDescription>查看你的房间设置</CardDescription>
+                <CardTitle>Room Preview</CardTitle>
+                <CardDescription>Review your room settings</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -213,7 +213,7 @@ const CreateRoom = () => {
                     <div className="text-2xl font-bold text-secondary-foreground">
                       {roomSettings.maxPlayers}
                     </div>
-                    <div className="text-sm text-secondary-foreground/70">最大玩家</div>
+                    <div className="text-sm text-secondary-foreground/70">Max Players</div>
                   </div>
 
                   <div className="text-center p-4 bg-gradient-primary rounded-lg">
@@ -221,7 +221,7 @@ const CreateRoom = () => {
                     <div className="text-2xl font-bold text-primary-foreground">
                       {roomSettings.minNumber}-{roomSettings.maxNumber}
                     </div>
-                    <div className="text-sm text-primary-foreground/70">数字范围</div>
+                    <div className="text-sm text-primary-foreground/70">Number Range</div>
                   </div>
 
                   <div className="text-center p-4 bg-game-grid rounded-lg">
@@ -229,7 +229,7 @@ const CreateRoom = () => {
                     <div className="text-2xl font-bold text-primary-foreground">
                       {roomSettings.prize.toLocaleString()}
                     </div>
-                    <div className="text-sm text-primary-foreground/70">奖励积分</div>
+                    <div className="text-sm text-primary-foreground/70">Reward Points</div>
                   </div>
 
                   <div className="text-center p-4 bg-accent rounded-lg">
@@ -237,18 +237,18 @@ const CreateRoom = () => {
                     <div className="text-2xl font-bold text-accent-foreground">
                       {roomSettings.timeLimit}s
                     </div>
-                    <div className="text-sm text-accent-foreground/70">时间限制</div>
+                    <div className="text-sm text-accent-foreground/70">Time Limit</div>
                   </div>
                 </div>
 
                 {/* Game Rules Preview */}
                 <div className="mt-6 p-4 bg-muted rounded-lg">
-                  <h4 className="font-semibold mb-2">游戏规则</h4>
+                  <h4 className="font-semibold mb-2">Game Rules</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• 每位玩家只能选择一个数字</li>
-                    <li>• 选择独特数字的玩家可获得奖励</li>
-                    <li>• 重复选择的数字无法获得积分</li>
-                    <li>• {roomSettings.timeLimit}秒内必须完成选择</li>
+                    <li>• Each player can only choose one number</li>
+                    <li>• Players who choose unique numbers get rewards</li>
+                    <li>• Duplicate number choices earn no points</li>
+                    <li>• Must complete selection within {roomSettings.timeLimit} seconds</li>
                   </ul>
                 </div>
               </CardContent>
@@ -261,7 +261,7 @@ const CreateRoom = () => {
               onClick={handleCreateRoom}
               disabled={isCreating}
             >
-              {isCreating ? "创建中..." : "创建房间"}
+              {isCreating ? "Creating..." : "Create Room"}
             </GradientButton>
 
             <GradientButton
@@ -270,7 +270,7 @@ const CreateRoom = () => {
               className="w-full"
               onClick={() => navigate("/join-room")}
             >
-              或者加入现有房间
+              Or Join Existing Room
             </GradientButton>
           </div>
         </div>
