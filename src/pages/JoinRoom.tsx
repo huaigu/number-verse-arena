@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Users, Target, Trophy, Timer, Search } from "lucide-react"
+import { ArrowLeft, Users, Target, Trophy, Timer, Search, Wallet } from "lucide-react"
+import { useAccount } from 'wagmi'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 // Mock available rooms
 const mockRooms = [
@@ -65,11 +67,21 @@ const mockRooms = [
 const JoinRoom = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { address, isConnected } = useAccount()
   
   const [roomCode, setRoomCode] = useState("")
   const [isJoining, setIsJoining] = useState(false)
 
   const handleJoinByCode = async () => {
+    if (!isConnected) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to join a room.",
+        variant: "destructive"
+      })
+      return
+    }
+
     if (!roomCode.trim()) {
       toast({
         title: "Please enter room code",
@@ -92,6 +104,15 @@ const JoinRoom = () => {
   }
 
   const handleJoinRoom = (roomId: string, status: string) => {
+    if (!isConnected) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to join a room.",
+        variant: "destructive"
+      })
+      return
+    }
+
     if (status === "finished") {
       toast({
         title: "Game finished",
@@ -143,16 +164,19 @@ const JoinRoom = () => {
     <div className="min-h-screen bg-gradient-background p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
-          <GradientButton 
-            variant="outline" 
-            size="sm"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </GradientButton>
-          <h1 className="text-3xl font-bold text-foreground">Join Game Room</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <GradientButton 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </GradientButton>
+            <h1 className="text-3xl font-bold text-foreground">Join Game Room</h1>
+          </div>
+          <ConnectButton />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -167,6 +191,17 @@ const JoinRoom = () => {
                 <CardDescription>Enter 6-digit room code to join directly</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {!isConnected && (
+                  <Card className="border-orange-200 bg-orange-50">
+                    <CardContent className="p-3">
+                      <div className="flex items-center space-x-2 text-orange-700">
+                        <Wallet className="w-4 h-4" />
+                        <span className="text-sm">Connect wallet to join rooms</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="roomCode">Room Code</Label>
                   <Input
@@ -176,15 +211,16 @@ const JoinRoom = () => {
                     onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                     maxLength={6}
                     className="text-center text-lg font-mono"
+                    disabled={!isConnected}
                   />
                 </div>
                 
                 <GradientButton
                   className="w-full"
                   onClick={handleJoinByCode}
-                  disabled={isJoining || roomCode.length < 6}
+                  disabled={isJoining || roomCode.length < 6 || !isConnected}
                 >
-                  {isJoining ? "Joining..." : "Join Room"}
+                  {isJoining ? "Joining..." : !isConnected ? "Connect Wallet First" : "Join Room"}
                 </GradientButton>
 
                 <div className="pt-4 border-t">

@@ -7,11 +7,14 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Users, Target, Trophy, Timer } from "lucide-react"
+import { ArrowLeft, Users, Target, Trophy, Timer, Wallet } from "lucide-react"
+import { useAccount } from 'wagmi'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 const CreateRoom = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { address, isConnected } = useAccount()
   
   const [roomSettings, setRoomSettings] = useState({
     roomName: "",
@@ -25,6 +28,15 @@ const CreateRoom = () => {
   const [isCreating, setIsCreating] = useState(false)
 
   const handleCreateRoom = async () => {
+    if (!isConnected) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to create a room.",
+        variant: "destructive"
+      })
+      return
+    }
+
     setIsCreating(true)
     
     // Simulate API call
@@ -61,16 +73,19 @@ const CreateRoom = () => {
     <div className="min-h-screen bg-gradient-background p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
-          <GradientButton 
-            variant="outline" 
-            size="sm"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </GradientButton>
-          <h1 className="text-3xl font-bold text-foreground">Create Game Room</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <GradientButton 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </GradientButton>
+            <h1 className="text-3xl font-bold text-foreground">Create Game Room</h1>
+          </div>
+          <ConnectButton />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -270,13 +285,24 @@ const CreateRoom = () => {
             </Card>
 
             {/* Create Button */}
+            {!isConnected && (
+              <Card className="border-orange-200 bg-orange-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2 text-orange-700">
+                    <Wallet className="w-4 h-4" />
+                    <span className="text-sm">Connect your wallet to create a room</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
             <GradientButton
               size="xl"
               className="w-full"
               onClick={handleCreateRoom}
-              disabled={isCreating}
+              disabled={isCreating || !isConnected}
             >
-              {isCreating ? "Creating..." : "Create Room"}
+              {isCreating ? "Creating..." : !isConnected ? "Connect Wallet First" : "Create Room"}
             </GradientButton>
 
             <GradientButton

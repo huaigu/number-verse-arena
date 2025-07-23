@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface GameCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "selected" | "available" | "disabled"
+  variant?: "default" | "selected" | "available" | "disabled" | "highlighted"
   children: React.ReactNode
 }
 
@@ -12,7 +12,8 @@ const GameCard = React.forwardRef<HTMLDivElement, GameCardProps>(
       default: "bg-game-grid text-primary-foreground hover:bg-primary-hover shadow-game",
       selected: "bg-game-selected text-primary-foreground ring-2 ring-accent shadow-float",
       available: "bg-game-available text-foreground hover:bg-game-grid shadow-card",
-      disabled: "bg-game-disabled text-muted-foreground cursor-not-allowed opacity-60"
+      disabled: "bg-game-disabled text-muted-foreground cursor-not-allowed opacity-60",
+      highlighted: "bg-accent text-accent-foreground shadow-card"
     }
 
     return (

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, Users, Target, Gamepad2 } from "lucide-react"
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 const LandingPage = () => {
   const navigate = useNavigate()
@@ -40,12 +41,15 @@ const LandingPage = () => {
             </div>
             <span className="text-xl font-bold text-foreground">Unique Number</span>
           </div>
-          <GradientButton 
-            variant="outline" 
-            onClick={() => navigate("/game")}
-          >
-            Enter Game
-          </GradientButton>
+          <div className="flex items-center gap-4">
+            <ConnectButton />
+            <GradientButton 
+              variant="outline" 
+              onClick={() => navigate("/game")}
+            >
+              Enter Game
+            </GradientButton>
+          </div>
         </div>
       </header>
 
