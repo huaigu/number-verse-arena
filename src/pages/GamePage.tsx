@@ -79,6 +79,22 @@ const GamePage = () => {
     const deadlineSeconds = Number(gameSummary.deadline)
     return Math.max(0, deadlineSeconds - now)
   }
+
+  // 格式化时间显示
+  const formatTimeLeft = (seconds: number) => {
+    if (seconds <= 0) return "Expired"
+    
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+    
+    const parts = []
+    if (hours > 0) parts.push(`${hours}h`)
+    if (minutes > 0) parts.push(`${minutes}m`)
+    if (secs > 0) parts.push(`${secs}s`)
+    
+    return parts.join(' ') || '0s'
+  }
   
   // 定时刷新游戏数据和时间
   useEffect(() => {
@@ -345,7 +361,7 @@ const GamePage = () => {
                       timeLeft <= 60 && timeLeft > 0 ? 'animate-timer-urgent' : 
                       timeLeft === 0 ? 'text-destructive' : 'text-primary'
                     }`}>
-                      {timeLeft > 0 ? `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}` : "Expired"}
+                      {formatTimeLeft(timeLeft)}
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground">Time Left</div>
