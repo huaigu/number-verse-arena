@@ -192,13 +192,37 @@ const GamePage = () => {
     
     try {
       toast({
-        title: "Submitting number...",
-        description: "Please confirm the transaction in your wallet.",
+        title: "Encrypting number...",
+        description: "Preparing your number with FHE encryption.",
       })
       
+      // 调用更新后的 submitNumber，它现在包含 FHE 加密
       await submitNumber(gameId, selectedNumber, formatETH(gameSummary.entryFee))
+      
+      toast({
+        title: "Transaction submitted",
+        description: "Please confirm the transaction in your wallet.",
+      })
     } catch (error) {
       console.error('Error submitting number:', error)
+      
+      // 提供更详细的错误信息
+      let errorMessage = "Please try again."
+      if (error instanceof Error) {
+        if (error.message.includes('FHEVM')) {
+          errorMessage = "FHE encryption failed. Please check your network connection."
+        } else if (error.message.includes('Wallet not connected')) {
+          errorMessage = "Please connect your wallet first."
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
+      toast({
+        title: "Submission failed",
+        description: errorMessage,
+        variant: "destructive"
+      })
     }
   }
 
