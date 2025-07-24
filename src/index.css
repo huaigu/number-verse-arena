@@ -161,12 +161,31 @@
   }
 }
 
+@keyframes timer-urgent {
+  0% {
+    color: hsl(var(--destructive));
+    transform: scale(1);
+  }
+  50% {
+    color: hsl(var(--destructive) / 0.7);
+    transform: scale(1.05);
+  }
+  100% {
+    color: hsl(var(--destructive));
+    transform: scale(1);
+  }
+}
+
 .animate-highlight-pulse {
   animation: highlight-pulse 0.8s ease-in-out;
 }
 
 .animate-selected-glow {
   animation: selected-glow 2s ease-in-out infinite;
+}
+
+.animate-timer-urgent {
+  animation: timer-urgent 1s ease-in-out infinite;
 }
 
 /* Game Number Button Styles */
