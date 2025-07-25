@@ -9,7 +9,7 @@ import { Trophy, Users, Clock, Home, RotateCcw, Wallet, Loader2, AlertCircle } f
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useToast } from "@/hooks/use-toast"
-import { useGetGameSummary, useHasPlayerSubmitted, useSubmitNumber } from "@/hooks/contract/useGameContract"
+import { useGetGameSummary, useHasPlayerSubmitted, useSubmitNumber, useFindWinner, useClaimPrize, useHasPlayerClaimed, useCanFinalizeGame } from "@/hooks/contract/useGameContract"
 import { CONTRACT_CONFIG, formatETH, formatAddress } from "@/contracts/config"
 
 const GamePage = () => {
@@ -49,6 +49,36 @@ const GamePage = () => {
     error: submitError
   } = useSubmitNumber()
   
+  // 检查当前用户是否已领取奖金
+  const { 
+    hasClaimed, 
+    isLoading: hasClaimedLoading,
+    refetch: refetchHasClaimed 
+  } = useHasPlayerClaimed(gameId, address)
+  
+  // 触发开奖的hook
+  const {
+    findWinner,
+    isFinding,
+    isSuccess: findSuccess,
+    error: findError
+  } = useFindWinner()
+  
+  // 领取奖金的hook
+  const {
+    claimPrize,
+    isClaiming,
+    isSuccess: claimSuccess,
+    error: claimError
+  } = useClaimPrize()
+  
+  // 检查游戏是否可以结束
+  const { 
+    canFinalize, 
+    isLoading: canFinalizeLoading,
+    refetch: refetchCanFinalize 
+  } = useCanFinalizeGame(gameId)
+  
   // 处理提交成功
   useEffect(() => {
     if (submitSuccess) {
@@ -71,6 +101,52 @@ const GamePage = () => {
       })
     }
   }, [submitError, toast])
+  
+  // 处理开奖成功
+  useEffect(() => {
+    if (findSuccess) {
+      toast({
+        title: "Game revealed! 🎉",
+        description: "Winner has been determined and prizes are available.",
+      })
+      refetchGame()
+      refetchCanFinalize()
+    }
+  }, [findSuccess, toast, refetchGame, refetchCanFinalize])
+  
+  // 处理开奖错误
+  useEffect(() => {
+    if (findError) {
+      toast({
+        title: "Reveal failed",
+        description: findError.message || "Please try again.",
+        variant: "destructive"
+      })
+    }
+  }, [findError, toast])
+  
+  // 处理领取成功
+  useEffect(() => {
+    if (claimSuccess) {
+      toast({
+        title: "Prize claimed! 🎉",
+        description: "Your winnings have been transferred to your wallet.",
+      })
+      refetchGame()
+      refetchHasClaimed()
+    }
+  }, [claimSuccess, toast, refetchGame, refetchHasClaimed])
+  
+  // 处理领取错误
+  useEffect(() => {
+    if (claimError) {
+      toast({
+        title: "Claim failed",
+        description: claimError.message || "Please try again.",
+        variant: "destructive"
+      })
+    }
+  }, [claimError, toast])
 
   // 计算剩余时间
   const getTimeLeft = () => {
@@ -197,7 +273,7 @@ const GamePage = () => {
   }
 
   const handleConfirmChoice = async () => {
-    if (!isConnected || !gameId || !selectedNumber || !gameSummary) {
+    if (!isConnected || !selectedNumber || !gameSummary) {
       toast({
         title: "Cannot submit",
         description: "Please make sure you're connected and have selected a number.",
@@ -242,8 +318,65 @@ const GamePage = () => {
     }
   }
 
+  // 处理开奖操作
+  const handleRevealWinner = async () => {
+    if (!gameId) {
+      toast({
+        title: "Cannot reveal",
+        description: "Game ID is missing.",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      await findWinner(gameId)
+      toast({
+        title: "Revealing winner...",
+        description: "Please confirm the transaction in your wallet.",
+      })
+    } catch (error) {
+      console.error('Error revealing winner:', error)
+    }
+  }
+
+  // 处理领取奖金操作
+  const handleClaimPrize = async () => {
+    if (!gameId) {
+      toast({
+        title: "Cannot claim",
+        description: "Game ID is missing.",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      await claimPrize(gameId)
+      toast({
+        title: "Claiming prize...",
+        description: "Please confirm the transaction in your wallet.",
+      })
+    } catch (error) {
+      console.error('Error claiming prize:', error)
+    }
+  }
+
+  // 检查当前用户是否为获胜者
+  const isCurrentUserWinner = () => {
+    return address && gameSummary?.winner && 
+           address.toLowerCase() === gameSummary.winner.toLowerCase() &&
+           gameSummary.winner !== "0x0000000000000000000000000000000000000000"
+  }
+
+  // 检查游戏是否已解密（有获胜者且获胜者不是零地址）
+  const isGameDecrypted = () => {
+    return gameSummary?.winner && 
+           gameSummary.winner !== "0x0000000000000000000000000000000000000000"
+  }
+
   // 如果没有游戏ID，显示错误
-  if (!gameId) {
+  if (gameId === undefined) {
     return (
       <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
         <Card className="max-w-md">
@@ -263,7 +396,7 @@ const GamePage = () => {
   }
 
   // 加载状态
-  if (gameLoading || hasSubmittedLoading) {
+  if (gameLoading || hasSubmittedLoading || hasClaimedLoading) {
     return (
       <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
         <Card className="max-w-md">
@@ -516,12 +649,12 @@ const GamePage = () => {
                   )}
 
                   {/* Game Status Messages */}
-                  {gameSummary?.status !== CONTRACT_CONFIG.GameStatus.Open && (
+                  {gameSummary?.status !== CONTRACT_CONFIG.GameStatus.Open && !isGameDecrypted() && (
                     <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-center">
                       <div className="flex items-center justify-center space-x-2 text-yellow-700">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm">
-                          {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating ? "Game is calculating results..." :
+                          {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating ? "Waiting for game results..." :
                            gameSummary?.status === CONTRACT_CONFIG.GameStatus.Finished ? "Game has finished" :
                            "Game is no longer accepting submissions"}
                         </span>
@@ -584,14 +717,126 @@ const GamePage = () => {
                     </div>
                   )}
 
-                  {/* Game Time Expired */}
-                  {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && (
+                  {/* Game Time Expired - No players */}
+                  {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && !canFinalize && (
                     <div className="p-2 bg-red-50 border border-red-200 rounded text-center">
                       <div className="flex items-center justify-center space-x-2 text-red-700">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm font-medium">
-                          Time expired! Game is ready for calculation.
+                          Time expired! No players joined this game.
                         </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Game Result Section */}
+                  {isGameDecrypted() && (
+                    <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
+                      <div className="text-center mb-3">
+                        <Trophy className="w-8 h-8 mx-auto mb-2 text-purple-600" />
+                        <h3 className="text-lg font-semibold text-purple-800">Game Completed!</h3>
+                      </div>
+                      
+                      {isCurrentUserWinner() ? (
+                        <div className="space-y-2">
+                          <div className="p-3 bg-green-50 border border-green-200 rounded text-center">
+                            <div className="text-green-800 font-semibold mb-1">🎉 Congratulations! You won!</div>
+                            <div className="text-green-700 text-sm">
+                              Your winning number: <span className="font-bold">{gameSummary.winningNumber}</span>
+                            </div>
+                            <div className="text-green-700 text-sm">
+                              Prize: <span className="font-bold">{formatETH(gameSummary.prizePool)} ETH</span>
+                            </div>
+                          </div>
+                          
+                          {!hasClaimed ? (
+                            <GradientButton 
+                              onClick={handleClaimPrize} 
+                              disabled={isClaiming}
+                              className="w-full"
+                              size="sm"
+                            >
+                              {isClaiming ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Claiming...
+                                </>
+                              ) : (
+                                <>
+                                  <Wallet className="w-4 h-4 mr-2" />
+                                  Claim {formatETH(gameSummary.prizePool)} ETH
+                                </>
+                              )}
+                            </GradientButton>
+                          ) : (
+                            <div className="p-2 bg-green-100 rounded text-green-800 text-sm text-center">
+                              ✅ Prize claimed! Congratulations!
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center space-y-2">
+                          <div className="p-3 bg-gray-50 border border-gray-200 rounded">
+                            <div className="text-gray-700 font-medium mb-1">Game Results</div>
+                            <div className="text-gray-600 text-sm">
+                              Winner: <span className="font-medium">{formatAddress(gameSummary.winner)}</span>
+                            </div>
+                            <div className="text-gray-600 text-sm">
+                              Winning number: <span className="font-medium">{gameSummary.winningNumber}</span>
+                            </div>
+                            <div className="text-gray-600 text-sm mt-2">
+                              Better luck next time! 🎯
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Time Expired - Manual Reveal Section */}
+                  {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && canFinalize && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                      <div className="text-blue-700 mb-3">
+                        <Clock className="w-6 h-6 mx-auto mb-2" />
+                        <div className="font-medium">Time Expired!</div>
+                        <div className="text-sm">
+                          Game ended with {gameSummary.playerCount} players. Anyone can reveal the winner now!
+                        </div>
+                      </div>
+                      
+                      <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm mb-3">
+                        💡 Reveal reward: ~{formatETH(gameSummary.prizePool / BigInt(10))} ETH (10% of prize pool)
+                      </div>
+                      
+                      <GradientButton 
+                        onClick={handleRevealWinner} 
+                        disabled={isFinding}
+                        size="sm"
+                        className="w-full"
+                      >
+                        {isFinding ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Revealing...
+                          </>
+                        ) : (
+                          <>
+                            🔍 Reveal Winner & Claim Reward
+                          </>
+                        )}
+                      </GradientButton>
+                    </div>
+                  )}
+
+                  {/* Calculating State - Only for time-expired games */}
+                  {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating && !isGameDecrypted() && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                      <div className="flex items-center justify-center space-x-2 text-blue-700 mb-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span className="text-sm font-medium">Calculating winner...</span>
+                      </div>
+                      <div className="text-blue-600 text-xs">
+                        Please wait while the blockchain determines the winner.
                       </div>
                     </div>
                   )}

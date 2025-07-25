@@ -11,6 +11,9 @@ import { ArrowLeft, Users, Target, Trophy, Timer, Wallet, Loader2 } from "lucide
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useCreateGame } from "@/hooks/contract/useGameContract"
+import { useReadContract } from 'wagmi'
+import { CONTRACT_CONFIG } from "@/contracts/config"
+import contractABI from "@/contracts/UniqueNumberGameFactory.json"
 
 const CreateRoom = () => {
   const navigate = useNavigate()
@@ -26,6 +29,16 @@ const CreateRoom = () => {
     createdGameId, 
     transactionHash 
   } = useCreateGame()
+  
+  // 获取gameCounter作为fallback
+  const { data: gameCounter, refetch: refetchGameCounter } = useReadContract({
+    address: CONTRACT_CONFIG.address,
+    abi: contractABI.abi,
+    functionName: 'gameCounter',
+    query: {
+      enabled: false, // 只在需要时手动调用
+    }
+  })
   
   const [roomSettings, setRoomSettings] = useState({
     roomName: "",
@@ -45,10 +58,32 @@ const CreateRoom = () => {
       })
       
       // 延迟一下让用户看到成功提示，然后跳转
-      setTimeout(() => {
-        // 跳转到游戏页面，使用createdGameId作为房间ID
-        // 如果没有gameId，使用交易hash的简短版本
-        const roomId = createdGameId ? createdGameId.toString() : transactionHash?.slice(-8) || 'new'
+      setTimeout(async () => {
+        let roomId: string;
+        
+        if (createdGameId) {
+          // 首选：使用从事件解析的gameId
+          roomId = createdGameId.toString();
+          console.log('Using parsed gameId:', roomId);
+        } else {
+          // 备选：从合约状态获取最新的gameCounter - 1（因为新游戏的ID是递增的）
+          try {
+            const result = await refetchGameCounter();
+            if (result.data) {
+              const counter = result.data as bigint;
+              roomId = (counter - BigInt(1)).toString();
+              console.log('Using calculated gameId from counter:', roomId);
+            } else {
+              throw new Error('No gameCounter data');
+            }
+          } catch (error) {
+            console.error('Failed to get gameId from contract:', error);
+            // 最后的备选：使用交易hash
+            roomId = transactionHash?.slice(-8) || 'new';
+            console.log('Using fallback transaction hash:', roomId);
+          }
+        }
+        
         navigate(`/game?room=${roomId}`)
       }, 1500)
     }

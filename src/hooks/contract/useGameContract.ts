@@ -119,6 +119,8 @@ export const useCreateGame = () => {
       
       // 从交易收据的事件日志中提取gameId
       try {
+        console.log('Parsing transaction receipt logs:', receipt.logs.length, 'logs found');
+        
         const gameCreatedEvent = receipt.logs.find(log => {
           try {
             const decoded = decodeEventLog({
@@ -126,8 +128,10 @@ export const useCreateGame = () => {
               data: log.data,
               topics: log.topics,
             });
+            console.log('Decoded event:', decoded.eventName);
             return decoded.eventName === 'GameCreated';
-          } catch {
+          } catch (e) {
+            // 忽略解码失败的日志
             return false;
           }
         });
@@ -139,11 +143,16 @@ export const useCreateGame = () => {
             topics: gameCreatedEvent.topics,
           });
           
+          console.log('GameCreated event decoded:', decoded);
+          
           if (decoded.eventName === 'GameCreated' && decoded.args) {
             const gameId = (decoded.args as any).gameId;
             setCreatedGameId(gameId);
             console.log('Game created with ID:', gameId.toString());
           }
+        } else {
+          console.warn('No GameCreated event found in transaction logs');
+          setCreatedGameId(null);
         }
       } catch (error) {
         console.error('Error parsing GameCreated event:', error);
@@ -271,6 +280,46 @@ export const useFindWinner = () => {
     isSuccess,
     error,
     transactionHash: hash,
+  };
+};
+
+// 检查玩家是否已领取奖金
+export const useHasPlayerClaimed = (gameId: bigint | undefined, playerAddress: string | undefined) => {
+  const { data, isError, isLoading, refetch } = useReadContract({
+    address: CONTRACT_CONFIG.address,
+    abi: contractABI.abi,
+    functionName: 'hasPlayerClaimed',
+    args: gameId !== undefined && playerAddress ? [gameId, playerAddress] : undefined,
+    query: {
+      enabled: gameId !== undefined && !!playerAddress,
+    },
+  });
+
+  return {
+    hasClaimed: data as boolean | undefined,
+    isError,
+    isLoading,
+    refetch,
+  };
+};
+
+// 检查游戏是否可以结束
+export const useCanFinalizeGame = (gameId: bigint | undefined) => {
+  const { data, isError, isLoading, refetch } = useReadContract({
+    address: CONTRACT_CONFIG.address,
+    abi: contractABI.abi,
+    functionName: 'canFinalizeGame',
+    args: gameId !== undefined ? [gameId] : undefined,
+    query: {
+      enabled: gameId !== undefined,
+    },
+  });
+
+  return {
+    canFinalize: data as boolean | undefined,
+    isError,
+    isLoading,
+    refetch,
   };
 };
 
