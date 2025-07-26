@@ -1,11 +1,91 @@
 import { useNavigate } from "react-router-dom"
 import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Trophy, Users, Target, Gamepad2 } from "lucide-react"
+import { Trophy, Users, Target, Gamepad2, TwitterIcon, GithubIcon } from "lucide-react"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useAccount } from 'wagmi'
+import { useToast } from "@/hooks/use-toast"
+import { useGetActiveGames } from "@/hooks/contract/useGameContract"
+import { CONTRACT_CONFIG } from "@/contracts/config"
 
 const LandingPage = () => {
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const { isConnected } = useAccount()
+  
+  // 获取活跃游戏列表
+  const { activeGames, isLoading: gamesLoading } = useGetActiveGames()
+
+  // Quick Join 逻辑：找到接近满员的可用房间
+  const handleQuickJoin = () => {
+    if (!isConnected) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to join a game.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (gamesLoading) {
+      toast({
+        title: "Loading games...",
+        description: "Please wait while we fetch available rooms.",
+      })
+      return
+    }
+
+    if (!activeGames || activeGames.length === 0) {
+      toast({
+        title: "No available rooms",
+        description: "Currently no open game rooms available. Create a new room to start playing!",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // 计算剩余时间函数
+    const getTimeLeft = (deadline: bigint) => {
+      const now = Math.floor(Date.now() / 1000)
+      const deadlineSeconds = Number(deadline)
+      return Math.max(0, deadlineSeconds - now)
+    }
+
+    // 过滤可加入的房间：状态为Open，未过期，未满员
+    const availableRooms = activeGames.filter(game => {
+      const timeLeft = getTimeLeft(game.deadline)
+      return (
+        game.status === CONTRACT_CONFIG.GameStatus.Open &&
+        timeLeft > 0 &&
+        game.playerCount < game.maxPlayers
+      )
+    })
+
+    if (availableRooms.length === 0) {
+      toast({
+        title: "No joinable rooms",
+        description: "All available rooms are either full or expired. Try creating a new room!",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // 按完成度排序：优先选择接近满员的房间
+    const sortedRooms = availableRooms.sort((a, b) => {
+      const aCompleteness = a.playerCount / a.maxPlayers
+      const bCompleteness = b.playerCount / b.maxPlayers
+      return bCompleteness - aCompleteness // 降序：越接近满员的排在前面
+    })
+
+    const bestRoom = sortedRooms[0]
+    
+    toast({
+      title: "Joining room...",
+      description: `Found room with ${bestRoom.playerCount}/${bestRoom.maxPlayers} players!`,
+    })
+
+    navigate(`/game?room=${bestRoom.gameId.toString()}`)
+  }
 
   const features = [
     {
@@ -45,9 +125,10 @@ const LandingPage = () => {
             <ConnectButton />
             <GradientButton 
               variant="outline" 
-              onClick={() => navigate("/game")}
+              onClick={handleQuickJoin}
+              disabled={gamesLoading}
             >
-              Enter Game
+              {gamesLoading ? "Loading..." : "Quick Join"}
             </GradientButton>
           </div>
         </div>
@@ -158,9 +239,29 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="bg-card py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground">
-            © 2024 Unique Number Game. Challenge your strategic thinking and enjoy the fun!
+          <p className="text-muted-foreground mb-4">
+            © 2025 Unique Number Game. Challenge your strategic thinking and enjoy the fun!
           </p>
+          <div className="flex justify-center items-center space-x-6">
+            <a 
+              href="https://x.com/coder_chao" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors duration-200"
+            >
+              <TwitterIcon className="w-4 h-4" />
+              <span>Twitter</span>
+            </a>
+            <a 
+              href="http://github.com/huaigu" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors duration-200"
+            >
+              <GithubIcon className="w-4 h-4" />
+              <span>GitHub</span>
+            </a>
+          </div>
         </div>
       </footer>
     </div>

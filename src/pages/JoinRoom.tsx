@@ -179,26 +179,6 @@ const JoinRoom = () => {
         return <Badge variant="outline">Unknown</Badge>
     }
   }
-
-  const getStatusColor = (status: number, isExpired?: boolean) => {
-    // If expired, use red border regardless of status
-    if (isExpired) {
-      return "border-red-300"
-    }
-    
-    switch (status) {
-      case CONTRACT_CONFIG.GameStatus.Open:
-        return "border-green-300 hover:border-green-400"
-      case CONTRACT_CONFIG.GameStatus.Calculating:
-        return "border-yellow-300"
-      case CONTRACT_CONFIG.GameStatus.Finished:
-        return "border-red-300"
-      case CONTRACT_CONFIG.GameStatus.PrizeClaimed:
-        return "border-gray-300"
-      default:
-        return "border-border"
-    }
-  }
   
   // 计算剩余时间（简化版，实际应该基于区块时间戳）
   const getTimeLeft = (deadline: bigint) => {
@@ -245,59 +225,7 @@ const JoinRoom = () => {
         </div>
 
         {/* Top Section - Join by Code */}
-        <div className="mb-8">
-          <Card className="shadow-card max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-center space-x-2">
-                <Search className="w-5 h-5" />
-                <span>Join by Room Code</span>
-              </CardTitle>
-              <CardDescription className="text-center">Enter room ID to join directly</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col md:flex-row gap-4 items-end">
-                {!isConnected && (
-                  <Card className="border-orange-200 bg-orange-50 w-full mb-4">
-                    <CardContent className="p-3">
-                      <div className="flex items-center justify-center space-x-2 text-orange-700">
-                        <Wallet className="w-4 h-4" />
-                        <span className="text-sm">Connect wallet to join rooms</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-                
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="roomCode">Room ID</Label>
-                  <Input
-                    id="roomCode"
-                    placeholder="e.g: 123"
-                    value={roomCode}
-                    onChange={(e) => setRoomCode(e.target.value)}
-                    className="text-center text-lg font-mono"
-                    disabled={!isConnected}
-                  />
-                </div>
-                
-                <div className="flex gap-2">
-                  <GradientButton
-                    onClick={handleJoinByCode}
-                    disabled={isJoining || !roomCode.trim() || !isConnected}
-                  >
-                    {isJoining ? "Joining..." : "Join Room"}
-                  </GradientButton>
-                  
-                  <GradientButton
-                    variant="outline"
-                    onClick={() => navigate("/create-room")}
-                  >
-                    Create New Room
-                  </GradientButton>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        
 
         {/* Bottom Section - Room Lists */}
         <div className="space-y-8">
@@ -341,22 +269,30 @@ const JoinRoom = () => {
                       Try Again
                     </GradientButton>
                   </div>
-                ) : (
+                ) : activeGames && activeGames.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {activeGames && activeGames.length > 0 ? (
-                      activeGames.map((game) => {
+                    {activeGames.filter((game) => {
+                        const timeLeft = getTimeLeft(game.deadline)
+                        const isExpired = timeLeft <= 0
+                        // 过滤掉没人参与且到期的房间
+                        return !(isExpired && game.playerCount === 0)
+                      }).map((game) => {
                         const timeLeft = getTimeLeft(game.deadline)
                         const prizePool = calculatePrizePool(game.playerCount, game.entryFee)
                         const isExpired = timeLeft <= 0
-                        const isEmpty = game.playerCount === 0
-                        const isExpiredAndEmpty = isExpired && isEmpty
-                        const canJoin = game.status === CONTRACT_CONFIG.GameStatus.Open && !isExpiredAndEmpty
+                        const isFull = game.playerCount >= game.maxPlayers
+                        const isWaitingClaim = (isFull || isExpired) && game.status === CONTRACT_CONFIG.GameStatus.Open
+                        const canJoin = game.status === CONTRACT_CONFIG.GameStatus.Open && !isExpired && !isFull
                         
                         return (
                           <div
                             key={game.gameId.toString()}
-                            className={`p-4 border-2 rounded-lg transition-all duration-300 ${getStatusColor(game.status, isExpired)} ${
-                              canJoin ? "hover:shadow-card cursor-pointer hover:-translate-y-1" : "opacity-60 cursor-not-allowed"
+                            className={`p-4 border-2 rounded-lg transition-all duration-300 ${
+                              canJoin 
+                                ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 hover:border-green-400 hover:shadow-card cursor-pointer hover:-translate-y-1" 
+                                : isWaitingClaim
+                                  ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300 opacity-75 cursor-not-allowed"
+                                  : "bg-gradient-to-br from-gray-50 to-slate-50 border-gray-300 opacity-60 cursor-not-allowed"
                             }`}
                             onClick={() => canJoin && handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)}
                           >
@@ -406,19 +342,18 @@ const JoinRoom = () => {
                             </div>
                           </div>
                         )
-                      })
-                    ) : (
-                      <div className="text-center py-12">
-                        <div className="text-6xl mb-4">🎮</div>
-                        <h3 className="text-xl font-semibold mb-2">No Available Rooms</h3>
-                        <p className="text-muted-foreground mb-4">
-                          Currently no open game rooms available. Create a new room to start playing!
-                        </p>
-                        <GradientButton onClick={() => navigate("/create-room")}>
-                          Create Room
-                        </GradientButton>
-                      </div>
-                    )}
+                      })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🎮</div>
+                    <h3 className="text-xl font-semibold mb-2">No Available Rooms</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Currently no open game rooms available. Create a new room to start playing!
+                    </p>
+                    <GradientButton onClick={() => navigate("/create-room")}>
+                      Create Room
+                    </GradientButton>
                   </div>
                 )}
               </CardContent>
@@ -466,21 +401,15 @@ const JoinRoom = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {finishedGames && finishedGames.length > 0 ? (
                       finishedGames.map((game) => {
-                        const timeLeft = getTimeLeft(game.deadline)
                         const prizePool = calculatePrizePool(game.playerCount, game.entryFee)
-                        const isWinner = address && game.winner && 
-                                       address.toLowerCase() === game.winner.toLowerCase() &&
-                                       game.winner !== "0x0000000000000000000000000000000000000000"
                         
                         return (
                           <div
                             key={game.gameId.toString()}
                             className={`p-4 border-2 rounded-lg transition-all duration-300 cursor-pointer hover:shadow-card hover:-translate-y-1 ${
-                              isWinner 
-                                ? "border-green-300 bg-green-50 hover:border-green-400" 
-                                : game.status === CONTRACT_CONFIG.GameStatus.Calculating
-                                  ? "border-yellow-300 bg-yellow-50 hover:border-yellow-400"
-                                  : "border-gray-300 bg-gray-50 hover:border-gray-400"
+                              game.status === CONTRACT_CONFIG.GameStatus.Calculating
+                                ? "bg-gradient-to-br from-blue-100 to-indigo-100 border-blue-400 hover:border-blue-500"
+                                : "bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-300 hover:border-purple-400"
                             }`}
                             onClick={() => handleViewFinishedGame(game.gameId)}
                           >
@@ -488,19 +417,13 @@ const JoinRoom = () => {
                               <div className="flex items-center space-x-3">
                                 <h3 className="font-semibold text-lg">{game.roomName || `Game ${game.gameId.toString()}`}</h3>
                                 {getStatusBadge(game.status)}
-                                {isWinner && (
-                                  <Badge className="bg-green-500 text-white">
-                                    <Trophy className="w-3 h-3 mr-1" />
-                                    Winner
-                                  </Badge>
-                                )}
                               </div>
                               <Badge variant="outline" className="font-mono">
                                 #{game.gameId.toString()}
                               </Badge>
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                            <div className="grid grid-cols-3 gap-3 mb-3">
                               <div className="flex items-center space-x-2 text-sm">
                                 <Users className="w-4 h-4 text-muted-foreground" />
                                 <span>{game.playerCount}/{game.maxPlayers}</span>
@@ -515,27 +438,8 @@ const JoinRoom = () => {
                                 <Trophy className="w-4 h-4 text-muted-foreground" />
                                 <span>{formatETH(prizePool)} ETH</span>
                               </div>
-                              
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Timer className="w-4 h-4 text-muted-foreground" />
-                                <span>Completed</span>
-                              </div>
                             </div>
 
-                            {/* Winner info or completion status */}
-                            {game.winner && game.winner !== "0x0000000000000000000000000000000000000000" && (
-                              <div className="mt-2 p-2 bg-white/50 rounded text-xs">
-                                {isWinner ? (
-                                  <div className="text-green-700 font-medium">
-                                    🎉 You won with number {game.winningNumber}! Click to claim your prize.
-                                  </div>
-                                ) : (
-                                  <div className="text-gray-600">
-                                    Winner: {game.winner.slice(0, 6)}...{game.winner.slice(-4)} (Number: {game.winningNumber})
-                                  </div>
-                                )}
-                              </div>
-                            )}
                             
                             {/* Entry fee info */}
                             <div className="mt-2 text-xs text-muted-foreground">

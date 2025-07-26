@@ -99,5 +99,5 @@ export const formatAddress = (address: string): string => {
 
 export const formatETH = (wei: bigint): string => {
   const eth = Number(wei) / 1e18;
-  return eth.toFixed(4);
+  return eth.toFixed(2);
 };
