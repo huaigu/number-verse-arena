@@ -320,7 +320,7 @@ const GamePage = () => {
 
   // 处理开奖操作
   const handleRevealWinner = async () => {
-    if (!gameId) {
+    if (gameId === undefined) {
       toast({
         title: "Cannot reveal",
         description: "Game ID is missing.",
@@ -342,7 +342,7 @@ const GamePage = () => {
 
   // 处理领取奖金操作
   const handleClaimPrize = async () => {
-    if (!gameId) {
+    if (gameId === undefined) {
       toast({
         title: "Cannot claim",
         description: "Game ID is missing.",
@@ -706,7 +706,7 @@ const GamePage = () => {
                   )}
 
                   {/* User Already Submitted Message */}
-                  {hasSubmitted && (
+                  {hasSubmitted && gameSummary?.status !== CONTRACT_CONFIG.GameStatus.Completed && !isGameDecrypted() && (
                     <div className="p-2 bg-green-50 border border-green-200 rounded text-center">
                       <div className="flex items-center justify-center space-x-2 text-green-700">
                         <Trophy className="w-5 h-5" />
@@ -731,21 +731,27 @@ const GamePage = () => {
 
                   {/* Game Result Section */}
                   {isGameDecrypted() && (
-                    <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
-                      <div className="text-center mb-3">
+                    <div className="space-y-4">
+                      {/* Header Section */}
+                      <div className="text-center">
                         <Trophy className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-lg font-semibold text-purple-800">Game Completed!</h3>
+                        <h3 className="text-xl font-bold text-purple-800">Game Completed!</h3>
                       </div>
                       
                       {isCurrentUserWinner() ? (
-                        <div className="space-y-2">
-                          <div className="p-3 bg-green-50 border border-green-200 rounded text-center">
-                            <div className="text-green-800 font-semibold mb-1">🎉 Congratulations! You won!</div>
-                            <div className="text-green-700 text-sm">
-                              Your winning number: <span className="font-bold">{gameSummary.winningNumber}</span>
-                            </div>
-                            <div className="text-green-700 text-sm">
-                              Prize: <span className="font-bold">{formatETH(gameSummary.prizePool)} ETH</span>
+                        /* Winner View */
+                        <div className="space-y-3">
+                          <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center">
+                            <div className="text-green-800 font-bold text-lg mb-2">🎉 Congratulations! You won!</div>
+                            <div className="flex justify-center items-center space-x-6 text-green-700">
+                              <div>
+                                <div className="text-sm font-medium">Your winning number</div>
+                                <div className="text-2xl font-bold">{gameSummary.winningNumber}</div>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium">Prize</div>
+                                <div className="text-2xl font-bold">{formatETH(gameSummary.prizePool)} ETH</div>
+                              </div>
                             </div>
                           </div>
                           
@@ -754,7 +760,7 @@ const GamePage = () => {
                               onClick={handleClaimPrize} 
                               disabled={isClaiming}
                               className="w-full"
-                              size="sm"
+                              size="lg"
                             >
                               {isClaiming ? (
                                 <>
@@ -769,22 +775,32 @@ const GamePage = () => {
                               )}
                             </GradientButton>
                           ) : (
-                            <div className="p-2 bg-green-100 rounded text-green-800 text-sm text-center">
+                            <div className="p-3 bg-green-100 border border-green-300 rounded-lg text-green-800 text-center font-medium">
                               ✅ Prize claimed! Congratulations!
                             </div>
                           )}
                         </div>
                       ) : (
-                        <div className="text-center space-y-2">
-                          <div className="p-3 bg-gray-50 border border-gray-200 rounded">
-                            <div className="text-gray-700 font-medium mb-1">Game Results</div>
-                            <div className="text-gray-600 text-sm">
-                              Winner: <span className="font-medium">{formatAddress(gameSummary.winner)}</span>
+                        /* Non-winner View */
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg text-center">
+                              <div className="text-sm text-blue-600 font-medium mb-1">Winner</div>
+                              <div className="text-blue-800 font-bold text-lg">
+                                {formatAddress(gameSummary.winner)}
+                              </div>
                             </div>
-                            <div className="text-gray-600 text-sm">
-                              Winning number: <span className="font-medium">{gameSummary.winningNumber}</span>
+                            
+                            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg text-center">
+                              <div className="text-sm text-purple-600 font-medium mb-1">Winning Number</div>
+                              <div className="text-purple-800 font-bold text-2xl">
+                                {gameSummary.winningNumber}
+                              </div>
                             </div>
-                            <div className="text-gray-600 text-sm mt-2">
+                          </div>
+                          
+                          <div className="p-3 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg text-center">
+                            <div className="text-orange-700 font-medium">
                               Better luck next time! 🎯
                             </div>
                           </div>
