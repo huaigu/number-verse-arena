@@ -116,8 +116,12 @@ const LandingPage = () => {
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">U</span>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+              <img 
+                src="/uninum.png" 
+                alt="Unique Number Game Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <span className="text-xl font-bold text-foreground">Unique Number</span>
           </div>
