@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Trophy, Users, Target, Gamepad2, TwitterIcon, GithubIcon } from "lucide-react"
+import { Trophy, Users, Target, Gamepad2, TwitterIcon, GithubIcon, Shield, Lock } from "lucide-react"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount } from 'wagmi'
 import { useToast } from "@/hooks/use-toast"
@@ -89,24 +89,24 @@ const LandingPage = () => {
 
   const features = [
     {
-      icon: Users,
-      title: "Multiplayer",
-      description: "Create rooms and invite friends to play the number selection game together"
+      icon: Shield,
+      title: "FHE Privacy Protection",
+      description: "Your number choices remain encrypted on-chain using ZAMA's FHE technology until game completion"
     },
     {
-      icon: Target,
-      title: "Strategic Choice",
-      description: "Choose unique numbers, avoid duplicates with others, and compete for rewards"
+      icon: Lock,
+      title: "Confidential by Design",
+      description: "Game logic runs on encrypted data without revealing player selections, ensuring true privacy"
+    },
+    {
+      icon: Users,
+      title: "Trustless Multiplayer",
+      description: "No central authority can see your choices - privacy guaranteed by cryptographic proofs"
     },
     {
       icon: Trophy,
-      title: "Leaderboard",
-      description: "View real-time score rankings and become the top player"
-    },
-    {
-      icon: Gamepad2,
-      title: "Easy to Play",
-      description: "Simple rules, easy to learn, suitable for all ages"
+      title: "Verifiable Fairness",
+      description: "All game results are cryptographically verifiable while maintaining complete player privacy"
     }
   ]
 
@@ -140,12 +140,12 @@ const LandingPage = () => {
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 animate-slide-in">
             Unique Number Game
             <span className="block text-2xl md:text-4xl text-primary mt-2">
-              Challenge Your Strategic Thinking
+              Powered by Zama's fhEVM
             </span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            In this exciting multiplayer game, choose your unique number, avoid duplicates with others, and win generous rewards!
+            The world's first privacy-preserving multiplayer number game using Fully Homomorphic Encryption. Your choices stay encrypted on-chain until reveal - no one can see your strategy!
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -170,7 +170,7 @@ const LandingPage = () => {
       {/* Features */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center text-foreground mb-12">
-          Game Features
+          Revolutionary Privacy Features
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -217,9 +217,9 @@ const LandingPage = () => {
               <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
                 2
               </div>
-              <h3 className="text-xl font-semibold mb-2">Choose Unique Number</h3>
+              <h3 className="text-xl font-semibold mb-2">Choose & Encrypt</h3>
               <p className="text-muted-foreground">
-                Select a number within the specified range. Remember: choose uniquely to win
+                Select your number - it's encrypted using ZAMA FHE and hidden from all players until reveal
               </p>
             </div>
             
@@ -227,9 +227,9 @@ const LandingPage = () => {
               <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
                 3
               </div>
-              <h3 className="text-xl font-semibold mb-2">Win Rewards</h3>
+              <h3 className="text-xl font-semibold mb-2">Cryptographic Reveal</h3>
               <p className="text-muted-foreground">
-                Players with unique numbers get rewards, duplicate choices earn no points
+                When time expires, FHE reveals all choices simultaneously - unique number holders win!
               </p>
             </div>
           </div>
