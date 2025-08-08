@@ -171,6 +171,28 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Demo Video */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-foreground mb-8">
+            Watch How It Works
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            See the Unique Number Game in action and learn how privacy-preserving gameplay works
+          </p>
+          <div className="relative w-full max-w-3xl mx-auto aspect-video rounded-xl overflow-hidden shadow-2xl bg-card">
+            <iframe
+              src="https://www.youtube.com/embed/5AlisRBd1tI"
+              title="Unique Number Game Demo"
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center text-foreground mb-12">
