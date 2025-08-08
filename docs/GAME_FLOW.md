@@ -1,370 +1,370 @@
-# 游戏流程说明
+# Game Flow Documentation
 
-本文档详细描述Number Verse Arena游戏的完整流程，包括用户交互、合约调用和状态变化。
+This document describes the complete flow of the Number Verse Arena game, including user interactions, contract calls, and state transitions.
 
-## 🎮 游戏概述
+## 🎮 Game Overview
 
-Number Verse Arena是一个基于FHE（完全同态加密）技术的Web3数字猜测游戏。玩家在加密状态下选择数字，选择**唯一数字**的玩家获得奖励。
+Number Verse Arena is a Web3 number guessing game based on FHE (Fully Homomorphic Encryption) technology. Players select numbers in an encrypted state, and players who choose **unique numbers** receive rewards.
 
-### 核心特性
-- 🔐 **隐私保护**: 使用FHE加密，玩家选择在游戏结束前完全保密
-- 🏆 **公平竞争**: 所有加密操作在链上执行，确保公平性
-- 💰 **奖励机制**: 选择唯一数字的玩家平分奖池
-- ⏰ **时间限制**: 每局游戏有明确的时间限制
+### Core Features
+- 🔐 **Privacy Protection**: Uses FHE encryption, player choices remain completely confidential until game completion
+- 🏆 **Fair Competition**: All encrypted operations executed on-chain, ensuring fairness
+- 💰 **Reward Mechanism**: Players who select unique numbers share the prize pool
+- ⏰ **Time Limits**: Each game has clear time constraints
 
-## 📋 游戏规则
+## 📋 Game Rules
 
-### 基本规则
-1. **房间创建**: 任何玩家都可以创建游戏房间
-2. **数字选择**: 玩家在指定范围内选择一个数字（例如1-16）
-3. **唯一获胜**: 只有选择**唯一数字**（没有其他玩家选择）的玩家才能获胜
-4. **奖池分配**: 如有多个获胜者，奖池将平均分配
-5. **时间限制**: 游戏有固定的参与时间，超时后自动开奖
+### Basic Rules
+1. **Room Creation**: Any player can create a game room
+2. **Number Selection**: Players choose a number within the specified range (e.g., 1-16)
+3. **Unique Wins**: Only players who select **unique numbers** (no other player selected the same) can win
+4. **Prize Distribution**: If multiple winners exist, the prize pool is divided equally
+5. **Time Limits**: Games have fixed participation time, automatically determining winners after timeout
 
-### 获胜条件
-- ✅ 选择的数字是唯一的（没有其他玩家选择相同数字）
-- ✅ 在截止时间前提交选择
-- ✅ 支付正确的参与费用
+### Victory Conditions
+- ✅ Selected number is unique (no other player chose the same number)
+- ✅ Submitted choice before deadline
+- ✅ Paid correct entry fee
 
-### 失败条件
-- ❌ 选择的数字有其他玩家也选择（重复数字）
-- ❌ 超过截止时间未提交
-- ❌ 未支付参与费用
+### Failure Conditions
+- ❌ Selected number was also chosen by other players (duplicate number)
+- ❌ Failed to submit before deadline
+- ❌ Did not pay entry fee
 
-## 🔄 完整游戏流程
+## 🔄 Complete Game Flow
 
-### 阶段1: 房间创建
+### Phase 1: Room Creation
 ```mermaid
 sequenceDiagram
-    participant Player as 创建者
-    participant Frontend as 前端应用
-    participant Contract as 智能合约
-    participant FHE as FHE网络
+    participant Player as Creator
+    participant Frontend as Frontend App
+    participant Contract as Smart Contract
+    participant FHE as FHE Network
 
-    Player->>Frontend: 填写房间信息
-    Frontend->>Player: 显示配置预览
-    Player->>Frontend: 确认创建
+    Player->>Frontend: Fill room information
+    Frontend->>Player: Display configuration preview
+    Player->>Frontend: Confirm creation
     Frontend->>Contract: createGame()
-    Contract->>Contract: 验证参数
-    Contract->>FHE: 初始化FHE计数器
-    Contract->>Frontend: GameCreated事件
-    Frontend->>Player: 显示房间已创建
+    Contract->>Contract: Validate parameters
+    Contract->>FHE: Initialize FHE counters
+    Contract->>Frontend: GameCreated event
+    Frontend->>Player: Display room created
 ```
 
-**详细步骤:**
-1. 玩家访问"创建房间"页面
-2. 填写房间配置:
-   - 房间名称 (1-64字符)
-   - 数字范围 (例如: 1-16)
-   - 最大玩家数 (2-10人)
-   - 参与费用 (ETH)
-   - 游戏时长 (秒)
-3. 前端验证输入参数
-4. 调用 `createGame()` 合约函数
-5. 合约创建游戏并初始化FHE计数器
-6. 触发 `GameCreated` 事件
-7. 前端显示创建成功，获得游戏ID
+**Detailed Steps:**
+1. Player visits "Create Room" page
+2. Fill room configuration:
+   - Room name (1-64 characters)
+   - Number range (e.g., 1-16)
+   - Maximum players (2-10 people)
+   - Entry fee (ETH)
+   - Game duration (seconds)
+3. Frontend validates input parameters
+4. Call `createGame()` contract function
+5. Contract creates game and initializes FHE counters
+6. Trigger `GameCreated` event
+7. Frontend displays creation success, obtain game ID
 
-### 阶段2: 玩家加入
+### Phase 2: Player Joining
 ```mermaid
 sequenceDiagram
-    participant Player as 玩家
-    participant Frontend as 前端应用
-    participant Contract as 智能合约
+    participant Player as Player
+    participant Frontend as Frontend App
+    participant Contract as Smart Contract
 
-    Player->>Frontend: 浏览活跃游戏
+    Player->>Frontend: Browse active games
     Frontend->>Contract: getActiveGames()
-    Contract->>Frontend: 返回游戏列表
-    Frontend->>Player: 显示可加入游戏
-    Player->>Frontend: 选择游戏房间
+    Contract->>Frontend: Return game list
+    Frontend->>Player: Display joinable games
+    Player->>Frontend: Select game room
     Frontend->>Contract: getGameSummary(gameId)
-    Contract->>Frontend: 返回游戏详情
-    Frontend->>Player: 显示房间详细信息
+    Contract->>Frontend: Return game details
+    Frontend->>Player: Display room detailed information
 ```
 
-**详细步骤:**
-1. 玩家访问"加入游戏"页面或主页
-2. 前端调用 `getActiveGames()` 获取开放游戏
-3. 显示游戏列表，包含:
-   - 房间名称
-   - 当前玩家数/最大玩家数
-   - 参与费用
-   - 剩余时间
-   - 数字范围
-4. 玩家选择感兴趣的游戏
-5. 前端调用 `getGameSummary()` 获取详细信息
-6. 显示游戏详情供玩家确认
+**Detailed Steps:**
+1. Player visits "Join Game" page or homepage
+2. Frontend calls `getActiveGames()` to get open games
+3. Display game list including:
+   - Room name
+   - Current players/max players
+   - Entry fee
+   - Remaining time
+   - Number range
+4. Player selects game of interest
+5. Frontend calls `getGameSummary()` to get detailed information
+6. Display game details for player confirmation
 
-### 阶段3: 数字提交
+### Phase 3: Number Submission
 ```mermaid
 sequenceDiagram
-    participant Player as 玩家
-    participant Frontend as 前端应用
-    participant FHE as FHE客户端
-    participant Contract as 智能合约
-    participant Network as FHE网络
+    participant Player as Player
+    participant Frontend as Frontend App
+    participant FHE as FHE Client
+    participant Contract as Smart Contract
+    participant Network as FHE Network
 
-    Player->>Frontend: 进入游戏页面
+    Player->>Frontend: Enter game page
     Frontend->>Contract: getGameSummary(gameId)
-    Contract->>Frontend: 返回游戏状态
-    Frontend->>Player: 显示数字选择界面
-    Player->>Frontend: 选择数字
-    Frontend->>Player: 确认选择
-    Player->>Frontend: 提交数字
-    Frontend->>FHE: 加密用户输入
-    FHE->>Frontend: 返回加密数据和证明
+    Contract->>Frontend: Return game status
+    Frontend->>Player: Display number selection interface
+    Player->>Frontend: Select number
+    Frontend->>Player: Confirm selection
+    Player->>Frontend: Submit number
+    Frontend->>FHE: Encrypt user input
+    FHE->>Frontend: Return encrypted data and proof
     Frontend->>Contract: submitNumber()
-    Contract->>Network: 更新FHE计数器
-    Contract->>Frontend: SubmissionReceived事件
-    Frontend->>Player: 显示提交成功
+    Contract->>Network: Update FHE counters
+    Contract->>Frontend: SubmissionReceived event
+    Frontend->>Player: Display submission success
 ```
 
-**详细步骤:**
-1. 玩家进入游戏页面（通过房间ID）
-2. 前端获取游戏当前状态
-3. 显示数字选择网格界面
-4. 玩家选择一个数字
-5. 前端显示选择确认界面
-6. 玩家确认提交
-7. **FHE加密过程**:
-   - 前端调用FHE库加密选择的数字
-   - 生成零知识证明
-   - 准备加密数据和证明
-8. 调用 `submitNumber()` 合约函数:
-   - 传入游戏ID
-   - 传入加密的数字
-   - 传入零知识证明
-   - 发送参与费用
-9. 合约验证并更新FHE计数器
-10. 触发 `SubmissionReceived` 事件
-11. 前端显示提交成功消息
+**Detailed Steps:**
+1. Player enters game page (via room ID)
+2. Frontend gets current game status
+3. Display number selection grid interface
+4. Player selects a number
+5. Frontend displays selection confirmation interface
+6. Player confirms submission
+7. **FHE Encryption Process**:
+   - Frontend calls FHE library to encrypt selected number
+   - Generate zero-knowledge proof
+   - Prepare encrypted data and proof
+8. Call `submitNumber()` contract function:
+   - Pass game ID
+   - Pass encrypted number
+   - Pass zero-knowledge proof
+   - Send entry fee
+9. Contract validates and updates FHE counters
+10. Trigger `SubmissionReceived` event
+11. Frontend displays submission success message
 
-### 阶段4: 游戏进行中
+### Phase 4: Game in Progress
 ```mermaid
 sequenceDiagram
-    participant Players as 多个玩家
-    participant Frontend as 前端应用
-    participant Contract as 智能合约
+    participant Players as Multiple Players
+    participant Frontend as Frontend App
+    participant Contract as Smart Contract
 
-    loop 游戏进行中
-        Players->>Frontend: 查看游戏状态
+    loop Game in Progress
+        Players->>Frontend: Check game status
         Frontend->>Contract: getGameSummary(gameId)
-        Contract->>Frontend: 返回当前状态
-        Frontend->>Players: 显示实时信息
+        Contract->>Frontend: Return current status
+        Frontend->>Players: Display real-time info
         
-        alt 新玩家加入
+        alt New player joins
             Players->>Contract: submitNumber()
-            Contract->>Frontend: SubmissionReceived事件
-            Frontend->>Players: 更新玩家计数
+            Contract->>Frontend: SubmissionReceived event
+            Frontend->>Players: Update player count
         end
         
-        alt 达到最大人数
-            Contract->>Contract: 自动触发开奖
-            Contract->>Frontend: WinnerCalculationStarted事件
+        alt Maximum players reached
+            Contract->>Contract: Auto-trigger winner determination
+            Contract->>Frontend: WinnerCalculationStarted event
         end
         
-        alt 时间到期
+        alt Time expired
             Players->>Contract: findWinnerByDeadline()
-            Contract->>Frontend: WinnerCalculationStarted事件
+            Contract->>Frontend: WinnerCalculationStarted event
         end
     end
 ```
 
-**详细步骤:**
-1. 游戏状态为"Open"时，持续接受新玩家
-2. 前端实时显示:
-   - 当前玩家数量
-   - 剩余时间
-   - 奖池金额
-   - 玩家自己的选择状态
-3. 自动开奖触发条件:
-   - 达到最大玩家数量，或
-   - 超过截止时间且有参与者
-4. 任何人都可以在时间到期后调用 `findWinnerByDeadline()`
+**Detailed Steps:**
+1. While game status is "Open", continuously accept new players
+2. Frontend displays in real-time:
+   - Current player count
+   - Remaining time
+   - Prize pool amount
+   - Player's own selection status
+3. Automatic winner determination triggers:
+   - Maximum player count reached, or
+   - Deadline exceeded with participants
+4. Anyone can call `findWinnerByDeadline()` after time expiry
 
-### 阶段5: 开奖计算
+### Phase 5: Winner Calculation
 ```mermaid
 sequenceDiagram
-    participant Contract as 智能合约
-    participant FHE as FHE网络
-    participant Oracle as 解密预言机
+    participant Contract as Smart Contract
+    participant FHE as FHE Network
+    participant Oracle as Decryption Oracle
 
     Contract->>Contract: _findWinner()
-    Contract->>FHE: FHE计算唯一数字
-    FHE->>Contract: 返回加密的获胜数字
-    Contract->>Oracle: 请求解密获胜数字
+    Contract->>FHE: FHE compute unique numbers
+    FHE->>Contract: Return encrypted winning number
+    Contract->>Oracle: Request decrypt winning number
     Oracle->>Contract: callbackDecryptWinnerNumber()
-    Contract->>Contract: 验证获胜数字
+    Contract->>Contract: Validate winning number
     
-    alt 有获胜者
-        Contract->>FHE: FHE计算获胜者索引
-        FHE->>Contract: 返回加密的获胜者索引
-        Contract->>Oracle: 请求解密获胜者索引
+    alt Winner exists
+        Contract->>FHE: FHE compute winner index
+        FHE->>Contract: Return encrypted winner index
+        Contract->>Oracle: Request decrypt winner index
         Oracle->>Contract: callbackDecryptWinnerIndex()
-        Contract->>Contract: 设置获胜者地址
-        Contract->>Contract: WinnerDetermined事件
-    else 无获胜者
-        Contract->>Contract: 游戏结束，无获胜者
+        Contract->>Contract: Set winner address
+        Contract->>Contract: WinnerDetermined event
+    else No winner
+        Contract->>Contract: Game ends, no winner
     end
 ```
 
-**详细步骤:**
-1. **触发开奖**: 游戏状态变为"Calculating"
-2. **FHE计算阶段1 - 找到获胜数字**:
-   - 遍历所有可能的数字
-   - 使用FHE操作检查每个数字的计数
-   - 找到计数为1（唯一）且最小的数字
-3. **解密阶段1**: 
-   - 请求FHE网络解密获胜数字
-   - 解密预言机回调 `callbackDecryptWinnerNumber()`
-4. **FHE计算阶段2 - 找到获胜者**:
-   - 遍历所有玩家的提交
-   - 使用FHE操作找到选择了获胜数字的玩家索引
-5. **解密阶段2**:
-   - 请求FHE网络解密获胜者索引
-   - 解密预言机回调 `callbackDecryptWinnerIndex()`
-6. **结果确定**:
-   - 设置获胜者地址
-   - 记录获胜历史
-   - 触发 `WinnerDetermined` 事件
-   - 游戏状态变为"Finished"
+**Detailed Steps:**
+1. **Trigger Winner Determination**: Game status changes to "Calculating"
+2. **FHE Computation Phase 1 - Find Winning Number**:
+   - Iterate through all possible numbers
+   - Use FHE operations to check count for each number
+   - Find the smallest number with count of 1 (unique)
+3. **Decryption Phase 1**: 
+   - Request FHE network to decrypt winning number
+   - Decryption oracle callback `callbackDecryptWinnerNumber()`
+4. **FHE Computation Phase 2 - Find Winner**:
+   - Iterate through all player submissions
+   - Use FHE operations to find player index who selected winning number
+5. **Decryption Phase 2**:
+   - Request FHE network to decrypt winner index
+   - Decryption oracle callback `callbackDecryptWinnerIndex()`
+6. **Result Determination**:
+   - Set winner address
+   - Record winner history
+   - Trigger `WinnerDetermined` event
+   - Game status changes to "Finished"
 
-### 阶段6: 奖金领取
+### Phase 6: Prize Claiming
 ```mermaid
 sequenceDiagram
-    participant Winner as 获胜者
-    participant Frontend as 前端应用
-    participant Contract as 智能合约
+    participant Winner as Winner
+    participant Frontend as Frontend App
+    participant Contract as Smart Contract
 
-    Winner->>Frontend: 查看获胜状态
+    Winner->>Frontend: Check winning status
     Frontend->>Contract: getGameSummary(gameId)
-    Contract->>Frontend: 返回游戏结果
-    Frontend->>Winner: 显示获胜信息和领奖按钮
-    Winner->>Frontend: 点击领取奖金
+    Contract->>Frontend: Return game result
+    Frontend->>Winner: Display winning info and claim button
+    Winner->>Frontend: Click claim prize
     Frontend->>Contract: claimPrize(gameId)
-    Contract->>Contract: 验证获胜者身份
-    Contract->>Winner: 转账奖金
-    Contract->>Frontend: PrizeClaimed事件
-    Frontend->>Winner: 显示领取成功
+    Contract->>Contract: Verify winner identity
+    Contract->>Winner: Transfer prize
+    Contract->>Frontend: PrizeClaimed event
+    Frontend->>Winner: Display claim success
 ```
 
-**详细步骤:**
-1. 获胜者访问游戏页面或个人统计页面
-2. 前端检查玩家是否为获胜者
-3. 显示获胜恭喜信息和"领取奖金"按钮
-4. 获胜者点击领取奖金
-5. 调用 `claimPrize()` 合约函数
-6. 合约验证:
-   - 游戏状态为"Finished"
-   - 调用者是获胜者
-   - 奖池有余额
-7. 转账奖金到获胜者钱包
-8. 触发 `PrizeClaimed` 事件
-9. 游戏状态变为"PrizeClaimed"
-10. 前端显示领取成功消息
+**Detailed Steps:**
+1. Winner visits game page or personal stats page
+2. Frontend checks if player is winner
+3. Display congratulations message and "Claim Prize" button
+4. Winner clicks claim prize
+5. Call `claimPrize()` contract function
+6. Contract verification:
+   - Game status is "Finished"
+   - Caller is the winner
+   - Prize pool has balance
+7. Transfer prize to winner's wallet
+8. Trigger `PrizeClaimed` event
+9. Game status changes to "PrizeClaimed"
+10. Frontend displays claim success message
 
-## 🎯 用户界面流程
+## 🎯 User Interface Flow
 
-### 主页流程
+### Homepage Flow
 ```
-主页 → 显示活跃游戏列表
-    ├── 创建房间 → 创建房间页面
-    ├── 加入游戏 → 游戏选择页面
-    └── 查看排行榜 → 排行榜页面
-```
-
-### 创建房间流程
-```
-创建房间页面
-├── 选择预设配置 (快速开始)
-├── 自定义配置
-│   ├── 房间名称
-│   ├── 玩家数量
-│   ├── 数字范围  
-│   ├── 参与费用
-│   └── 游戏时长
-├── 预览配置
-└── 确认创建 → 游戏页面
+Homepage → Display active games list
+    ├── Create Room → Create room page
+    ├── Join Game → Game selection page
+    └── View Leaderboard → Leaderboard page
 ```
 
-### 游戏页面流程
+### Create Room Flow
 ```
-游戏页面
-├── 显示游戏信息 (房间名、参与者、时间、奖池)
-├── 数字选择网格
-├── 玩家状态面板
-├── 选择数字 → 确认提交 → 等待结果
-└── 游戏结束
-    ├── 获胜 → 领取奖金
-    └── 失败 → 查看结果分析
+Create Room Page
+├── Select preset configuration (quick start)
+├── Custom configuration
+│   ├── Room name
+│   ├── Player count
+│   ├── Number range  
+│   ├── Entry fee
+│   └── Game duration
+├── Preview configuration
+└── Confirm creation → Game page
 ```
 
-## 📊 状态管理
+### Game Page Flow
+```
+Game Page
+├── Display game info (room name, participants, time, prize pool)
+├── Number selection grid
+├── Player status panel
+├── Select number → Confirm submission → Wait for result
+└── Game ends
+    ├── Victory → Claim prize
+    └── Loss → View result analysis
+```
 
-### 游戏状态
-- **Open** (0): 游戏开放，接受玩家加入
-- **Calculating** (1): 正在计算获胜者，不接受新玩家
-- **Finished** (2): 游戏结束，获胜者可领奖
-- **PrizeClaimed** (3): 奖金已被领取
+## 📊 State Management
 
-### 前端状态
-- **Loading**: 数据加载中
-- **Connected**: 钱包已连接
-- **Selecting**: 玩家正在选择数字
-- **Confirming**: 交易确认中
-- **Submitted**: 已提交，等待结果
-- **Won**: 玩家获胜
-- **Lost**: 玩家失败
+### Game States
+- **Open** (0): Game open, accepting players
+- **Calculating** (1): Calculating winner, no new players accepted
+- **Finished** (2): Game ended, winner can claim prize
+- **PrizeClaimed** (3): Prize has been claimed
 
-## ⚠️ 异常情况处理
+### Frontend States
+- **Loading**: Data loading
+- **Connected**: Wallet connected
+- **Selecting**: Player selecting number
+- **Confirming**: Transaction confirming
+- **Submitted**: Submitted, waiting for result
+- **Won**: Player won
+- **Lost**: Player lost
 
-### 合约层面
-1. **无人参与**: 游戏结束，无获胜者，参与费用不退还（按规则）
-2. **无唯一数字**: 所有数字都被多人选择，无获胜者
-3. **解密失败**: 重试机制，最终fallback到游戏取消
-4. **Gas不足**: 交易失败，用户需要重试
+## ⚠️ Exception Handling
 
-### 前端层面
-1. **网络断开**: 显示离线提示，自动重连
-2. **钱包断开**: 提示重新连接钱包
-3. **交易失败**: 显示具体错误信息和重试选项
-4. **时间同步**: 定期同步区块时间，避免时间偏差
+### Contract Level
+1. **No Participants**: Game ends, no winner, entry fees not refunded (by rules)
+2. **No Unique Numbers**: All numbers selected by multiple players, no winner
+3. **Decryption Failure**: Retry mechanism, final fallback to game cancellation
+4. **Insufficient Gas**: Transaction fails, user needs to retry
 
-### 用户体验
-1. **错误恢复**: 提供明确的错误信息和解决方案
-2. **状态保存**: 在页面刷新后恢复用户状态
-3. **进度指示**: 清楚显示当前阶段和剩余步骤
-4. **帮助系统**: 提供游戏规则说明和FAQ
+### Frontend Level
+1. **Network Disconnect**: Display offline prompt, auto-reconnect
+2. **Wallet Disconnect**: Prompt to reconnect wallet
+3. **Transaction Failure**: Display specific error message and retry options
+4. **Time Synchronization**: Periodically sync block time, avoid time drift
 
-## 🔐 安全考虑
+### User Experience
+1. **Error Recovery**: Provide clear error messages and solutions
+2. **State Preservation**: Restore user state after page refresh
+3. **Progress Indication**: Clearly show current phase and remaining steps
+4. **Help System**: Provide game rules explanation and FAQ
 
-### 隐私保护
-- 玩家选择通过FHE加密，链上不可见
-- 只有游戏结束后才公开获胜数字
-- 获胜者身份通过FHE计算确定
+## 🔐 Security Considerations
 
-### 公平性保证
-- 所有加密操作在链上执行
-- 无法提前知道其他玩家选择
-- 解密过程通过预言机验证
+### Privacy Protection
+- Player selections encrypted through FHE, not visible on-chain
+- Winning number only revealed after game completion
+- Winner identity determined through FHE computation
 
-### 经济安全
-- 参与费用锁定在合约中
-- 只有验证的获胜者可以领取奖金
-- 防重入攻击保护
+### Fairness Guarantee
+- All encryption operations executed on-chain
+- Cannot know other players' selections in advance
+- Decryption process verified through oracle
 
-## 📈 性能优化
+### Economic Security
+- Entry fees locked in contract
+- Only verified winners can claim prizes
+- Reentrancy attack protection
 
-### 链上优化
-- FHE操作批量处理
-- 事件驱动的状态更新
-- Gas使用优化
+## 📈 Performance Optimization
 
-### 前端优化
-- 数据缓存和预加载
-- 实时状态订阅
-- 响应式UI更新
+### On-Chain Optimization
+- FHE operations batched processing
+- Event-driven state updates
+- Gas usage optimization
+
+### Frontend Optimization
+- Data caching and preloading
+- Real-time status subscription
+- Reactive UI updates
 
 ---
 
-这个游戏流程确保了用户体验的流畅性，同时维护了FHE技术提供的隐私保护特性。每个阶段都有明确的状态转换和错误处理机制。
+This game flow ensures smooth user experience while maintaining the privacy protection features provided by FHE technology. Each phase has clear state transitions and error handling mechanisms.

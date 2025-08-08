@@ -1,281 +1,281 @@
-# 开发任务清单
+# Development Task List
 
-本文档列出了Number Verse Arena项目的所有待办事项和开发任务。
+This document lists all pending tasks and development items for the Number Verse Arena project.
 
-## 🚀 已完成任务 ✅
+## 🚀 Completed Tasks ✅
 
-### 智能合约扩展
-- [x] 为Game结构体添加roomName字段
-- [x] 修改createGame函数支持房间名字参数
-- [x] 添加房间名字长度验证
-- [x] 更新GameCreated事件包含房间名字
-- [x] 添加getAllGames()查询函数
-- [x] 添加getActiveGames()查询函数
-- [x] 添加getGamesByStatus()查询函数
-- [x] 添加getGamesWithPagination()查询函数
-- [x] 添加GameSummary结构体定义
-- [x] 添加getGameSummary()查询函数
-- [x] 添加getPlayerGames()查询函数
-- [x] 添加getTotalGamesCount()查询函数
-- [x] 添加canFinalizeGame()查询函数
-- [x] 添加PlayerStats结构体定义
-- [x] 添加WinnerRecord结构体定义
-- [x] 添加winnerHistory状态变量
-- [x] 修改获胜逻辑记录历史
-- [x] 添加getPlayerStats()查询函数
-- [x] 添加getWinnerHistory()查询函数
-- [x] 添加getWinnerHistoryCount()查询函数
-- [x] 添加getLeaderboard()查询函数
+### Smart Contract Extensions
+- [x] Add roomName field to Game struct
+- [x] Modify createGame function to support room name parameter
+- [x] Add room name length validation
+- [x] Update GameCreated event to include room name
+- [x] Add getAllGames() query function
+- [x] Add getActiveGames() query function
+- [x] Add getGamesByStatus() query function
+- [x] Add getGamesWithPagination() query function
+- [x] Add GameSummary struct definition
+- [x] Add getGameSummary() query function
+- [x] Add getPlayerGames() query function
+- [x] Add getTotalGamesCount() query function
+- [x] Add canFinalizeGame() query function
+- [x] Add PlayerStats struct definition
+- [x] Add WinnerRecord struct definition
+- [x] Add winnerHistory state variable
+- [x] Modify winner logic to record history
+- [x] Add getPlayerStats() query function
+- [x] Add getWinnerHistory() query function
+- [x] Add getWinnerHistoryCount() query function
+- [x] Add getLeaderboard() query function
 
-### 前端基础设施
-- [x] 创建合约ABI文件
-- [x] 创建合约配置文件
-- [x] 创建游戏相关hooks
-- [x] 创建统计相关hooks
-- [x] 更新Wagmi配置支持Zama网络
-- [x] 创建合约hooks入口文件
+### Frontend Infrastructure
+- [x] Create contract ABI file
+- [x] Create contract configuration file
+- [x] Create game-related hooks
+- [x] Create statistics-related hooks
+- [x] Update Wagmi configuration to support Zama network
+- [x] Create contract hooks entry file
 
-### 文档
-- [x] 创建CONTRACT_INTEGRATION.md
-- [x] 创建API_REFERENCE.md  
-- [x] 创建DEPLOYMENT_GUIDE.md
-- [x] 创建TODO.md任务清单
+### Documentation
+- [x] Create CONTRACT_INTEGRATION.md
+- [x] Create API_REFERENCE.md  
+- [x] Create DEPLOYMENT_GUIDE.md
+- [x] Create TODO.md task list
 
-## 🔄 进行中任务 🚧
+## 🔄 In Progress Tasks 🚧
 
-### 前端集成
-- [ ] 替换CreateRoom页面的mock数据
-- [ ] 替换GamePage页面的mock数据
-- [ ] 替换LandingPage页面的mock数据
-- [ ] 替换JoinRoom页面的mock数据
+### Frontend Integration
+- [ ] Replace mock data in CreateRoom page
+- [ ] Replace mock data in GamePage page
+- [ ] Replace mock data in LandingPage page
+- [ ] Replace mock data in JoinRoom page
 
-### FHE集成
-- [ ] 集成@zama-fhe/fhevmjs库
-- [ ] 实现客户端数字加密逻辑
-- [ ] 更新submitNumber函数使用真实FHE加密
-- [ ] 添加加密状态指示器
+### FHE Integration
+- [ ] Integrate @zama-fhe/fhevmjs library
+- [ ] Implement client-side number encryption logic
+- [ ] Update submitNumber function to use real FHE encryption
+- [ ] Add encryption status indicator
 
-## 📋 待办任务 ⏳
+## 📋 Pending Tasks ⏳
 
-### 高优先级任务
+### High Priority Tasks
 
-#### 合约部署和配置
-- [ ] 部署合约到Zama FHE测试网
-- [ ] 更新前端合约地址配置
-- [ ] 获取并配置WalletConnect项目ID
-- [ ] 验证合约在区块浏览器上
-- [ ] 测试基本合约交互功能
+#### Contract Deployment and Configuration
+- [ ] Deploy contract to Zama FHE testnet
+- [ ] Update frontend contract address configuration
+- [ ] Obtain and configure WalletConnect project ID
+- [ ] Verify contract on block explorer
+- [ ] Test basic contract interaction functionality
 
-#### 前端核心功能实现
-- [ ] 实现CreateRoom页面合约集成
-  - [ ] 连接useCreateGame hook
-  - [ ] 处理交易状态和错误
-  - [ ] 添加交易确认提示
-  - [ ] 成功后导航到游戏页面
-- [ ] 实现GamePage页面合约集成
-  - [ ] 连接useGetGameSummary hook
-  - [ ] 连接useSubmitNumber hook
-  - [ ] 实现实时游戏状态更新
-  - [ ] 添加玩家参与状态检查
-- [ ] 实现JoinRoom页面合约集成
-  - [ ] 连接useGetActiveGames hook
-  - [ ] 实现游戏搜索和筛选
-  - [ ] 添加游戏详情预览
-- [ ] 实现LandingPage页面合约集成
-  - [ ] 连接useGetActiveGames hook
-  - [ ] 连接useGetLeaderboard hook
-  - [ ] 添加统计数据显示
+#### Frontend Core Feature Implementation
+- [ ] Implement CreateRoom page contract integration
+  - [ ] Connect useCreateGame hook
+  - [ ] Handle transaction status and errors
+  - [ ] Add transaction confirmation prompts
+  - [ ] Navigate to game page after success
+- [ ] Implement GamePage page contract integration
+  - [ ] Connect useGetGameSummary hook
+  - [ ] Connect useSubmitNumber hook
+  - [ ] Implement real-time game status updates
+  - [ ] Add player participation status check
+- [ ] Implement JoinRoom page contract integration
+  - [ ] Connect useGetActiveGames hook
+  - [ ] Implement game search and filtering
+  - [ ] Add game details preview
+- [ ] Implement LandingPage page contract integration
+  - [ ] Connect useGetActiveGames hook
+  - [ ] Connect useGetLeaderboard hook
+  - [ ] Add statistics data display
 
-#### 用户体验优化
-- [ ] 添加加载状态指示器
-- [ ] 实现错误处理和用户友好的错误信息
-- [ ] 添加交易进度跟踪
-- [ ] 实现自动数据刷新
-- [ ] 添加交易历史查看
-- [ ] 优化移动端响应式设计
+#### User Experience Optimization
+- [ ] Add loading status indicators
+- [ ] Implement error handling and user-friendly error messages
+- [ ] Add transaction progress tracking
+- [ ] Implement automatic data refresh
+- [ ] Add transaction history viewing
+- [ ] Optimize mobile responsive design
 
-### 中优先级任务
+### Medium Priority Tasks
 
-#### 高级功能
-- [ ] 实现事件监听和实时更新
-  - [ ] 监听GameCreated事件
-  - [ ] 监听SubmissionReceived事件  
-  - [ ] 监听WinnerDetermined事件
-  - [ ] 监听PrizeClaimed事件
-- [ ] 添加玩家统计页面
-  - [ ] 个人游戏历史
-  - [ ] 获胜记录展示
-  - [ ] 收益统计图表
-- [ ] 实现排行榜页面
-  - [ ] 全球排行榜
-  - [ ] 月度/周度排行榜
-  - [ ] 玩家搜索功能
-- [ ] 添加游戏房间管理
-  - [ ] 房间创建者管理面板
-  - [ ] 提前结束游戏功能
-  - [ ] 房间设置修改
+#### Advanced Features
+- [ ] Implement event listening and real-time updates
+  - [ ] Listen to GameCreated events
+  - [ ] Listen to SubmissionReceived events  
+  - [ ] Listen to WinnerDetermined events
+  - [ ] Listen to PrizeClaimed events
+- [ ] Add player statistics page
+  - [ ] Personal game history
+  - [ ] Win record display
+  - [ ] Revenue statistics charts
+- [ ] Implement leaderboard page
+  - [ ] Global leaderboard
+  - [ ] Monthly/weekly leaderboards
+  - [ ] Player search functionality
+- [ ] Add game room management
+  - [ ] Room creator management panel
+  - [ ] Early game termination functionality
+  - [ ] Room settings modification
 
-#### UI/UX改进
-- [ ] 添加深色模式支持
-- [ ] 实现自定义主题
-- [ ] 添加动画效果和过渡
-- [ ] 优化游戏数字选择交互
-- [ ] 添加音效和振动反馈
-- [ ] 实现国际化(i18n)支持
+#### UI/UX Improvements
+- [ ] Add dark mode support
+- [ ] Implement custom themes
+- [ ] Add animation effects and transitions
+- [ ] Optimize game number selection interaction
+- [ ] Add sound effects and haptic feedback
+- [ ] Implement internationalization (i18n) support
 
-#### 性能优化
-- [ ] 实现数据缓存策略
-- [ ] 优化合约调用频率
-- [ ] 添加懒加载和代码分割
-- [ ] 优化图片和资源加载
-- [ ] 实现服务工作者(Service Worker)
+#### Performance Optimization
+- [ ] Implement data caching strategy
+- [ ] Optimize contract call frequency
+- [ ] Add lazy loading and code splitting
+- [ ] Optimize image and resource loading
+- [ ] Implement Service Worker
 
-### 低优先级任务
+### Low Priority Tasks
 
-#### 测试和质量保证
-- [ ] 编写单元测试
-  - [ ] hooks测试
-  - [ ] 组件测试
-  - [ ] 工具函数测试
-- [ ] 编写集成测试
-  - [ ] 端到端用户流程测试
-  - [ ] 合约交互测试
-- [ ] 性能测试和优化
-- [ ] 浏览器兼容性测试
-- [ ] 移动设备测试
+#### Testing and Quality Assurance
+- [ ] Write unit tests
+  - [ ] Hook tests
+  - [ ] Component tests
+  - [ ] Utility function tests
+- [ ] Write integration tests
+  - [ ] End-to-end user flow tests
+  - [ ] Contract interaction tests
+- [ ] Performance testing and optimization
+- [ ] Browser compatibility testing
+- [ ] Mobile device testing
 
-#### 开发工具和流程
-- [ ] 设置CI/CD管道
-- [ ] 添加代码格式化和检查
-- [ ] 配置自动化测试
-- [ ] 设置错误监控(Sentry)
-- [ ] 添加性能监控
-- [ ] 配置自动部署
+#### Development Tools and Process
+- [ ] Set up CI/CD pipeline
+- [ ] Add code formatting and linting
+- [ ] Configure automated testing
+- [ ] Set up error monitoring (Sentry)
+- [ ] Add performance monitoring
+- [ ] Configure automatic deployment
 
-#### 安全和监控
-- [ ] 实施安全最佳实践
-- [ ] 添加输入验证和清理
-- [ ] 实现速率限制
-- [ ] 添加日志记录
-- [ ] 设置监控和告警
-- [ ] 安全审计和渗透测试
+#### Security and Monitoring
+- [ ] Implement security best practices
+- [ ] Add input validation and sanitization
+- [ ] Implement rate limiting
+- [ ] Add logging
+- [ ] Set up monitoring and alerts
+- [ ] Security audit and penetration testing
 
-#### 扩展功能
-- [ ] 添加社交功能
-  - [ ] 玩家资料页面
-  - [ ] 好友系统
-  - [ ] 聊天功能
-- [ ] 实现游戏模式变体
-  - [ ] 团队模式
-  - [ ] 锦标赛模式
-  - [ ] 练习模式
-- [ ] 添加NFT奖励系统
-- [ ] 实现代币经济模型
-- [ ] 添加游戏成就系统
+#### Extended Features
+- [ ] Add social features
+  - [ ] Player profile pages
+  - [ ] Friend system
+  - [ ] Chat functionality
+- [ ] Implement game mode variants
+  - [ ] Team mode
+  - [ ] Tournament mode
+  - [ ] Practice mode
+- [ ] Add NFT reward system
+- [ ] Implement token economy model
+- [ ] Add game achievement system
 
-## 🔧 技术债务
+## 🔧 Technical Debt
 
-### 代码质量
-- [ ] 重构复杂组件为更小的模块
-- [ ] 统一错误处理模式
-- [ ] 标准化API响应格式
-- [ ] 优化TypeScript类型定义
-- [ ] 清理未使用的代码和依赖
+### Code Quality
+- [ ] Refactor complex components into smaller modules
+- [ ] Unify error handling patterns
+- [ ] Standardize API response formats
+- [ ] Optimize TypeScript type definitions
+- [ ] Clean up unused code and dependencies
 
-### 架构改进
-- [ ] 实现状态管理方案(Zustand/Redux)
-- [ ] 分离业务逻辑和UI组件
-- [ ] 实现数据层抽象
-- [ ] 优化组件渲染性能
-- [ ] 实现错误边界组件
+### Architecture Improvements
+- [ ] Implement state management solution (Zustand/Redux)
+- [ ] Separate business logic from UI components
+- [ ] Implement data layer abstraction
+- [ ] Optimize component rendering performance
+- [ ] Implement error boundary components
 
-### 文档和注释
-- [ ] 添加代码注释和文档字符串
-- [ ] 更新README文件
-- [ ] 创建开发者指南
-- [ ] 编写用户使用手册
-- [ ] 创建API文档
+### Documentation and Comments
+- [ ] Add code comments and docstrings
+- [ ] Update README file
+- [ ] Create developer guide
+- [ ] Write user manual
+- [ ] Create API documentation
 
-## 🎯 里程碑
+## 🎯 Milestones
 
-### 里程碑1: MVP发布 (2-3周)
-- [ ] 合约部署和基本前端集成
-- [ ] 核心游戏功能(创建、加入、游戏)
-- [ ] 基本UI和用户体验
-- [ ] 错误处理和加载状态
+### Milestone 1: MVP Release (2-3 weeks)
+- [ ] Contract deployment and basic frontend integration
+- [ ] Core game functionality (create, join, play)
+- [ ] Basic UI and user experience
+- [ ] Error handling and loading states
 
-### 里程碑2: 增强版 (4-6周)
-- [ ] FHE完全集成
-- [ ] 高级功能(统计、排行榜)
-- [ ] 事件监听和实时更新
-- [ ] 性能优化和缓存
+### Milestone 2: Enhanced Version (4-6 weeks)
+- [ ] Complete FHE integration
+- [ ] Advanced features (statistics, leaderboard)
+- [ ] Event listening and real-time updates
+- [ ] Performance optimization and caching
 
-### 里程碑3: 生产版 (8-10周)
-- [ ] 完整测试覆盖
-- [ ] 安全审计和优化
-- [ ] 监控和分析
-- [ ] 文档完善
+### Milestone 3: Production Version (8-10 weeks)
+- [ ] Complete test coverage
+- [ ] Security audit and optimization
+- [ ] Monitoring and analytics
+- [ ] Documentation completion
 
-## 📊 进度追踪
+## 📊 Progress Tracking
 
-- **总任务数**: 85+
-- **已完成**: 25 (29%)
-- **进行中**: 4 (5%)
-- **待办**: 56+ (66%)
+- **Total Tasks**: 85+
+- **Completed**: 25 (29%)
+- **In Progress**: 4 (5%)
+- **Pending**: 56+ (66%)
 
-## 👥 任务分配建议
+## 👥 Recommended Task Assignment
 
-### 前端开发者
-- UI组件集成
-- 用户体验优化
-- 响应式设计
-- 性能优化
+### Frontend Developer
+- UI component integration
+- User experience optimization
+- Responsive design
+- Performance optimization
 
-### 区块链开发者
-- 合约部署和配置
-- FHE集成
-- 事件监听
-- 安全优化
+### Blockchain Developer
+- Contract deployment and configuration
+- FHE integration
+- Event listening
+- Security optimization
 
-### 全栈开发者
-- 端到端集成
-- 测试编写
-- CI/CD设置
-- 监控配置
+### Full-Stack Developer
+- End-to-end integration
+- Test writing
+- CI/CD setup
+- Monitoring configuration
 
-## 📅 时间估算
+## 📅 Time Estimates
 
-| 任务类型 | 预估时间 |
-|---------|---------|
-| 合约集成 | 1-2周 |
-| FHE集成 | 2-3周 |
-| UI/UX优化 | 2-4周 |
-| 测试编写 | 1-2周 |
-| 部署配置 | 1周 |
-| 文档完善 | 1周 |
+| Task Type | Estimated Time |
+|-----------|---------------|
+| Contract Integration | 1-2 weeks |
+| FHE Integration | 2-3 weeks |
+| UI/UX Optimization | 2-4 weeks |
+| Test Writing | 1-2 weeks |
+| Deployment Configuration | 1 week |
+| Documentation | 1 week |
 
-## ⚠️ 风险和注意事项
+## ⚠️ Risks and Considerations
 
-### 技术风险
-- FHE技术学习曲线较陡
-- 合约升级困难
-- 跨浏览器兼容性问题
-- 移动端性能限制
+### Technical Risks
+- Steep learning curve for FHE technology
+- Difficulty in contract upgrades
+- Cross-browser compatibility issues
+- Mobile performance limitations
 
-### 项目风险
-- 时间估算可能偏乐观
-- 依赖第三方服务稳定性
-- 用户采用率不确定
-- 监管环境变化
+### Project Risks
+- Time estimates may be optimistic
+- Third-party service stability dependency
+- Uncertain user adoption rates
+- Changing regulatory environment
 
-### 缓解措施
-- 增量开发和测试
-- 备用方案准备
-- 早期用户反馈收集
-- 持续监控和调整
+### Mitigation Measures
+- Incremental development and testing
+- Prepare backup solutions
+- Collect early user feedback
+- Continuous monitoring and adjustment
 
 ---
 
-**最后更新**: 2024-01-XX  
-**负责人**: 开发团队  
-**下次审查**: 每周更新
+**Last Updated**: 2024-01-XX  
+**Owner**: Development Team  
+**Next Review**: Weekly updates

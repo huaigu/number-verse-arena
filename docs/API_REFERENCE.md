@@ -1,26 +1,26 @@
-# API 参考文档
+# API Reference Documentation
 
-本文档详细介绍UniqueNumberGameFactory智能合约的所有可用方法和事件。
+This document provides detailed information about all available methods and events of the UniqueNumberGameFactory smart contract.
 
-## 📋 合约接口概览
+## 📋 Contract Interface Overview
 
-### 核心功能
-- ✅ **游戏创建** - `createGame()`
-- ✅ **数字提交** - `submitNumber()`
-- ✅ **触发开奖** - `findWinnerByDeadline()`
-- ✅ **领取奖金** - `claimPrize()`
+### Core Functions
+- ✅ **Game Creation** - `createGame()`
+- ✅ **Number Submission** - `submitNumber()`
+- ✅ **Winner Determination** - `findWinnerByDeadline()`
+- ✅ **Prize Claiming** - `claimPrize()`
 
-### 查询功能
-- ✅ **游戏发现** - `getAllGames()`, `getActiveGames()`
-- ✅ **游戏详情** - `getGameSummary()`
-- ✅ **玩家统计** - `getPlayerStats()`
-- ✅ **排行榜** - `getLeaderboard()`
+### Query Functions
+- ✅ **Game Discovery** - `getAllGames()`, `getActiveGames()`
+- ✅ **Game Details** - `getGameSummary()`
+- ✅ **Player Statistics** - `getPlayerStats()`
+- ✅ **Leaderboard** - `getLeaderboard()`
 
-## 🔧 核心函数
+## 🔧 Core Functions
 
 ### `createGame()`
 
-创建一个新的游戏房间。
+Creates a new game room.
 
 ```solidity
 function createGame(
@@ -33,20 +33,20 @@ function createGame(
 ) public
 ```
 
-**参数：**
-- `_roomName`: 房间名称 (1-64字符)
-- `_minNumber`: 数字范围下限 (>0)
-- `_maxNumber`: 数字范围上限 (>_minNumber)
-- `_maxPlayers`: 最大玩家数 (≥2)
-- `_entryFee`: 参与费用 (wei)
-- `_deadlineDuration`: 游戏时长 (秒)
+**Parameters:**
+- `_roomName`: Room name (1-64 characters)
+- `_minNumber`: Lower bound of number range (>0)
+- `_maxNumber`: Upper bound of number range (>_minNumber)
+- `_maxPlayers`: Maximum number of players (≥2)
+- `_entryFee`: Entry fee (in wei)
+- `_deadlineDuration`: Game duration (in seconds)
 
-**限制：**
-- 房间名称长度: 1-64字符
-- 数字范围: _maxNumber - _minNumber < 256 (FHE效率限制)
-- 最小玩家数: 2人
+**Constraints:**
+- Room name length: 1-64 characters
+- Number range: _maxNumber - _minNumber < 256 (FHE efficiency limit)
+- Minimum players: 2
 
-**事件：**
+**Event:**
 ```solidity
 event GameCreated(
     uint256 indexed gameId,
@@ -60,7 +60,7 @@ event GameCreated(
 
 ### `submitNumber()`
 
-提交加密的数字参与游戏。
+Submits an encrypted number to participate in the game.
 
 ```solidity
 function submitNumber(
@@ -70,18 +70,18 @@ function submitNumber(
 ) public payable
 ```
 
-**参数：**
-- `_gameId`: 游戏ID
-- `_encryptedNumber`: FHE加密的数字
-- `inputProof`: 零知识证明
+**Parameters:**
+- `_gameId`: Game ID
+- `_encryptedNumber`: FHE-encrypted number
+- `inputProof`: Zero-knowledge proof
 
-**要求：**
-- 游戏状态为Open
-- 未超过截止时间
-- 发送正确的参与费用
-- 玩家未曾参与此游戏
+**Requirements:**
+- Game status must be Open
+- Game must not have passed deadline
+- Correct entry fee must be sent
+- Player must not have already participated in this game
 
-**事件：**
+**Event:**
 ```solidity
 event SubmissionReceived(
     uint256 indexed gameId,
@@ -92,67 +92,67 @@ event SubmissionReceived(
 
 ### `findWinnerByDeadline()`
 
-在截止时间后手动触发开奖。
+Manually triggers winner determination after deadline.
 
 ```solidity
 function findWinnerByDeadline(uint256 _gameId) public
 ```
 
-**要求：**
-- 游戏状态为Open
-- 已超过截止时间
-- 至少有1个参与者
+**Requirements:**
+- Game status must be Open
+- Game must have passed deadline
+- Must have at least 1 participant
 
 ### `claimPrize()`
 
-获胜者领取奖金。
+Winner claims the prize.
 
 ```solidity
 function claimPrize(uint256 _gameId) public
 ```
 
-**要求：**
-- 游戏状态为Finished
-- 调用者是获胜者
-- 奖金池有余额
+**Requirements:**
+- Game status must be Finished
+- Caller must be the winner
+- Prize pool must have balance
 
-## 📊 查询函数
+## 📊 Query Functions
 
-### 游戏发现
+### Game Discovery
 
 #### `getAllGames()`
 ```solidity
 function getAllGames() external view returns (Game[] memory)
 ```
-返回所有游戏的完整信息。
+Returns complete information for all games.
 
 #### `getActiveGames()`
 ```solidity
 function getActiveGames() external view returns (Game[] memory)
 ```
-返回状态为Open的活跃游戏。
+Returns all games with Open status.
 
 #### `getGamesByStatus()`
 ```solidity
 function getGamesByStatus(GameStatus status) external view returns (Game[] memory)
 ```
-根据指定状态筛选游戏。
+Filters games by specified status.
 
 #### `getGamesWithPagination()`
 ```solidity
 function getGamesWithPagination(uint256 offset, uint256 limit) external view returns (Game[] memory)
 ```
-分页获取游戏列表。
+Returns paginated game list.
 
-### 游戏详情
+### Game Details
 
 #### `getGameSummary()`
 ```solidity
 function getGameSummary(uint256 gameId) external view returns (GameSummary memory)
 ```
-获取游戏的详细摘要信息，包括奖池、获胜者等。
+Gets detailed game summary including prize pool, winner, etc.
 
-**返回结构：**
+**Return Structure:**
 ```solidity
 struct GameSummary {
     uint256 gameId;
@@ -175,23 +175,23 @@ struct GameSummary {
 ```solidity
 function canFinalizeGame(uint256 gameId) external view returns (bool)
 ```
-检查游戏是否可以开始开奖流程。
+Checks if game can start winner determination process.
 
-### 玩家相关
+### Player Functions
 
 #### `getPlayerGames()`
 ```solidity
 function getPlayerGames(address player) external view returns (uint256[] memory)
 ```
-获取玩家参与的所有游戏ID。
+Gets all game IDs that a player has participated in.
 
 #### `getPlayerStats()`
 ```solidity
 function getPlayerStats(address player) external view returns (PlayerStats memory)
 ```
-获取玩家的统计信息。
+Gets player statistics.
 
-**返回结构：**
+**Return Structure:**
 ```solidity
 struct PlayerStats {
     uint256 gamesPlayed;
@@ -200,7 +200,7 @@ struct PlayerStats {
 }
 ```
 
-### 排行榜与历史
+### Leaderboard & History
 
 #### `getLeaderboard()`
 ```solidity
@@ -210,15 +210,15 @@ function getLeaderboard(uint256 limit) external view returns (
     uint256[] memory totalWinnings
 )
 ```
-获取按获胜次数排序的排行榜。
+Gets leaderboard sorted by win count.
 
 #### `getWinnerHistory()`
 ```solidity
 function getWinnerHistory(uint256 limit) external view returns (WinnerRecord[] memory)
 ```
-获取获胜历史记录（按时间倒序）。
+Gets winner history records (sorted by timestamp descending).
 
-**返回结构：**
+**Return Structure:**
 ```solidity
 struct WinnerRecord {
     uint256 gameId;
@@ -234,17 +234,17 @@ struct WinnerRecord {
 ```solidity
 function getWinnerHistoryCount() external view returns (uint256)
 ```
-获取获胜记录总数。
+Gets total count of winner records.
 
 #### `getTotalGamesCount()`
 ```solidity
 function getTotalGamesCount() external view returns (uint256)
 ```
-获取游戏总数。
+Gets total number of games.
 
-## 📋 状态变量
+## 📋 State Variables
 
-### 公开可读的映射
+### Public Readable Mappings
 
 ```solidity
 uint256 public gameCounter;
@@ -255,19 +255,19 @@ mapping(uint256 => address) public gameWinners;
 WinnerRecord[] public winnerHistory;
 ```
 
-## 🏷️ 数据结构
+## 🏷️ Data Structures
 
-### GameStatus枚举
+### GameStatus Enum
 ```solidity
 enum GameStatus {
-    Open,        // 0 - 游戏开放，可以参与
-    Calculating, // 1 - 正在计算获胜者
-    Finished,    // 2 - 游戏结束，可领奖
-    PrizeClaimed // 3 - 奖金已领取
+    Open,        // 0 - Game is open for participation
+    Calculating, // 1 - Calculating winner
+    Finished,    // 2 - Game finished, prize claimable
+    PrizeClaimed // 3 - Prize has been claimed
 }
 ```
 
-### Game结构体
+### Game Struct
 ```solidity
 struct Game {
     uint256 gameId;
@@ -285,7 +285,7 @@ struct Game {
 }
 ```
 
-## 🎯 事件
+## 🎯 Events
 
 ### GameCreated
 ```solidity
@@ -334,34 +334,34 @@ event PrizeClaimed(
 );
 ```
 
-## ⚠️ 错误处理
+## ⚠️ Error Handling
 
-### 常见错误消息
+### Common Error Messages
 
-- `"Invalid room name length"` - 房间名称长度不合法
-- `"Invalid number range"` - 数字范围设置错误
-- `"Max players must be at least 2"` - 最大玩家数小于2
-- `"Range is too large for efficient FHE"` - 数字范围超过FHE效率限制
-- `"Game is not open"` - 游戏不在开放状态
-- `"Game has passed deadline"` - 游戏已超过截止时间
-- `"Incorrect entry fee"` - 参与费用不正确
-- `"Player has already submitted"` - 玩家已经参与过
-- `"Game does not exist"` - 游戏不存在
-- `"You are not the winner"` - 不是获胜者
-- `"Prize already claimed or no prize"` - 奖金已领取或无奖金
+- `"Invalid room name length"` - Room name length is invalid
+- `"Invalid number range"` - Number range setting is incorrect
+- `"Max players must be at least 2"` - Maximum players is less than 2
+- `"Range is too large for efficient FHE"` - Number range exceeds FHE efficiency limit
+- `"Game is not open"` - Game is not in Open status
+- `"Game has passed deadline"` - Game has exceeded deadline
+- `"Incorrect entry fee"` - Entry fee is incorrect
+- `"Player has already submitted"` - Player has already participated
+- `"Game does not exist"` - Game does not exist
+- `"You are not the winner"` - Not the winner
+- `"Prize already claimed or no prize"` - Prize already claimed or no prize available
 
-## 📊 Gas消耗估算
+## 📊 Gas Usage Estimates
 
-| 函数 | 预估Gas消耗 | 说明 |
-|------|------------|------|
-| `createGame()` | ~200K-500K | 取决于数字范围大小 |
-| `submitNumber()` | ~150K-300K | FHE操作消耗较高 |
-| `findWinnerByDeadline()` | ~300K-800K | 取决于参与人数 |
-| `claimPrize()` | ~50K-80K | 简单转账操作 |
-| 查询函数 | 0 Gas | 只读操作 |
+| Function | Estimated Gas | Notes |
+|----------|--------------|-------|
+| `createGame()` | ~200K-500K | Depends on number range size |
+| `submitNumber()` | ~150K-300K | FHE operations consume more gas |
+| `findWinnerByDeadline()` | ~300K-800K | Depends on number of participants |
+| `claimPrize()` | ~50K-80K | Simple transfer operation |
+| Query functions | 0 Gas | Read-only operations |
 
-## 🔗 相关资源
+## 🔗 Related Resources
 
-- [Solidity文档](https://docs.soliditylang.org/)
-- [Zama FHE文档](https://docs.zama.ai/fhevm)
-- [以太坊开发者文档](https://ethereum.org/developers/)
+- [Solidity Documentation](https://docs.soliditylang.org/)
+- [Zama FHE Documentation](https://docs.zama.ai/fhevm)
+- [Ethereum Developer Documentation](https://ethereum.org/developers/)

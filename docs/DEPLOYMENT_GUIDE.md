@@ -1,8 +1,8 @@
-# 部署指南
+# Deployment Guide
 
-本文档提供了Number Verse Arena项目的完整部署说明，包括智能合约部署和前端应用部署。
+This document provides complete deployment instructions for the Number Verse Arena project, including smart contract deployment and frontend application deployment.
 
-## 🏗️ 项目架构
+## 🏗️ Project Architecture
 
 ```
 ┌─────────────────────┐    ┌──────────────────────┐    ┌─────────────────────┐
@@ -13,34 +13,34 @@
 └─────────────────────┘    └──────────────────────┘    └─────────────────────┘
 ```
 
-## 🚀 合约部署
+## 🚀 Contract Deployment
 
-### 环境准备
+### Environment Setup
 
-1. **安装依赖**
+1. **Install Dependencies**
    ```bash
    cd zama-unique-number-game-contract
    npm install
    ```
 
-2. **环境变量配置**
+2. **Environment Variables Configuration**
    
-   创建 `.env` 文件：
+   Create a `.env` file:
    ```bash
-   # 私钥（不要上传到GitHub）
+   # Private key (do not upload to GitHub)
    PRIVATE_KEY=your_private_key_here
    
-   # 网络RPC URLs
+   # Network RPC URLs
    SEPOLIA_RPC_URL=https://rpc.sepolia.org
    ZAMA_TESTNET_RPC_URL=https://devnet.zama.ai
    
-   # Etherscan API (可选，用于验证合约)
+   # Etherscan API (optional, for contract verification)
    ETHERSCAN_API_KEY=your_etherscan_api_key
    ```
 
-3. **更新Hardhat配置**
+3. **Update Hardhat Configuration**
    
-   确保 `hardhat.config.ts` 包含正确的网络配置：
+   Ensure `hardhat.config.ts` contains the correct network configuration:
    ```typescript
    const config: HardhatUserConfig = {
      networks: {
@@ -51,52 +51,52 @@
        zamaTestnet: {
          url: process.env.ZAMA_TESTNET_RPC_URL,
          accounts: [process.env.PRIVATE_KEY!],
-         chainId: 8009, // 实际的Zama测试网链ID
+         chainId: 8009, // Actual Zama testnet chain ID
        },
      },
-     // ... 其他配置
+     // ... other configurations
    };
    ```
 
-### 部署步骤
+### Deployment Steps
 
-1. **编译合约**
+1. **Compile Contracts**
    ```bash
    npm run compile
    ```
 
-2. **运行测试**
+2. **Run Tests**
    ```bash
    npm test
    ```
 
-3. **部署到测试网**
+3. **Deploy to Testnet**
    
-   **Sepolia测试网：**
+   **Sepolia Testnet:**
    ```bash
    npx hardhat --network sepolia deploy
    ```
    
-   **Zama FHE测试网：**
+   **Zama FHE Testnet:**
    ```bash
    npx hardhat --network zamaTestnet deploy
    ```
 
-4. **记录合约地址**
+4. **Record Contract Address**
    
-   部署成功后，记录显示的合约地址：
+   After successful deployment, record the displayed contract address:
    ```
    UniqueNumberGameFactory deployed to: 0x1234567890123456789012345678901234567890
    ```
 
-5. **验证合约（可选）**
+5. **Verify Contract (Optional)**
    ```bash
    npx hardhat verify --network sepolia 0x1234567890123456789012345678901234567890
    ```
 
-### 部署脚本示例
+### Deployment Script Example
 
-创建 `deploy/deploy-game.ts`：
+Create `deploy/deploy-game.ts`:
 
 ```typescript
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
@@ -109,13 +109,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const result = await deploy('UniqueNumberGameFactory', {
     from: deployer,
-    args: [], // 构造函数参数
+    args: [], // Constructor parameters
     log: true,
   });
 
   console.log(`UniqueNumberGameFactory deployed at: ${result.address}`);
   
-  // 可选：设置初始参数或执行初始化
+  // Optional: Set initial parameters or perform initialization
   const contract = await hre.ethers.getContractAt(
     'UniqueNumberGameFactory',
     result.address
@@ -128,43 +128,43 @@ export default func;
 func.tags = ['UniqueNumberGameFactory'];
 ```
 
-## 🌐 前端部署
+## 🌐 Frontend Deployment
 
-### 环境配置
+### Environment Configuration
 
-1. **安装依赖**
+1. **Install Dependencies**
    ```bash
    cd number-verse-arena
    npm install
    ```
 
-2. **更新合约配置**
+2. **Update Contract Configuration**
    
-   编辑 `src/contracts/config.ts`：
+   Edit `src/contracts/config.ts`:
    ```typescript
    export const CONTRACT_CONFIG = {
-     // 使用实际部署的合约地址
+     // Use the actual deployed contract address
      address: '0x1234567890123456789012345678901234567890' as `0x${string}`,
-     // ... 其他配置
+     // ... other configurations
    };
    ```
 
-3. **配置WalletConnect**
+3. **Configure WalletConnect**
    
-   编辑 `src/config/wagmi.ts`：
+   Edit `src/config/wagmi.ts`:
    ```typescript
    export const config = getDefaultConfig({
      projectId: 'your-actual-walletconnect-project-id',
-     // ... 其他配置
+     // ... other configurations
    });
    ```
 
-4. **更新网络配置**
+4. **Update Network Configuration**
    
-   根据实际的Zama网络信息更新：
+   Update with actual Zama network information:
    ```typescript
    const zamaTestnet = defineChain({
-     id: 8009, // 实际的链ID
+     id: 8009, // Actual chain ID
      name: 'Zama FHE Testnet',
      rpcUrls: {
        default: {
@@ -180,218 +180,218 @@ func.tags = ['UniqueNumberGameFactory'];
    });
    ```
 
-### 构建和部署
+### Build and Deploy
 
-#### 本地开发
+#### Local Development
 
 ```bash
 npm run dev
 ```
 
-#### 生产构建
+#### Production Build
 
 ```bash
 npm run build
 ```
 
-#### 部署到静态托管
+#### Deploy to Static Hosting
 
-**Vercel部署：**
+**Vercel Deployment:**
 
-1. 连接GitHub仓库到Vercel
-2. 设置构建命令：`npm run build`
-3. 设置输出目录：`dist`
-4. 配置环境变量（如果需要）
+1. Connect GitHub repository to Vercel
+2. Set build command: `npm run build`
+3. Set output directory: `dist`
+4. Configure environment variables (if needed)
 
-**Netlify部署：**
+**Netlify Deployment:**
 
-1. 连接GitHub仓库到Netlify
-2. 构建设置：
+1. Connect GitHub repository to Netlify
+2. Build settings:
    - Build command: `npm run build` 
    - Publish directory: `dist`
 
-**手动部署：**
+**Manual Deployment:**
 
 ```bash
-# 构建生产版本
+# Build production version
 npm run build
 
-# 上传dist目录到你的服务器
+# Upload dist directory to your server
 scp -r dist/* user@server:/var/www/html/
 ```
 
-### 环境变量（可选）
+### Environment Variables (Optional)
 
-如果需要环境变量，创建 `.env` 文件：
+If environment variables are needed, create a `.env` file:
 
 ```bash
-# WalletConnect项目ID
+# WalletConnect project ID
 VITE_WALLETCONNECT_PROJECT_ID=your_project_id
 
-# 合约地址（可选，也可以在代码中硬编码）
+# Contract address (optional, can also be hardcoded in code)
 VITE_CONTRACT_ADDRESS=0x1234567890123456789012345678901234567890
 
-# API端点（如果有后端服务）
+# API endpoint (if there's a backend service)
 VITE_API_URL=https://api.yourapp.com
 ```
 
-在代码中使用：
+Use in code:
 ```typescript
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
 ```
 
-## 🔧 配置检查清单
+## 🔧 Configuration Checklist
 
-### 合约部署检查
+### Contract Deployment Checklist
 
-- [ ] 合约成功编译
-- [ ] 测试全部通过
-- [ ] 部署到目标网络
-- [ ] 合约地址已记录
-- [ ] 合约验证（可选）
-- [ ] 基本功能测试
+- [ ] Contract compiled successfully
+- [ ] All tests pass
+- [ ] Deployed to target network
+- [ ] Contract address recorded
+- [ ] Contract verified (optional)
+- [ ] Basic functionality tested
 
-### 前端配置检查
+### Frontend Configuration Checklist
 
-- [ ] 合约地址已更新
-- [ ] WalletConnect项目ID已配置
-- [ ] 网络配置正确
-- [ ] 构建成功无错误
-- [ ] 本地测试通过
-- [ ] 部署到托管平台
+- [ ] Contract address updated
+- [ ] WalletConnect project ID configured
+- [ ] Network configuration correct
+- [ ] Build succeeds without errors
+- [ ] Local testing passes
+- [ ] Deployed to hosting platform
 
-### 集成测试检查
+### Integration Testing Checklist
 
-- [ ] 钱包连接正常
-- [ ] 创建游戏功能
-- [ ] 加入游戏功能
-- [ ] 游戏列表显示
-- [ ] 玩家统计显示
-- [ ] 排行榜显示
-- [ ] 事件监听工作
+- [ ] Wallet connection working
+- [ ] Create game functionality
+- [ ] Join game functionality
+- [ ] Game list display
+- [ ] Player statistics display
+- [ ] Leaderboard display
+- [ ] Event listening working
 
-## 🛠️ 故障排除
+## 🛠️ Troubleshooting
 
-### 常见问题
+### Common Issues
 
-**1. 合约部署失败**
+**1. Contract deployment fails**
 ```bash
 Error: insufficient funds for gas * price + value
 ```
-解决：确保部署账户有足够的测试币。
+Solution: Ensure deployment account has enough test tokens.
 
-**2. 前端无法连接合约**
+**2. Frontend cannot connect to contract**
 ```javascript
 Error: call revert exception
 ```
-解决：检查合约地址和ABI是否正确，网络是否匹配。
+Solution: Check if contract address and ABI are correct, and if network matches.
 
-**3. FHE功能不工作**
+**3. FHE functionality not working**
 ```javascript
 Error: FHE operation failed
 ```
-解决：确保使用正确的Zama FHE网络和配置。
+Solution: Ensure using correct Zama FHE network and configuration.
 
-**4. 交易失败**
+**4. Transaction failures**
 ```javascript
 Error: execution reverted
 ```
-解决：检查交易参数，确保满足合约要求。
+Solution: Check transaction parameters and ensure they meet contract requirements.
 
-### 调试技巧
+### Debugging Tips
 
-1. **使用浏览器开发者工具**
-   - 检查控制台错误
-   - 查看网络请求
-   - 监控钱包交互
+1. **Use Browser Developer Tools**
+   - Check console errors
+   - View network requests
+   - Monitor wallet interactions
 
-2. **使用区块链浏览器**
-   - 查看交易状态
-   - 检查合约调用
-   - 分析事件日志
+2. **Use Blockchain Explorer**
+   - View transaction status
+   - Check contract calls
+   - Analyze event logs
 
-3. **本地测试**
+3. **Local Testing**
    ```bash
-   # 启动本地Hardhat网络
+   # Start local Hardhat network
    npx hardhat node
    
-   # 在另一个终端部署合约
+   # Deploy contract in another terminal
    npx hardhat --network localhost deploy
    ```
 
-## 📊 监控和维护
+## 📊 Monitoring and Maintenance
 
-### 合约监控
+### Contract Monitoring
 
-1. **事件监听**
-   - 监控GameCreated事件
-   - 跟踪SubmissionReceived事件
-   - 记录WinnerDetermined事件
+1. **Event Listening**
+   - Monitor GameCreated events
+   - Track SubmissionReceived events
+   - Record WinnerDetermined events
 
-2. **状态查询**
-   - 定期检查活跃游戏数量
-   - 监控奖池总额
-   - 跟踪玩家统计
+2. **State Queries**
+   - Regularly check active game count
+   - Monitor total prize pool
+   - Track player statistics
 
-### 前端监控
+### Frontend Monitoring
 
-1. **性能监控**
-   - 页面加载速度
-   - 交易确认时间
-   - 用户交互响应
+1. **Performance Monitoring**
+   - Page load speed
+   - Transaction confirmation time
+   - User interaction response
 
-2. **错误追踪**
-   - JavaScript错误
-   - 合约调用失败
-   - 网络连接问题
+2. **Error Tracking**
+   - JavaScript errors
+   - Contract call failures
+   - Network connection issues
 
-## 🔄 更新流程
+## 🔄 Update Process
 
-### 合约更新
+### Contract Updates
 
-由于智能合约不可变，更新需要：
+Since smart contracts are immutable, updates require:
 
-1. 部署新版本合约
-2. 更新前端合约地址
-3. 通知用户迁移（如需要）
+1. Deploy new version contract
+2. Update frontend contract address
+3. Notify users to migrate (if needed)
 
-### 前端更新
+### Frontend Updates
 
-1. 开发新功能
-2. 测试通过
-3. 构建生产版本
-4. 部署到托管平台
+1. Develop new features
+2. Pass testing
+3. Build production version
+4. Deploy to hosting platform
 
-## 🎯 生产环境建议
+## 🎯 Production Environment Recommendations
 
-### 安全性
+### Security
 
-- [ ] 使用多重签名钱包管理合约
-- [ ] 实施合约访问控制
-- [ ] 定期安全审计
-- [ ] 监控异常活动
+- [ ] Use multi-signature wallet for contract management
+- [ ] Implement contract access controls
+- [ ] Regular security audits
+- [ ] Monitor abnormal activities
 
-### 性能
+### Performance
 
-- [ ] 启用CDN加速
-- [ ] 优化图片和资源
-- [ ] 实施缓存策略
-- [ ] 监控响应时间
+- [ ] Enable CDN acceleration
+- [ ] Optimize images and resources
+- [ ] Implement caching strategies
+- [ ] Monitor response times
 
-### 用户体验
+### User Experience
 
-- [ ] 提供详细的用户指南
-- [ ] 实施错误恢复机制
-- [ ] 优化移动端体验
-- [ ] 提供客户支持
+- [ ] Provide detailed user guides
+- [ ] Implement error recovery mechanisms
+- [ ] Optimize mobile experience
+- [ ] Provide customer support
 
-## 📞 支持和联系
+## 📞 Support and Contact
 
-如果在部署过程中遇到问题，请：
+If you encounter issues during deployment:
 
-1. 检查本文档的故障排除部分
-2. 查看相关日志和错误信息
-3. 参考官方文档：
-   - [Hardhat文档](https://hardhat.org/docs)
-   - [Wagmi文档](https://wagmi.sh/)
-   - [Zama文档](https://docs.zama.ai/)
+1. Check the troubleshooting section of this document
+2. Review related logs and error information
+3. Refer to official documentation:
+   - [Hardhat Documentation](https://hardhat.org/docs)
+   - [Wagmi Documentation](https://wagmi.sh/)
+   - [Zama Documentation](https://docs.zama.ai/)

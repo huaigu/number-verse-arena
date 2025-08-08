@@ -1,12 +1,12 @@
-# 合约集成指南
+# Contract Integration Guide
 
-本文档介绍如何将前端与UniqueNumberGameFactory智能合约进行集成。
+This document describes how to integrate the frontend with the UniqueNumberGameFactory smart contract.
 
-## 📋 概述
+## 📋 Overview
 
-UniqueNumberGameFactory是一个基于Zama FHE技术的智能合约，支持创建和管理加密数字游戏。前端通过React hooks与合约进行交互。
+UniqueNumberGameFactory is a smart contract based on Zama FHE technology that supports creating and managing encrypted number games. The frontend interacts with the contract through React hooks.
 
-## 🏗️ 架构图
+## 🏗️ Architecture Diagram
 
 ```
 Frontend (React + TypeScript)
@@ -18,51 +18,51 @@ Smart Contract (UniqueNumberGameFactory.sol)
 FHE Layer (Zama Protocol)
 ```
 
-## 🔧 配置步骤
+## 🔧 Configuration Steps
 
-### 1. 合约配置
+### 1. Contract Configuration
 
-更新 `src/contracts/config.ts` 中的合约地址：
+Update the contract address in `src/contracts/config.ts`:
 
 ```typescript
 export const CONTRACT_CONFIG = {
-  // 替换为实际部署的合约地址
+  // Replace with the actual deployed contract address
   address: '0x1234567890123456789012345678901234567890' as `0x${string}`,
-  // ... 其他配置
+  // ... other configurations
 };
 ```
 
-### 2. 网络配置
+### 2. Network Configuration
 
-在 `src/config/wagmi.ts` 中配置支持的网络：
+Configure supported networks in `src/config/wagmi.ts`:
 
 ```typescript
 const zamaTestnet = defineChain({
-  id: 8009, // 实际的链ID
+  id: 8009, // Actual chain ID
   name: 'Zama FHE Testnet',
   rpcUrls: {
     default: {
-      http: ['https://actual-rpc-url.com'], // 实际的RPC URL
+      http: ['https://actual-rpc-url.com'], // Actual RPC URL
     },
   },
-  // ... 其他配置
+  // ... other configurations
 });
 ```
 
-### 3. WalletConnect项目ID
+### 3. WalletConnect Project ID
 
-从 [WalletConnect](https://cloud.walletconnect.com) 获取项目ID并更新：
+Get a project ID from [WalletConnect](https://cloud.walletconnect.com) and update:
 
 ```typescript
 export const config = getDefaultConfig({
   projectId: 'your-actual-project-id',
-  // ... 其他配置
+  // ... other configurations
 });
 ```
 
-## 🎯 核心功能集成
+## 🎯 Core Feature Integration
 
-### 游戏创建
+### Game Creation
 
 ```typescript
 import { useCreateGame } from '@/hooks/contract';
@@ -76,22 +76,22 @@ const handleCreate = async () => {
     maxNumber: 16,
     maxPlayers: 6,
     entryFee: '0.1', // ETH
-    deadlineDuration: 300, // 5分钟
+    deadlineDuration: 300, // 5 minutes
   });
 };
 ```
 
-### 游戏列表获取
+### Fetching Game List
 
 ```typescript
 import { useGetActiveGames } from '@/hooks/contract';
 
 const { activeGames, isLoading, refetch } = useGetActiveGames();
 
-// activeGames包含所有状态为Open的游戏
+// activeGames contains all games with Open status
 ```
 
-### 加入游戏/提交数字
+### Joining Game/Submitting Numbers
 
 ```typescript
 import { useSubmitNumber } from '@/hooks/contract';
@@ -103,66 +103,66 @@ const handleSubmit = async (gameId: bigint, selectedNumber: number, entryFee: st
 };
 ```
 
-### 获取游戏状态
+### Getting Game Status
 
 ```typescript
 import { useGetGameSummary } from '@/hooks/contract';
 
 const { gameSummary, isLoading } = useGetGameSummary(gameId);
 
-// gameSummary包含完整的游戏信息：状态、玩家数、奖池等
+// gameSummary contains complete game information: status, player count, prize pool, etc.
 ```
 
-### 玩家统计
+### Player Statistics
 
 ```typescript
 import { useGetPlayerStats } from '@/hooks/contract';
 
 const { playerStats } = useGetPlayerStats(playerAddress);
 
-// playerStats包含：gamesPlayed, gamesWon, totalWinnings
+// playerStats contains: gamesPlayed, gamesWon, totalWinnings
 ```
 
-### 排行榜
+### Leaderboard
 
 ```typescript
 import { useGetLeaderboard } from '@/hooks/contract';
 
-const { leaderboard } = useGetLeaderboard(10); // 前10名
+const { leaderboard } = useGetLeaderboard(10); // Top 10
 
-// leaderboard包含：topPlayers, winCounts, totalWinnings数组
+// leaderboard contains: topPlayers, winCounts, totalWinnings arrays
 ```
 
-## 🔒 FHE加密集成
+## 🔒 FHE Encryption Integration
 
-### 当前状态
+### Current Status
 
-目前 `useSubmitNumber` hook使用模拟的加密数据：
+Currently the `useSubmitNumber` hook uses mock encrypted data:
 
 ```typescript
-// TODO: 实现FHE加密逻辑
+// TODO: Implement FHE encryption logic
 const mockEncryptedNumber = '0x0000000000000000000000000000000000000000000000000000000000000000';
 const mockInputProof = '0x00';
 ```
 
-### FHE集成计划
+### FHE Integration Plan
 
-1. **安装Zama FHE客户端库**
+1. **Install Zama FHE Client Library**
    ```bash
    npm install @zama-fhe/fhevmjs
    ```
 
-2. **初始化FHE实例**
+2. **Initialize FHE Instance**
    ```typescript
    import { createFhevmInstance } from '@zama-fhe/fhevmjs';
    
    const fhevmInstance = await createFhevmInstance({
-     chainId: 8009, // Zama测试网链ID
+     chainId: 8009, // Zama testnet chain ID
      gatewayUrl: 'https://gateway.zama.ai',
    });
    ```
 
-3. **加密用户输入**
+3. **Encrypt User Input**
    ```typescript
    const encryptNumber = async (number: number) => {
      const encrypted = await fhevmInstance.encrypt32(number);
@@ -173,7 +173,7 @@ const mockInputProof = '0x00';
    };
    ```
 
-4. **更新submitNumber函数**
+4. **Update submitNumber Function**
    ```typescript
    const submitNumber = async (gameId: bigint, number: number, entryFeeETH: string) => {
      const { encryptedData, inputProof } = await encryptNumber(number);
@@ -188,9 +188,9 @@ const mockInputProof = '0x00';
    };
    ```
 
-## 📊 事件监听
+## 📊 Event Listening
 
-### 游戏创建事件
+### Game Creation Events
 
 ```typescript
 import { useWatchContractEvent } from 'wagmi';
@@ -202,14 +202,14 @@ useWatchContractEvent({
   onLogs(logs) {
     logs.forEach((log) => {
       console.log('New game created:', log.args);
-      // 刷新游戏列表
+      // Refresh game list
       refetchActiveGames();
     });
   },
 });
 ```
 
-### 获胜者确定事件
+### Winner Determined Events
 
 ```typescript
 useWatchContractEvent({
@@ -219,44 +219,44 @@ useWatchContractEvent({
   onLogs(logs) {
     logs.forEach((log) => {
       console.log('Winner determined:', log.args);
-      // 更新游戏状态和排行榜
+      // Update game status and leaderboard
     });
   },
 });
 ```
 
-## ⚠️ 注意事项
+## ⚠️ Important Notes
 
-### 1. 错误处理
+### 1. Error Handling
 
 ```typescript
 const { createGame, error } = useCreateGame();
 
 if (error) {
   console.error('Contract error:', error);
-  // 向用户显示友好的错误信息
+  // Display user-friendly error message
 }
 ```
 
-### 2. 交易确认
+### 2. Transaction Confirmation
 
 ```typescript
 const { isCreating, isSuccess, transactionHash } = useCreateGame();
 
-// isCreating: 交易发送中或确认中
-// isSuccess: 交易成功确认
-// transactionHash: 交易哈希，可用于区块链浏览器查看
+// isCreating: Transaction being sent or confirmed
+// isSuccess: Transaction successfully confirmed
+// transactionHash: Transaction hash for blockchain explorer viewing
 ```
 
-### 3. 数据刷新
+### 3. Data Refresh
 
-合约状态变化后需要手动刷新相关数据：
+Manual data refresh is needed after contract state changes:
 
 ```typescript
 const { refetch: refetchGames } = useGetActiveGames();
 const { refetch: refetchStats } = useGetPlayerStats(address);
 
-// 在交易成功后刷新
+// Refresh after successful transaction
 useEffect(() => {
   if (isSuccess) {
     refetchGames();
@@ -265,17 +265,17 @@ useEffect(() => {
 }, [isSuccess]);
 ```
 
-## 🔗 相关文件
+## 🔗 Related Files
 
-- `src/contracts/config.ts` - 合约配置和类型定义
-- `src/contracts/UniqueNumberGameFactory.json` - 合约ABI
-- `src/hooks/contract/useGameContract.ts` - 游戏相关hooks
-- `src/hooks/contract/useStatsContract.ts` - 统计相关hooks
-- `src/config/wagmi.ts` - Web3配置
+- `src/contracts/config.ts` - Contract configuration and type definitions
+- `src/contracts/UniqueNumberGameFactory.json` - Contract ABI
+- `src/hooks/contract/useGameContract.ts` - Game-related hooks
+- `src/hooks/contract/useStatsContract.ts` - Statistics-related hooks
+- `src/config/wagmi.ts` - Web3 configuration
 
-## 📚 参考资源
+## 📚 Reference Resources
 
-- [Wagmi文档](https://wagmi.sh/)
-- [RainbowKit文档](https://www.rainbowkit.com/)
-- [Zama FHE文档](https://docs.zama.ai/fhevm)
-- [Viem文档](https://viem.sh/)
+- [Wagmi Documentation](https://wagmi.sh/)
+- [RainbowKit Documentation](https://www.rainbowkit.com/)
+- [Zama FHE Documentation](https://docs.zama.ai/fhevm)
+- [Viem Documentation](https://viem.sh/)

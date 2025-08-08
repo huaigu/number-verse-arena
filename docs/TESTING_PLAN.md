@@ -1,172 +1,172 @@
-# 测试计划
+# Testing Plan
 
-本文档描述了Number Verse Arena项目的完整测试策略和测试用例。
+This document describes the complete testing strategy and test cases for the Number Verse Arena project.
 
-## 📋 测试概述
+## 📋 Testing Overview
 
-### 测试目标
-- 确保智能合约功能正确性和安全性
-- 验证前端与合约的集成工作正常
-- 保证用户体验流畅和错误处理得当
-- 验证FHE加密功能的隐私保护
+### Testing Objectives
+- Ensure smart contract functionality correctness and security
+- Verify frontend-contract integration works properly
+- Guarantee smooth user experience and proper error handling
+- Validate FHE encryption functionality for privacy protection
 
-### 测试层级
-1. **单元测试** - 智能合约函数级别测试
-2. **集成测试** - 前端与合约交互测试
-3. **端到端测试** - 完整用户流程测试
-4. **安全测试** - 合约安全性和漏洞测试
+### Testing Levels
+1. **Unit Testing** - Smart contract function-level testing
+2. **Integration Testing** - Frontend-contract interaction testing
+3. **End-to-End Testing** - Complete user flow testing
+4. **Security Testing** - Contract security and vulnerability testing
 
-## 🧪 智能合约测试
+## 🧪 Smart Contract Testing
 
-### 已完成的测试 ✅
+### Completed Tests ✅
 
-#### 游戏创建测试
-- [x] 正确参数创建游戏
-- [x] 房间名字验证（长度1-64字符）
-- [x] 参数验证（数字范围、玩家数、FHE限制）
-- [x] 游戏计数器递增
-- [x] GameCreated事件触发
+#### Game Creation Tests
+- [x] Create game with valid parameters
+- [x] Room name validation (1-64 character length)
+- [x] Parameter validation (number range, player count, FHE limits)
+- [x] Game counter increment
+- [x] GameCreated event trigger
 
-#### 数字提交测试
-- [x] 有效数字提交
-- [x] 参与费用验证
-- [x] 重复提交拒绝
-- [x] 截止时间后提交拒绝
-- [x] 最大玩家数触发开奖
-- [x] SubmissionReceived事件触发
+#### Number Submission Tests
+- [x] Valid number submission
+- [x] Entry fee validation
+- [x] Duplicate submission rejection
+- [x] Post-deadline submission rejection
+- [x] Maximum player count triggers draw
+- [x] SubmissionReceived event trigger
 
-#### 开奖机制测试
-- [x] 截止时间后手动开奖
-- [x] 截止时间前拒绝开奖
-- [x] 无玩家时拒绝开奖
-- [x] WinnerCalculationStarted事件触发
+#### Draw Mechanism Tests
+- [x] Manual draw after deadline
+- [x] Pre-deadline draw rejection
+- [x] Draw rejection when no players
+- [x] WinnerCalculationStarted event trigger
 
-#### 奖池管理测试
-- [x] 奖池金额正确累积
-- [x] 初始奖池为零
+#### Prize Pool Management Tests
+- [x] Prize pool amount correctly accumulated
+- [x] Initial prize pool is zero
 
-#### 游戏状态管理测试
-- [x] 状态转换正确性（Open → Calculating）
+#### Game State Management Tests
+- [x] State transition correctness (Open → Calculating)
 
-#### View函数测试
-- [x] getAllGames() 返回所有游戏
-- [x] getActiveGames() 仅返回开放游戏
-- [x] getGamesByStatus() 按状态筛选
-- [x] getGamesWithPagination() 分页查询
-- [x] getGameSummary() 游戏详细信息
-- [x] getTotalGamesCount() 游戏总数
-- [x] getPlayerGames() 玩家参与的游戏
-- [x] canFinalizeGame() 开奖条件检查
+#### View Function Tests
+- [x] getAllGames() returns all games
+- [x] getActiveGames() returns only open games
+- [x] getGamesByStatus() filters by status
+- [x] getGamesWithPagination() paginated queries
+- [x] getGameSummary() game detailed information
+- [x] getTotalGamesCount() total game count
+- [x] getPlayerGames() player's participated games
+- [x] canFinalizeGame() draw condition check
 
-#### 统计功能测试
-- [x] getPlayerStats() 空玩家统计
-- [x] getWinnerHistory() 空获胜历史
-- [x] getWinnerHistoryCount() 获胜记录计数
-- [x] getLeaderboard() 空排行榜
+#### Statistics Function Tests
+- [x] getPlayerStats() empty player stats
+- [x] getWinnerHistory() empty winner history
+- [x] getWinnerHistoryCount() winner record count
+- [x] getLeaderboard() empty leaderboard
 
-### 待补充的测试 📋
+### Pending Tests 📋
 
-#### 完整游戏流程测试
-- [ ] 完整的获胜者确定流程（需要模拟FHE解密回调）
-- [ ] 奖金领取流程测试
-- [ ] 多个获胜者情况处理
-- [ ] 无获胜者情况处理
+#### Complete Game Flow Tests
+- [ ] Complete winner determination flow (requires simulating FHE decryption callback)
+- [ ] Prize claiming flow test
+- [ ] Multiple winners scenario handling
+- [ ] No winners scenario handling
 
-#### 边缘情况测试
-- [ ] 所有数字都被选择的情况
-- [ ] 仅一个玩家参与的情况
-- [ ] 达到最大数字范围限制的情况
-- [ ] 超大奖池的处理
+#### Edge Case Tests
+- [ ] All numbers selected scenario
+- [ ] Single player participation scenario
+- [ ] Maximum number range limit scenario
+- [ ] Large prize pool handling
 
-#### 安全性测试
-- [ ] 重入攻击防护测试
-- [ ] 权限控制测试
-- [ ] 溢出/下溢保护测试
-- [ ] 恶意输入处理测试
+#### Security Tests
+- [ ] Reentrancy attack protection test
+- [ ] Access control tests
+- [ ] Overflow/underflow protection tests
+- [ ] Malicious input handling tests
 
-#### Gas优化测试
-- [ ] 各函数Gas消耗测量
-- [ ] 大数据量情况下的性能测试
-- [ ] 批量操作效率测试
+#### Gas Optimization Tests
+- [ ] Gas consumption measurement for each function
+- [ ] Performance testing under large data volumes
+- [ ] Batch operation efficiency tests
 
-### 测试运行
+### Test Execution
 ```bash
 cd zama-unique-number-game-contract
 npm test
 ```
 
-当前测试结果：**32个测试全部通过** ✅
+Current test results: **All 32 tests pass** ✅
 
-## 🌐 前端测试
+## 🌐 Frontend Testing
 
-### 组件单元测试
+### Component Unit Tests
 
-#### GameCard组件
+#### GameCard Component
 ```typescript
 describe('GameCard', () => {
   it('should render number correctly', () => {
-    // 测试数字显示
+    // Test number display
   });
   
   it('should handle click events', () => {
-    // 测试点击事件
+    // Test click events
   });
   
   it('should show different variants', () => {
-    // 测试不同状态（available, selected, highlighted）
+    // Test different states (available, selected, highlighted)
   });
 });
 ```
 
-#### CreateRoom页面
+#### CreateRoom Page
 ```typescript
 describe('CreateRoom', () => {
   it('should validate room name input', () => {
-    // 测试房间名字验证
+    // Test room name validation
   });
   
   it('should calculate total prize pool', () => {
-    // 测试奖池计算
+    // Test prize pool calculation
   });
   
   it('should show wallet connection warning', () => {
-    // 测试钱包连接提示
+    // Test wallet connection prompt
   });
 });
 ```
 
-#### GamePage页面
+#### GamePage Page
 ```typescript
 describe('GamePage', () => {
   it('should display game information correctly', () => {
-    // 测试游戏信息显示
+    // Test game information display
   });
   
   it('should handle number selection', () => {
-    // 测试数字选择
+    // Test number selection
   });
   
   it('should show submission status', () => {
-    // 测试提交状态显示
+    // Test submission status display
   });
 });
 ```
 
-### Hooks测试
+### Hook Tests
 
 #### useCreateGame Hook
 ```typescript
 describe('useCreateGame', () => {
   it('should create game with valid parameters', () => {
-    // 测试游戏创建
+    // Test game creation
   });
   
   it('should handle transaction errors', () => {
-    // 测试错误处理
+    // Test error handling
   });
   
   it('should update loading states correctly', () => {
-    // 测试加载状态
+    // Test loading states
   });
 });
 ```
@@ -175,249 +175,249 @@ describe('useCreateGame', () => {
 ```typescript
 describe('Game Contract Hooks', () => {
   it('should fetch active games', () => {
-    // 测试获取活跃游戏
+    // Test fetching active games
   });
   
   it('should submit numbers correctly', () => {
-    // 测试数字提交
+    // Test number submission
   });
   
   it('should handle contract errors', () => {
-    // 测试合约错误
+    // Test contract errors
   });
 });
 ```
 
-### 集成测试
+### Integration Tests
 
-#### 钱包连接集成
-- [ ] RainbowKit连接流程
-- [ ] 网络切换功能
-- [ ] 账户变更处理
-- [ ] 断开连接处理
+#### Wallet Connection Integration
+- [ ] RainbowKit connection flow
+- [ ] Network switching functionality
+- [ ] Account change handling
+- [ ] Disconnection handling
 
-#### 合约交互集成
-- [ ] 合约函数调用
-- [ ] 事件监听
-- [ ] 交易状态跟踪
-- [ ] 错误信息显示
+#### Contract Interaction Integration
+- [ ] Contract function calls
+- [ ] Event listening
+- [ ] Transaction status tracking
+- [ ] Error message display
 
-## 🔄 端到端测试
+## 🔄 End-to-End Testing
 
-### 用户流程测试
+### User Flow Tests
 
-#### 创建游戏流程
+#### Create Game Flow
 ```gherkin
-Feature: 创建游戏
-  Scenario: 用户成功创建游戏房间
-    Given 用户已连接钱包
-    When 用户填写房间信息
-    And 点击创建房间按钮
-    Then 应该显示交易确认
-    And 交易成功后跳转到游戏页面
+Feature: Create Game
+  Scenario: User successfully creates game room
+    Given User has connected wallet
+    When User fills room information
+    And Clicks create room button
+    Then Should display transaction confirmation
+    And Navigate to game page after successful transaction
 ```
 
-#### 加入游戏流程
+#### Join Game Flow
 ```gherkin
-Feature: 加入游戏
-  Scenario: 用户成功加入游戏
-    Given 存在开放的游戏房间
-    When 用户选择数字
-    And 确认提交
-    Then 应该发送交易
-    And 显示参与成功消息
+Feature: Join Game
+  Scenario: User successfully joins game
+    Given Open game room exists
+    When User selects number
+    And Confirms submission
+    Then Should send transaction
+    And Display participation success message
 ```
 
-#### 完整游戏流程
+#### Complete Game Flow
 ```gherkin
-Feature: 完整游戏
-  Scenario: 从创建到结束的完整流程
-    Given 用户A创建游戏房间
-    When 用户B和C加入游戏
-    And 所有用户提交数字
-    And 游戏自动开奖
-    Then 获胜者应该能够领取奖金
+Feature: Complete Game
+  Scenario: Complete flow from creation to end
+    Given User A creates game room
+    When User B and C join game
+    And All users submit numbers
+    And Game automatically draws
+    Then Winner should be able to claim prize
 ```
 
-### 错误处理测试
+### Error Handling Tests
 
-#### 网络错误
-- [ ] RPC连接失败
-- [ ] 交易超时
-- [ ] Gas不足
-- [ ] 网络拥堵
+#### Network Errors
+- [ ] RPC connection failure
+- [ ] Transaction timeout
+- [ ] Insufficient gas
+- [ ] Network congestion
 
-#### 合约错误
-- [ ] 合约函数revert
-- [ ] 参数验证失败
-- [ ] 权限错误
-- [ ] 状态不匹配
+#### Contract Errors
+- [ ] Contract function revert
+- [ ] Parameter validation failure
+- [ ] Permission errors
+- [ ] State mismatch
 
-#### 用户错误
-- [ ] 钱包未连接
-- [ ] 余额不足
-- [ ] 重复操作
-- [ ] 无效输入
+#### User Errors
+- [ ] Wallet not connected
+- [ ] Insufficient balance
+- [ ] Duplicate operations
+- [ ] Invalid input
 
-## 🛡️ 安全测试
+## 🛡️ Security Testing
 
-### 智能合约安全
+### Smart Contract Security
 
-#### 常见漏洞测试
-- [ ] 重入攻击（Reentrancy）
-- [ ] 整数溢出/下溢
-- [ ] 访问控制漏洞
-- [ ] 前置运行攻击（Front-running）
-- [ ] 时间戳依赖
-- [ ] DoS攻击
+#### Common Vulnerability Tests
+- [ ] Reentrancy attacks
+- [ ] Integer overflow/underflow
+- [ ] Access control vulnerabilities
+- [ ] Front-running attacks
+- [ ] Timestamp dependence
+- [ ] DoS attacks
 
-#### FHE特定安全
-- [ ] 加密数据泄露
-- [ ] 解密权限控制
-- [ ] 零知识证明验证
-- [ ] 侧信道攻击防护
+#### FHE-Specific Security
+- [ ] Encrypted data leakage
+- [ ] Decryption permission control
+- [ ] Zero-knowledge proof verification
+- [ ] Side-channel attack protection
 
-### 前端安全
+### Frontend Security
 
-#### Web安全
-- [ ] XSS攻击防护
-- [ ] CSRF攻击防护
-- [ ] 输入验证
-- [ ] 内容安全策略（CSP）
+#### Web Security
+- [ ] XSS attack protection
+- [ ] CSRF attack protection
+- [ ] Input validation
+- [ ] Content Security Policy (CSP)
 
-#### Web3安全
-- [ ] 私钥保护
-- [ ] 交易签名验证
-- [ ] 钓鱼攻击防护
-- [ ] 恶意DApp检测
+#### Web3 Security
+- [ ] Private key protection
+- [ ] Transaction signature verification
+- [ ] Phishing attack protection
+- [ ] Malicious DApp detection
 
-## 📊 性能测试
+## 📊 Performance Testing
 
-### 合约性能
+### Contract Performance
 
-#### Gas消耗测试
+#### Gas Consumption Tests
 ```typescript
 describe('Gas Usage', () => {
   it('should measure createGame gas cost', () => {
-    // 测量创建游戏的Gas消耗
+    // Measure gas consumption for creating games
   });
   
   it('should measure submitNumber gas cost', () => {
-    // 测量提交数字的Gas消耗
+    // Measure gas consumption for submitting numbers
   });
 });
 ```
 
-#### 可扩展性测试
-- [ ] 大量玩家同时参与
-- [ ] 大量游戏同时进行
-- [ ] 长时间运行稳定性
+#### Scalability Tests
+- [ ] Multiple players participating simultaneously
+- [ ] Multiple games running simultaneously
+- [ ] Long-term operation stability
 
-### 前端性能
+### Frontend Performance
 
-#### 加载性能
-- [ ] 首次加载时间
-- [ ] 资源加载优化
-- [ ] 代码分割效果
-- [ ] 图片懒加载
+#### Loading Performance
+- [ ] Initial load time
+- [ ] Resource loading optimization
+- [ ] Code splitting effectiveness
+- [ ] Image lazy loading
 
-#### 运行时性能
-- [ ] 组件渲染性能
-- [ ] 内存泄漏检测
-- [ ] 事件处理效率
-- [ ] 数据更新频率
+#### Runtime Performance
+- [ ] Component rendering performance
+- [ ] Memory leak detection
+- [ ] Event handling efficiency
+- [ ] Data update frequency
 
-## 🔧 测试工具和框架
+## 🔧 Testing Tools and Frameworks
 
-### 智能合约测试
-- **Hardhat** - 测试框架
-- **Chai** - 断言库
-- **FHEVM Mock** - FHE功能模拟
-- **Time Helpers** - 时间控制
+### Smart Contract Testing
+- **Hardhat** - Testing framework
+- **Chai** - Assertion library
+- **FHEVM Mock** - FHE functionality simulation
+- **Time Helpers** - Time control
 
-### 前端测试
-- **Vitest** - 测试运行器
-- **React Testing Library** - 组件测试
-- **MSW** - API模拟
-- **Wagmi Test Utils** - Web3测试工具
+### Frontend Testing
+- **Vitest** - Test runner
+- **React Testing Library** - Component testing
+- **MSW** - API mocking
+- **Wagmi Test Utils** - Web3 testing tools
 
-### 端到端测试
-- **Playwright** - 浏览器自动化
-- **Metamask Test Utils** - 钱包交互测试
-- **Local Testnet** - 本地测试网络
+### End-to-End Testing
+- **Playwright** - Browser automation
+- **Metamask Test Utils** - Wallet interaction testing
+- **Local Testnet** - Local test network
 
-## 📅 测试计划时间表
+## 📅 Testing Schedule
 
-### 第一阶段：基础测试 (1周)
-- [x] 智能合约单元测试
-- [ ] 前端组件单元测试
-- [ ] 基础集成测试
+### Phase 1: Basic Testing (1 week)
+- [x] Smart contract unit tests
+- [ ] Frontend component unit tests
+- [ ] Basic integration tests
 
-### 第二阶段：集成测试 (1周)
-- [ ] 完整合约流程测试
-- [ ] 前端与合约集成测试
-- [ ] 错误处理测试
+### Phase 2: Integration Testing (1 week)
+- [ ] Complete contract flow tests
+- [ ] Frontend-contract integration tests
+- [ ] Error handling tests
 
-### 第三阶段：端到端测试 (1周)
-- [ ] 用户流程测试
-- [ ] 跨浏览器测试
-- [ ] 移动端测试
+### Phase 3: End-to-End Testing (1 week)
+- [ ] User flow tests
+- [ ] Cross-browser testing
+- [ ] Mobile testing
 
-### 第四阶段：安全和性能测试 (1周)
-- [ ] 安全漏洞扫描
-- [ ] 性能基准测试
-- [ ] 压力测试
+### Phase 4: Security and Performance Testing (1 week)
+- [ ] Security vulnerability scanning
+- [ ] Performance benchmarking
+- [ ] Stress testing
 
-## 🚨 测试环境
+## 🚨 Test Environments
 
-### 本地开发环境
-- Hardhat本地网络
-- FHEVM Mock环境
-- 测试钱包和账户
+### Local Development Environment
+- Hardhat local network
+- FHEVM Mock environment
+- Test wallets and accounts
 
-### 测试网环境
-- Sepolia测试网
-- Zama FHE测试网
-- 测试代币和资金
+### Testnet Environment
+- Sepolia testnet
+- Zama FHE testnet
+- Test tokens and funds
 
-### CI/CD环境
+### CI/CD Environment
 - GitHub Actions
-- 自动化测试运行
-- 测试结果报告
+- Automated test execution
+- Test result reporting
 
-## 📈 测试指标
+## 📈 Testing Metrics
 
-### 覆盖率目标
-- **合约代码覆盖率**: ≥ 90%
-- **前端代码覆盖率**: ≥ 80%
-- **集成测试覆盖率**: ≥ 70%
+### Coverage Targets
+- **Contract code coverage**: ≥ 90%
+- **Frontend code coverage**: ≥ 80%
+- **Integration test coverage**: ≥ 70%
 
-### 质量指标
-- **Bug密度**: < 1 bug/KLOC
-- **回归测试通过率**: ≥ 95%
-- **性能回归**: < 5%降级
+### Quality Metrics
+- **Bug density**: < 1 bug/KLOC
+- **Regression test pass rate**: ≥ 95%
+- **Performance regression**: < 5% degradation
 
-### 安全指标
-- **安全漏洞**: 0个高危漏洞
-- **代码审计**: 通过第三方审计
-- **渗透测试**: 通过安全测试
+### Security Metrics
+- **Security vulnerabilities**: 0 critical vulnerabilities
+- **Code audit**: Pass third-party audit
+- **Penetration testing**: Pass security testing
 
-## 🔍 测试报告
+## 🔍 Test Reporting
 
-### 日常测试报告
-- 测试执行结果
-- 代码覆盖率报告
-- 性能监控数据
-- 安全扫描结果
+### Daily Test Reports
+- Test execution results
+- Code coverage reports
+- Performance monitoring data
+- Security scan results
 
-### 里程碑测试报告
-- 功能完整性评估
-- 质量指标达成情况
-- 风险评估和缓解措施
-- 发布就绪性评估
+### Milestone Test Reports
+- Feature completeness assessment
+- Quality metrics achievement
+- Risk assessment and mitigation measures
+- Release readiness evaluation
 
 ---
 
-**最后更新**: 2024-01-XX  
-**维护者**: 测试团队  
-**审查周期**: 每周更新
+**Last Updated**: 2024-01-XX  
+**Maintainer**: Testing Team  
+**Review Cycle**: Weekly updates
