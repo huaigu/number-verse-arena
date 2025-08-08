@@ -124,6 +124,7 @@ The application will be available at `http://localhost:8080`
 - **Network**: Sepolia Testnet
 - **Contract**: `0xF0d12594D93950DfAe70011c4FAF04F1Cc9f9e06`
 - **Explorer**: [View on Etherscan](https://sepolia.etherscan.io/address/0xF0d12594D93950DfAe70011c4FAF04F1Cc9f9e06)
+- **Repository**: [EVM Contract Source](https://github.com/huaigu/zama-unique-number-game-contract)
 
 ## 📁 Project Structure
 
@@ -198,7 +199,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🔗 Links & Resources
 
 - **Developer**: [@coder_chao](https://x.com/coder_chao)
-- **GitHub**: [huaigu/number-verse-arena](https://github.com/huaigu/number-verse-arena)
+- **Frontend Repository**: [huaigu/number-verse-arena](https://github.com/huaigu/number-verse-arena)
+- **Smart Contract Repository**: [huaigu/zama-unique-number-game-contract](https://github.com/huaigu/zama-unique-number-game-contract)
 - **Zama Documentation**: [docs.zama.ai](https://docs.zama.ai/)
 - **Demo Video**: [YouTube](https://www.youtube.com/watch?v=5AlisRBd1tI)
 
