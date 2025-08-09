@@ -215,7 +215,20 @@ const GamePage = () => {
     if (totalNumbers <= 9) return 3
     if (totalNumbers <= 16) return 4
     if (totalNumbers <= 25) return 5
+    if (totalNumbers <= 36) return 6
+    if (totalNumbers <= 49) return 7
     return Math.ceil(Math.sqrt(totalNumbers))
+  }
+
+  const getGridCellSize = () => {
+    if (!gameSummary) return { minHeight: '120px', maxHeight: '120px' }
+    const totalNumbers = gameSummary.maxNumber - gameSummary.minNumber + 1
+    if (totalNumbers <= 9) return { minHeight: '120px', maxHeight: '150px' }
+    if (totalNumbers <= 16) return { minHeight: '100px', maxHeight: '120px' }
+    if (totalNumbers <= 25) return { minHeight: '80px', maxHeight: '100px' }
+    if (totalNumbers <= 36) return { minHeight: '70px', maxHeight: '90px' }
+    if (totalNumbers <= 49) return { minHeight: '60px', maxHeight: '80px' }
+    return { minHeight: '50px', maxHeight: '70px' }
   }
 
   const getNumberFontClass = (number: number) => {
@@ -440,8 +453,8 @@ const GamePage = () => {
   const timeLeft = getTimeLeft()
 
   return (
-    <div className="h-screen bg-gradient-background p-3 overflow-hidden">
-      <div className="max-w-6xl mx-auto h-full flex flex-col">
+    <div className="min-h-screen bg-gradient-background p-3">
+      <div className="max-w-6xl mx-auto flex flex-col">
         {/* Compact Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
@@ -481,7 +494,7 @@ const GamePage = () => {
         </div>
 
         {/* Main Game Layout - 2 Column */}
-        <div className="flex-1 grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-4 pb-6">
           {/* Left Panel: Status & Player Slots */}
           <div className="col-span-1 space-y-3">
             {/* Top Row: Timer & Prize Pool */}
@@ -605,39 +618,53 @@ const GamePage = () => {
           {/* Main Game Area */}
           <div className="col-span-3">
             <Card className="shadow-card">
-              <CardContent className="flex flex-col p-3">
-                {/* Number Grid - Natural sizing */}
-                <div 
-                  className={`grid gap-2 place-items-stretch items-center`}
-                  style={{
-                    gridTemplateColumns: `repeat(${getGridColumns()}, minmax(0, 1fr))`,
-                    gridTemplateRows: `repeat(${Math.ceil(generateNumberGrid().length / getGridColumns())}, minmax(120px, 1fr))`
-                  }}
-                >
-                  {generateNumberGrid().map((number) => (
-                    <GameCard
-                      key={number}
-                      variant={getNumberVariant(number)}
-                      className={`w-full h-full min-h-[120px] text-4xl ${getNumberFontClass(number)} transition-all hover:scale-105 ${
-                        hasSubmitted || isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer'
-                      } ${
-                        highlightedNumber === number && !hasSubmitted && !selectedNumber 
-                          ? 'animate-highlight-pulse' 
-                          : ''
-                      } ${
-                        hasSubmitted && selectedNumber === number
-                          ? 'animate-selected-glow'
-                          : ''
-                      }`}
-                      onClick={() => handleNumberSelect(number)}
-                    >
-                      {number}
-                    </GameCard>
-                  ))}
+              <CardContent className="p-3">
+                {/* Number Grid - Responsive sizing */}
+                <div className="mb-6">
+                  <div 
+                    className="grid gap-2 place-items-stretch"
+                    style={{
+                      gridTemplateColumns: `repeat(${getGridColumns()}, minmax(0, 1fr))`,
+                    }}
+                  >
+                    {generateNumberGrid().map((number) => {
+                      const cellSize = getGridCellSize();
+                      const totalNumbers = gameSummary.maxNumber - gameSummary.minNumber + 1;
+                      
+                      // Adjust font size based on grid size
+                      let fontSize = 'text-4xl';
+                      if (totalNumbers > 25) fontSize = 'text-3xl';
+                      if (totalNumbers > 36) fontSize = 'text-2xl';
+                      if (totalNumbers > 49) fontSize = 'text-xl';
+                      
+                      return (
+                        <GameCard
+                          key={number}
+                          variant={getNumberVariant(number)}
+                          className={`w-full aspect-square ${fontSize} ${getNumberFontClass(number)} transition-all hover:scale-105 ${
+                            hasSubmitted || isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer'
+                          } ${
+                            highlightedNumber === number && !hasSubmitted && !selectedNumber 
+                              ? 'animate-highlight-pulse' 
+                              : ''
+                          } ${
+                            hasSubmitted && selectedNumber === number
+                              ? 'animate-selected-glow'
+                              : ''
+                          }`}
+                          style={{ minHeight: cellSize.minHeight, maxHeight: cellSize.maxHeight }}
+                          onClick={() => handleNumberSelect(number)}
+                        >
+                          {number}
+                        </GameCard>
+                      );
+                    })}
                 </div>
 
-                {/* Bottom Section - With appropriate spacing */}
-                <div className="mt-6 space-y-2">
+                </div>
+                
+                {/* Bottom Section - Always visible */}
+                <div className="space-y-2">
                   {/* Wallet Warning - Compact */}
                   {!isConnected && (
                     <div className="p-2 bg-orange-50 border border-orange-200 rounded text-center">
