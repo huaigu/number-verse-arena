@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { GameCard } from "@/components/ui/game-card"
 import { GradientButton } from "@/components/ui/gradient-button"
@@ -9,8 +9,8 @@ import { Trophy, Users, Clock, Home, RotateCcw, Wallet, Loader2, AlertCircle } f
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useToast } from "@/hooks/use-toast"
-import { useGetGameSummary, useHasPlayerSubmitted, useSubmitNumber, useFindWinner, useClaimPrize, useHasPlayerClaimed, useCanFinalizeGame } from "@/hooks/contract/useGameContract"
-import { CONTRACT_CONFIG, formatETH, formatAddress } from "@/contracts/config"
+import { useGetGameSummary, useHasPlayerSubmitted, useSubmitNumber, useFindWinner, useClaimPrize, useHasPlayerClaimed, useCanFinalizeGame, useGetAllGames } from "@/hooks/contract/useGameContract"
+import { CONTRACT_CONFIG, formatETH, formatAddress, Game, GameSummary } from "@/contracts/config"
 
 const GamePage = () => {
   const navigate = useNavigate()
@@ -31,8 +31,47 @@ const GamePage = () => {
     gameSummary, 
     isError: gameError, 
     isLoading: gameLoading, 
-    refetch: refetchGame 
+    refetch: refetchGame,
+    error: gameErrorDetails
   } = useGetGameSummary(gameId)
+
+  // 备用方案：如果无法获取游戏摘要，尝试从所有游戏中获取
+  const { 
+    games: allGames, 
+    isLoading: allGamesLoading 
+  } = useGetAllGames()
+
+  // 从所有游戏中找到目标游戏作为备用数据
+  const fallbackGame = useMemo(() => {
+    if (!allGames || !gameId) return null
+    return allGames.find(game => game.gameId === gameId)
+  }, [allGames, gameId])
+
+  // 转换Game数据为GameSummary格式
+  const convertGameToSummary = useMemo(() => {
+    if (!fallbackGame) return null
+    
+    const gameSummaryFromGame: GameSummary = {
+      gameId: fallbackGame.gameId,
+      roomName: fallbackGame.roomName,
+      creator: fallbackGame.creator,
+      status: fallbackGame.status,
+      playerCount: fallbackGame.playerCount,
+      maxPlayers: fallbackGame.maxPlayers,
+      minNumber: fallbackGame.minNumber,
+      maxNumber: fallbackGame.maxNumber,
+      entryFee: fallbackGame.entryFee,
+      deadline: fallbackGame.deadline,
+      prizePool: fallbackGame.entryFee * BigInt(fallbackGame.playerCount),
+      winner: fallbackGame.status >= CONTRACT_CONFIG.GameStatus.Finished ? '0x0000000000000000000000000000000000000000' : '0x0000000000000000000000000000000000000000',
+      winningNumber: fallbackGame.decryptedWinner || 0
+    }
+    
+    return gameSummaryFromGame
+  }, [fallbackGame])
+
+  // 使用主要数据或备用数据
+  const finalGameSummary = gameSummary || convertGameToSummary
   
   // 检查当前用户是否已提交
   const { 
@@ -102,17 +141,76 @@ const GamePage = () => {
     }
   }, [submitError, toast])
   
-  // 处理开奖成功
+  // 处理开奖成功 - 添加重试机制获取winner信息
   useEffect(() => {
     if (findSuccess) {
       toast({
         title: "Game revealed! 🎉",
-        description: "Winner has been determined and prizes are available.",
+        description: "Fetching winner information...",
       })
+      
+      // 立即刷新一次
       refetchGame()
       refetchCanFinalize()
+      
+      // 设置重试机制，每3秒重试一次，最多5次
+      let retryCount = 0
+      const maxRetries = 5
+      
+      const retryInterval = setInterval(async () => {
+        try {
+          // 重新获取游戏数据
+          const result = await refetchGame()
+          
+          // 检查是否已获取到winner信息
+          const gameData = result.data as typeof finalGameSummary
+          const hasWinner = gameData?.winner && gameData.winner !== "0x0000000000000000000000000000000000000000"
+          
+          if (hasWinner) {
+            // 成功获取winner信息
+            clearInterval(retryInterval)
+            toast({
+              title: "Winner information loaded! 🎉",
+              description: "Game results are now available.",
+            })
+          } else {
+            retryCount++
+            if (retryCount >= maxRetries) {
+              // 达到最大重试次数
+              clearInterval(retryInterval)
+              toast({
+                title: "Winner information pending",
+                description: "Please refresh the page manually to see results.",
+                variant: "destructive"
+              })
+            } else {
+              // 继续重试
+              toast({
+                title: `Fetching winner... (${retryCount}/${maxRetries})`,
+                description: "Waiting for blockchain confirmation.",
+              })
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching winner info:', error)
+          retryCount++
+          if (retryCount >= maxRetries) {
+            clearInterval(retryInterval)
+            toast({
+              title: "Error fetching winner",
+              description: "Please refresh the page to see results.",
+              variant: "destructive"
+            })
+          }
+        }
+      }, 3000) // 每3秒重试一次
+      
+      // 清理函数
+      return () => {
+        clearInterval(retryInterval)
+      }
     }
-  }, [findSuccess, toast, refetchGame, refetchCanFinalize])
+  }, [findSuccess, toast, refetchGame, refetchCanFinalize, finalGameSummary])
   
   // 处理开奖错误
   useEffect(() => {
@@ -150,9 +248,9 @@ const GamePage = () => {
 
   // 计算剩余时间
   const getTimeLeft = () => {
-    if (!gameSummary) return 0
+    if (!finalGameSummary) return 0
     const now = Math.floor(Date.now() / 1000)
-    const deadlineSeconds = Number(gameSummary.deadline)
+    const deadlineSeconds = Number(finalGameSummary.deadline)
     return Math.max(0, deadlineSeconds - now)
   }
 
@@ -175,17 +273,17 @@ const GamePage = () => {
   // 定时刷新游戏数据和时间
   useEffect(() => {
     const interval = setInterval(() => {
-      if (gameSummary && gameSummary.status === CONTRACT_CONFIG.GameStatus.Open) {
+      if (finalGameSummary && finalGameSummary.status === CONTRACT_CONFIG.GameStatus.Open) {
         refetchGame()
       }
     }, 5000) // 每5秒刷新一次
     
     return () => clearInterval(interval)
-  }, [gameSummary, refetchGame])
+  }, [finalGameSummary, refetchGame])
 
   // Animation for non-participating users
   useEffect(() => {
-    if (!hasSubmitted && !selectedNumber && isConnected && gameSummary) {
+    if (!hasSubmitted && !selectedNumber && isConnected && finalGameSummary) {
       const numbers = generateNumberGrid()
       let currentIndex = 0
       
@@ -198,20 +296,20 @@ const GamePage = () => {
     } else {
       setHighlightedNumber(null)
     }
-  }, [hasSubmitted, selectedNumber, isConnected, gameSummary])
+  }, [hasSubmitted, selectedNumber, isConnected, finalGameSummary])
 
   const generateNumberGrid = () => {
-    if (!gameSummary) return []
+    if (!finalGameSummary) return []
     const numbers = []
-    for (let i = gameSummary.minNumber; i <= gameSummary.maxNumber; i++) {
+    for (let i = finalGameSummary.minNumber; i <= finalGameSummary.maxNumber; i++) {
       numbers.push(i)
     }
     return numbers
   }
 
   const getGridColumns = () => {
-    if (!gameSummary) return 4
-    const totalNumbers = gameSummary.maxNumber - gameSummary.minNumber + 1
+    if (!finalGameSummary) return 4
+    const totalNumbers = finalGameSummary.maxNumber - finalGameSummary.minNumber + 1
     if (totalNumbers <= 9) return 3
     if (totalNumbers <= 16) return 4
     if (totalNumbers <= 25) return 5
@@ -221,8 +319,8 @@ const GamePage = () => {
   }
 
   const getGridCellSize = () => {
-    if (!gameSummary) return { minHeight: '120px', maxHeight: '120px' }
-    const totalNumbers = gameSummary.maxNumber - gameSummary.minNumber + 1
+    if (!finalGameSummary) return { minHeight: '120px', maxHeight: '120px' }
+    const totalNumbers = finalGameSummary.maxNumber - finalGameSummary.minNumber + 1
     if (totalNumbers <= 9) return { minHeight: '120px', maxHeight: '150px' }
     if (totalNumbers <= 16) return { minHeight: '100px', maxHeight: '120px' }
     if (totalNumbers <= 25) return { minHeight: '80px', maxHeight: '100px' }
@@ -272,7 +370,7 @@ const GamePage = () => {
     }
     
     // Check if game is still open
-    if (!gameSummary || gameSummary.status !== CONTRACT_CONFIG.GameStatus.Open) {
+    if (!finalGameSummary || finalGameSummary.status !== CONTRACT_CONFIG.GameStatus.Open) {
       toast({
         title: "Game not available",
         description: "This game is no longer accepting submissions.",
@@ -286,7 +384,7 @@ const GamePage = () => {
   }
 
   const handleConfirmChoice = async () => {
-    if (!isConnected || !selectedNumber || !gameSummary) {
+    if (!isConnected || !selectedNumber || !finalGameSummary) {
       toast({
         title: "Cannot submit",
         description: "Please make sure you're connected and have selected a number.",
@@ -302,7 +400,7 @@ const GamePage = () => {
       })
       
       // 调用更新后的 submitNumber，它现在包含 FHE 加密
-      await submitNumber(gameId, selectedNumber, formatETH(gameSummary.entryFee))
+      await submitNumber(gameId, selectedNumber, formatETH(finalGameSummary.entryFee))
       
       toast({
         title: "Transaction submitted",
@@ -377,15 +475,15 @@ const GamePage = () => {
 
   // 检查当前用户是否为获胜者
   const isCurrentUserWinner = () => {
-    return address && gameSummary?.winner && 
-           address.toLowerCase() === gameSummary.winner.toLowerCase() &&
-           gameSummary.winner !== "0x0000000000000000000000000000000000000000"
+    return address && finalGameSummary?.winner && 
+           address.toLowerCase() === finalGameSummary.winner.toLowerCase() &&
+           finalGameSummary.winner !== "0x0000000000000000000000000000000000000000"
   }
 
   // 检查游戏是否已解密（有获胜者且获胜者不是零地址）
   const isGameDecrypted = () => {
-    return gameSummary?.winner && 
-           gameSummary.winner !== "0x0000000000000000000000000000000000000000"
+    return finalGameSummary?.winner && 
+           finalGameSummary.winner !== "0x0000000000000000000000000000000000000000"
   }
 
   // 如果没有游戏ID，显示错误
@@ -408,8 +506,10 @@ const GamePage = () => {
     )
   }
 
-  // 加载状态
-  if (gameLoading || hasSubmittedLoading || hasClaimedLoading) {
+  // 加载状态 - 如果主要数据在加载，或者主要数据失败但备用数据还在加载
+  const isLoading = gameLoading || hasSubmittedLoading || hasClaimedLoading || (!gameSummary && allGamesLoading)
+  
+  if (isLoading) {
     return (
       <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
         <Card className="max-w-md">
@@ -425,16 +525,33 @@ const GamePage = () => {
     )
   }
 
-  // 错误状态
-  if (gameError || !gameSummary) {
+  // 错误状态 - 只有在主要数据和备用数据都失败/不存在时才显示错误
+  if ((gameError || !gameSummary) && !finalGameSummary) {
+    // 为调试添加更详细的错误信息
+    console.log('GamePage Error:', {
+      gameError,
+      gameSummary,
+      gameId: gameId?.toString(),
+      gameErrorDetails,
+      errorMessage: gameErrorDetails?.message || 'No error details available'
+    })
+
     return (
-      <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-background p-3 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-            <h3 className="text-xl font-semibold mb-2">Game Not Found</h3>
-            <p className="text-muted-foreground mb-4">
-              Room #{gameId.toString()} could not be found or loaded.
+            <h3 className="text-xl font-semibold mb-2">Game Load Error</h3>
+            <p className="text-muted-foreground mb-2">
+              Room #{gameId?.toString()} could not be loaded.
+            </p>
+            {(gameError || gameErrorDetails) && (
+              <div className="text-sm text-muted-foreground mb-4 p-2 bg-muted rounded">
+                <strong>Error:</strong> {gameErrorDetails?.message || 'Unknown error'}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mb-4">
+              This might be an expired game or network issue.
             </p>
             <div className="space-y-2">
               <GradientButton onClick={() => refetchGame()} className="w-full">
@@ -470,12 +587,12 @@ const GamePage = () => {
               Room #{gameId.toString()}
             </Badge>
             <Badge 
-              variant={gameSummary.status === CONTRACT_CONFIG.GameStatus.Open ? "default" : "destructive"}
+              variant={finalGameSummary.status === CONTRACT_CONFIG.GameStatus.Open ? "default" : "destructive"}
               className="px-3 py-1"
             >
-              {CONTRACT_CONFIG.GameStatus.Open === gameSummary.status ? "Open" : 
-               CONTRACT_CONFIG.GameStatus.Calculating === gameSummary.status ? "Calculating" : 
-               CONTRACT_CONFIG.GameStatus.Finished === gameSummary.status ? "Finished" : "Completed"}
+              {CONTRACT_CONFIG.GameStatus.Open === finalGameSummary.status ? "Open" : 
+               CONTRACT_CONFIG.GameStatus.Calculating === finalGameSummary.status ? "Calculating" : 
+               CONTRACT_CONFIG.GameStatus.Finished === finalGameSummary.status ? "Finished" : "Completed"}
             </Badge>
           </div>
           
@@ -518,7 +635,7 @@ const GamePage = () => {
                 <CardContent className="p-2 text-center">
                   <Trophy className="w-3 h-3 mx-auto mb-1 text-primary-foreground" />
                   <div className="text-sm font-bold text-primary-foreground">
-                    {formatETH(gameSummary.prizePool)} ETH
+                    {formatETH(finalGameSummary.prizePool)} ETH
                   </div>
                   <div className="text-xs text-primary-foreground/80">Prize Pool</div>
                 </CardContent>
@@ -549,7 +666,7 @@ const GamePage = () => {
                 <CardContent className="p-2 text-center">
                   <Users className="w-3 h-3 mx-auto mb-1 text-primary" />
                   <div className="text-sm font-bold text-primary">
-                    {gameSummary.playerCount}/{gameSummary.maxPlayers}
+                    {finalGameSummary.playerCount}/{finalGameSummary.maxPlayers}
                   </div>
                   <div className="text-xs text-muted-foreground">Players</div>
                 </CardContent>
@@ -564,7 +681,7 @@ const GamePage = () => {
                   <span className="text-sm font-medium text-primary-foreground">Entry Fee Required</span>
                 </div>
                 <div className="text-xl font-bold text-primary-foreground">
-                  {formatETH(gameSummary.entryFee)} ETH
+                  {formatETH(finalGameSummary.entryFee)} ETH
                 </div>
                 <div className="text-xs text-primary-foreground/80">
                   To participate in this room
@@ -577,21 +694,21 @@ const GamePage = () => {
               <CardContent className="p-3">
                 <div className="space-y-3">
                   <div className="text-center">
-                    <h4 className="font-semibold text-sm mb-1">{gameSummary.roomName}</h4>
+                    <h4 className="font-semibold text-sm mb-1">{finalGameSummary.roomName}</h4>
                     <p className="text-xs text-muted-foreground">
-                      Numbers: {gameSummary.minNumber}-{gameSummary.maxNumber}
+                      Numbers: {finalGameSummary.minNumber}-{finalGameSummary.maxNumber}
                     </p>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-center p-2 bg-muted/20 rounded">
-                      <div className="font-semibold">{formatETH(gameSummary.entryFee)} ETH</div>
+                      <div className="font-semibold">{formatETH(finalGameSummary.entryFee)} ETH</div>
                       <div className="text-muted-foreground">Entry Fee</div>
                     </div>
                     <div className="text-center p-2 bg-muted/20 rounded">
                       <div className="font-semibold">
-                        {gameSummary.winner !== "0x0000000000000000000000000000000000000000" ? 
-                          formatAddress(gameSummary.winner) : "TBD"}
+                        {finalGameSummary.winner !== "0x0000000000000000000000000000000000000000" ? 
+                          formatAddress(finalGameSummary.winner) : "TBD"}
                       </div>
                       <div className="text-muted-foreground">Winner</div>
                     </div>
@@ -601,12 +718,12 @@ const GamePage = () => {
                   <div>
                     <div className="flex justify-between text-xs text-muted-foreground mb-1">
                       <span>Players</span>
-                      <span>{gameSummary.playerCount}/{gameSummary.maxPlayers}</span>
+                      <span>{finalGameSummary.playerCount}/{finalGameSummary.maxPlayers}</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div 
                         className="bg-gradient-primary h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(gameSummary.playerCount / gameSummary.maxPlayers) * 100}%` }}
+                        style={{ width: `${(finalGameSummary.playerCount / finalGameSummary.maxPlayers) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -629,7 +746,7 @@ const GamePage = () => {
                   >
                     {generateNumberGrid().map((number) => {
                       const cellSize = getGridCellSize();
-                      const totalNumbers = gameSummary.maxNumber - gameSummary.minNumber + 1;
+                      const totalNumbers = finalGameSummary.maxNumber - finalGameSummary.minNumber + 1;
                       
                       // Adjust font size based on grid size
                       let fontSize = 'text-4xl';
@@ -676,13 +793,13 @@ const GamePage = () => {
                   )}
 
                   {/* Game Status Messages */}
-                  {gameSummary?.status !== CONTRACT_CONFIG.GameStatus.Open && !isGameDecrypted() && (
+                  {finalGameSummary?.status !== CONTRACT_CONFIG.GameStatus.Open && !isGameDecrypted() && (
                     <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-center">
                       <div className="flex items-center justify-center space-x-2 text-yellow-700">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm">
-                          {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating ? "Waiting for game results..." :
-                           gameSummary?.status === CONTRACT_CONFIG.GameStatus.Finished ? "Game has finished" :
+                          {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating ? "Waiting for game results..." :
+                           finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Finished ? "Game has finished" :
                            "Game is no longer accepting submissions"}
                         </span>
                       </div>
@@ -690,7 +807,7 @@ const GamePage = () => {
                   )}
 
                   {/* Status Message - Enhanced */}
-                  {selectedNumber && !hasSubmitted && isConnected && gameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
+                  {selectedNumber && !hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
                     <div className="p-2 bg-accent/20 rounded text-center">
                       <span className="text-sm text-accent-foreground">
                         Selected: <span className="font-bold text-lg">{selectedNumber}</span>
@@ -699,7 +816,7 @@ const GamePage = () => {
                   )}
 
                   {/* Action Buttons - Enhanced */}
-                  {!hasSubmitted && isConnected && gameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
+                  {!hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
                     <div className="grid grid-cols-2 gap-4">
                       <GradientButton 
                         variant="game" 
@@ -733,7 +850,7 @@ const GamePage = () => {
                   )}
 
                   {/* User Already Submitted Message */}
-                  {hasSubmitted && gameSummary?.status !== CONTRACT_CONFIG.GameStatus.Completed && !isGameDecrypted() && (
+                  {hasSubmitted && finalGameSummary?.status !== CONTRACT_CONFIG.GameStatus.PrizeClaimed && !isGameDecrypted() && (
                     <div className="p-2 bg-green-50 border border-green-200 rounded text-center">
                       <div className="flex items-center justify-center space-x-2 text-green-700">
                         <Trophy className="w-5 h-5" />
@@ -745,7 +862,7 @@ const GamePage = () => {
                   )}
 
                   {/* Game Time Expired - No players */}
-                  {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && !canFinalize && (
+                  {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && !canFinalize && (
                     <div className="p-2 bg-red-50 border border-red-200 rounded text-center">
                       <div className="flex items-center justify-center space-x-2 text-red-700">
                         <Clock className="w-4 h-4" />
@@ -773,11 +890,11 @@ const GamePage = () => {
                             <div className="flex justify-center items-center space-x-6 text-green-700">
                               <div>
                                 <div className="text-sm font-medium">Your winning number</div>
-                                <div className="text-2xl font-bold">{gameSummary.winningNumber}</div>
+                                <div className="text-2xl font-bold">{finalGameSummary.winningNumber}</div>
                               </div>
                               <div>
                                 <div className="text-sm font-medium">Prize</div>
-                                <div className="text-2xl font-bold">{formatETH(gameSummary.prizePool)} ETH</div>
+                                <div className="text-2xl font-bold">{formatETH(finalGameSummary.prizePool)} ETH</div>
                               </div>
                             </div>
                           </div>
@@ -797,7 +914,7 @@ const GamePage = () => {
                               ) : (
                                 <>
                                   <Wallet className="w-4 h-4 mr-2" />
-                                  Claim {formatETH(gameSummary.prizePool)} ETH
+                                  Claim {formatETH(finalGameSummary.prizePool)} ETH
                                 </>
                               )}
                             </GradientButton>
@@ -814,14 +931,14 @@ const GamePage = () => {
                             <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg text-center">
                               <div className="text-sm text-blue-600 font-medium mb-1">Winner</div>
                               <div className="text-blue-800 font-bold text-lg">
-                                {formatAddress(gameSummary.winner)}
+                                {formatAddress(finalGameSummary.winner)}
                               </div>
                             </div>
                             
                             <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg text-center">
                               <div className="text-sm text-purple-600 font-medium mb-1">Winning Number</div>
                               <div className="text-purple-800 font-bold text-2xl">
-                                {gameSummary.winningNumber}
+                                {finalGameSummary.winningNumber}
                               </div>
                             </div>
                           </div>
@@ -837,18 +954,18 @@ const GamePage = () => {
                   )}
 
                   {/* Time Expired - Manual Reveal Section */}
-                  {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && canFinalize && (
+                  {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && canFinalize && (
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
                       <div className="text-blue-700 mb-3">
                         <Clock className="w-6 h-6 mx-auto mb-2" />
                         <div className="font-medium">Time Expired!</div>
                         <div className="text-sm">
-                          Game ended with {gameSummary.playerCount} players. Anyone can reveal the winner now!
+                          Game ended with {finalGameSummary.playerCount} players. Anyone can reveal the winner now!
                         </div>
                       </div>
                       
                       <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm mb-3">
-                        💡 Reveal reward: ~{formatETH(gameSummary.prizePool / BigInt(10))} ETH (10% of prize pool)
+                        💡 Reveal reward: ~{formatETH(finalGameSummary.prizePool / BigInt(10))} ETH (10% of prize pool)
                       </div>
                       
                       <GradientButton 
@@ -872,7 +989,7 @@ const GamePage = () => {
                   )}
 
                   {/* Calculating State - Only for time-expired games */}
-                  {gameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating && !isGameDecrypted() && (
+                  {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating && !isGameDecrypted() && (
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
                       <div className="flex items-center justify-center space-x-2 text-blue-700 mb-2">
                         <Loader2 className="w-5 h-5 animate-spin" />

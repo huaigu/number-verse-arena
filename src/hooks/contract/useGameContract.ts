@@ -38,21 +38,44 @@ export const useGetActiveGames = () => {
 
 // 获取游戏摘要
 export const useGetGameSummary = (gameId: bigint | undefined) => {
-  const { data, isError, isLoading, refetch } = useReadContract({
+  const { data, isError, isLoading, refetch, error } = useReadContract({
     address: CONTRACT_CONFIG.address,
     abi: contractABI.abi,
     functionName: 'getGameSummary',
     args: gameId !== undefined ? [gameId] : undefined,
     query: {
       enabled: gameId !== undefined,
+      // 添加重试逻辑
+      retry: (failureCount, error) => {
+        // 对于网络错误最多重试3次
+        if (failureCount < 3 && error.message?.includes('network')) {
+          return true;
+        }
+        // 对于合约调用错误，如果不是因为游戏不存在，重试1次
+        if (failureCount < 1 && !error.message?.includes('Game not found')) {
+          return true;
+        }
+        return false;
+      },
     },
   });
+
+  // 添加调试信息
+  if (isError || error) {
+    console.log('useGetGameSummary Error:', {
+      gameId: gameId?.toString(),
+      isError,
+      error,
+      errorMessage: error?.message || 'Unknown error'
+    });
+  }
 
   return {
     gameSummary: data as GameSummary | undefined,
     isError,
     isLoading,
     refetch,
+    error,
   };
 };
 

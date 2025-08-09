@@ -283,6 +283,7 @@ const JoinRoom = () => {
                         const isFull = game.playerCount >= game.maxPlayers
                         const isWaitingClaim = (isFull || isExpired) && game.status === CONTRACT_CONFIG.GameStatus.Open
                         const canJoin = game.status === CONTRACT_CONFIG.GameStatus.Open && !isExpired && !isFull
+                        const canView = isExpired || isFull // 允许查看过期或已满的游戏
                         
                         return (
                           <div
@@ -290,11 +291,17 @@ const JoinRoom = () => {
                             className={`p-4 border-2 rounded-lg transition-all duration-300 ${
                               canJoin 
                                 ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 hover:border-green-400 hover:shadow-card cursor-pointer hover:-translate-y-1" 
-                                : isWaitingClaim
-                                  ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300 opacity-75 cursor-not-allowed"
+                                : canView
+                                  ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300 hover:border-yellow-400 hover:shadow-card cursor-pointer hover:-translate-y-1 opacity-90"
                                   : "bg-gradient-to-br from-gray-50 to-slate-50 border-gray-300 opacity-60 cursor-not-allowed"
                             }`}
-                            onClick={() => canJoin && handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)}
+                            onClick={() => {
+                              if (canJoin) {
+                                handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)
+                              } else if (canView) {
+                                handleViewFinishedGame(game.gameId)
+                              }
+                            }}
                           >
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center space-x-3">
@@ -336,9 +343,23 @@ const JoinRoom = () => {
                               />
                             </div>
                             
-                            {/* Entry fee info */}
-                            <div className="mt-2 text-xs text-muted-foreground">
-                              Entry Fee: {formatETH(game.entryFee)} ETH
+                            {/* Entry fee info and action hint */}
+                            <div className="mt-2 flex items-center justify-between">
+                              <div className="text-xs text-muted-foreground">
+                                Entry Fee: {formatETH(game.entryFee)} ETH
+                              </div>
+                              
+                              {canJoin && (
+                                <div className="text-xs text-green-600 font-medium">
+                                  Click to Join
+                                </div>
+                              )}
+                              
+                              {canView && !canJoin && (
+                                <div className="text-xs text-amber-600 font-medium">
+                                  {isExpired ? "Click to View (Expired)" : "Click to View (Full)"}
+                                </div>
+                              )}
                             </div>
                           </div>
                         )
