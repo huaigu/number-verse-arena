@@ -49,9 +49,12 @@ Number Verse Arena is the world's first **FHE-powered multiplayer game** where p
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/huaigu/number-verse-arena.git
+# Clone the repository with submodules
+git clone --recurse-submodules https://github.com/huaigu/number-verse-arena.git
 cd number-verse-arena
+
+# If you already cloned without submodules, initialize them:
+# git submodule update --init --recursive
 
 # Install dependencies
 npm install
@@ -141,6 +144,15 @@ src/
 ├── contracts/             # Contract ABI and configuration
 ├── lib/                   # Utilities and FHE integration
 └── main.tsx              # Application entry point
+
+contracts/                  # Git submodule: Smart contract source code
+├── contracts/             # Solidity smart contracts
+│   ├── UniqueNumberGameFactory.sol  # Main game contract
+│   └── TestAsyncDecrypt.sol         # FHE testing contract
+├── deploy/                # Deployment scripts
+├── test/                  # Contract test suites
+├── tasks/                 # Hardhat tasks and utilities
+└── docs/                  # Contract documentation
 ```
 
 ## 🛠️ Development Commands
@@ -162,8 +174,11 @@ npm run lint            # Run ESLint for code linting
 
 ### Smart Contract Testing
 ```bash
-# Navigate to contract repository
-cd ../zama-unique-number-game-contract
+# Navigate to contracts submodule
+cd contracts
+
+# Install contract dependencies
+npm install
 
 # Run contract tests
 npm test
@@ -177,12 +192,18 @@ npx hardhat test
 
 ## 📚 Documentation
 
+### Frontend Documentation
 - **API Reference**: [docs/API_REFERENCE.md](docs/API_REFERENCE.md) - Smart contract methods and events
 - **Game Flow**: [docs/GAME_FLOW.md](docs/GAME_FLOW.md) - Complete game mechanics and user flow
 - **Contract Integration**: [docs/CONTRACT_INTEGRATION.md](docs/CONTRACT_INTEGRATION.md) - Frontend-contract integration guide  
 - **Deployment Guide**: [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) - Full deployment instructions
 - **Testing Plan**: [docs/TESTING_PLAN.md](docs/TESTING_PLAN.md) - Comprehensive testing strategy and test cases
 - **Development Tasks**: [docs/TODO.md](docs/TODO.md) - Project roadmap and task tracking
+
+### Smart Contract Documentation
+- **Contract README**: [contracts/README.md](contracts/README.md) - Smart contract overview and setup
+- **Game Flow**: [contracts/docs/game-flow.md](contracts/docs/game-flow.md) - Contract-level game mechanics
+- **Deployment**: [contracts/DEPLOYMENT.md](contracts/DEPLOYMENT.md) - Contract deployment guide
 
 ## 🤝 Contributing
 
