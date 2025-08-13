@@ -14,6 +14,7 @@ Number Verse Arena is the world's first **FHE-powered multiplayer game** where p
 - ⚡ **Real-time Multiplayer**: Support for 2-10 players per room
 - 🏆 **Fair Competition**: Cryptographically verifiable results
 - 💰 **Prize Pool System**: Entry fees distributed to unique number holders
+- 📊 **Leaderboard System**: Track winners and earnings with caching
 - 🎨 **Modern UI**: Built with React 18 + shadcn/ui components
 - 🔗 **Web3 Native**: Seamless wallet integration with RainbowKit
 
