@@ -121,7 +121,7 @@ The application will be available at `http://localhost:8080`
 ## 🌐 Live Demo
 
 ### Demo Application
-- **Live Site**: *Coming Soon* - Deployment in progress
+- **Live Site**: https://number-verse-arena.vercel.app
 - **Demo Video**: [Watch How It Works](https://www.youtube.com/watch?v=5AlisRBd1tI)
 
 ### Smart Contract
