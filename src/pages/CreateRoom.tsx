@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Users, Target, Trophy, Timer, Wallet, Loader2 } from "lucide-react"
+import { ArrowLeft, Users, Target, Trophy, Timer, Wallet, Loader2, TrendingUp } from "lucide-react"
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useCreateGame } from "@/hooks/contract/useGameContract"
@@ -206,9 +206,20 @@ const CreateRoom = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </GradientButton>
-            <h1 className="text-3xl font-bold text-foreground">Create Game Room</h1>
+            <h1 className="text-xl font-bold text-foreground">Create Game Room</h1>
           </div>
-          <ConnectButton />
+          <div className="flex items-center space-x-2">
+            <GradientButton 
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/leaderboard")}
+              disabled={isCreating}
+            >
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Leaderboard
+            </GradientButton>
+            <ConnectButton />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

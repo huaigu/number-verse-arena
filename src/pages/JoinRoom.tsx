@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Users, Target, Trophy, Timer, Search, Wallet, Loader2, RefreshCw } from "lucide-react"
+import { ArrowLeft, Users, Target, Trophy, Timer, Search, Wallet, Loader2, RefreshCw, TrendingUp } from "lucide-react"
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useGetActiveGames, useGetAllGames, useGetGameSummary } from "@/hooks/contract/useGameContract"
@@ -233,9 +233,19 @@ const JoinRoom = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </GradientButton>
-            <h1 className="text-3xl font-bold text-foreground">Join Game Room</h1>
+            <h1 className="text-xl font-bold text-foreground">Join Game Room</h1>
           </div>
-          <ConnectButton />
+          <div className="flex items-center space-x-2">
+            <GradientButton 
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/leaderboard")}
+            >
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Leaderboard
+            </GradientButton>
+            <ConnectButton />
+          </div>
         </div>
 
         {/* Top Section - Join by Code */}
