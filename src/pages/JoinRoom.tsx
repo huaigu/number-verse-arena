@@ -2,11 +2,9 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Users, Target, Trophy, Timer, Search, Wallet, Loader2, RefreshCw, TrendingUp } from "lucide-react"
+import { ArrowLeft, Users, Target, Trophy, Timer, Loader2, RefreshCw, TrendingUp } from "lucide-react"
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useGetActiveGames, useGetAllGames, useGetGameSummary } from "@/hooks/contract/useGameContract"
@@ -16,9 +14,6 @@ const JoinRoom = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { address, isConnected } = useAccount()
-  
-  const [roomCode, setRoomCode] = useState("")
-  const [isJoining, setIsJoining] = useState(false)
   
   // 获取活跃游戏列表
   const { 
@@ -46,54 +41,6 @@ const JoinRoom = () => {
     return () => clearInterval(interval)
   }, [refetchGames, refetchAllGames])
 
-  const handleJoinByCode = async () => {
-    if (!isConnected) {
-      toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to join a room.",
-        variant: "destructive"
-      })
-      return
-    }
-
-    if (!roomCode.trim()) {
-      toast({
-        title: "Please enter room code",
-        variant: "destructive"
-      })
-      return
-    }
-
-    // 验证房间ID是否为数字
-    const gameId = parseInt(roomCode)
-    if (isNaN(gameId)) {
-      toast({
-        title: "Invalid room code",
-        description: "Room code must be a number.",
-        variant: "destructive"
-      })
-      return
-    }
-
-    setIsJoining(true)
-    
-    try {
-      // 直接跳转到游戏页面，让游戏页面处理数据加载
-      toast({
-        title: "Joining room...",
-        description: `Room ID: ${gameId}`,
-      })
-      navigate(`/game?room=${gameId}`)
-    } catch (error) {
-      toast({
-        title: "Failed to join room",
-        description: "Please check the room code and try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsJoining(false)
-    }
-  }
 
   const handleJoinRoom = (gameId: bigint, status: number, timeLeft: number, playerCount: number) => {
     if (!isConnected) {
@@ -248,45 +195,6 @@ const JoinRoom = () => {
           </div>
         </div>
 
-        {/* Top Section - Join by Code */}
-        <Card className="shadow-card mb-8">
-          <CardHeader>
-            <CardTitle>Join by Room Code</CardTitle>
-            <CardDescription>Enter the room ID to join a specific game</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex space-x-4">
-              <div className="flex-1">
-                <Label htmlFor="room-code">Room ID</Label>
-                <Input
-                  id="room-code"
-                  type="text"
-                  placeholder="Enter room ID (number)"
-                  value={roomCode}
-                  onChange={(e) => setRoomCode(e.target.value)}
-                  className="mt-1"
-                  onKeyDown={(e) => e.key === 'Enter' && handleJoinByCode()}
-                />
-              </div>
-              <div className="flex items-end">
-                <GradientButton 
-                  onClick={handleJoinByCode}
-                  disabled={!roomCode.trim() || isJoining}
-                  className="min-w-[100px]"
-                >
-                  {isJoining ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Search className="w-4 h-4 mr-2" />
-                      Join
-                    </>
-                  )}
-                </GradientButton>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Bottom Section - Room Lists */}
         <div className="space-y-8">
@@ -342,7 +250,6 @@ const JoinRoom = () => {
                         const prizePool = calculatePrizePool(game.playerCount, game.entryFee)
                         const isExpired = timeLeft <= 0
                         const isFull = game.playerCount >= game.maxPlayers
-                        const isWaitingClaim = (isFull || isExpired) && game.status === CONTRACT_CONFIG.GameStatus.Open
                         const canJoin = game.status === CONTRACT_CONFIG.GameStatus.Open && !isExpired && !isFull
                         
                         return (
@@ -351,11 +258,21 @@ const JoinRoom = () => {
                             className={`p-4 border-2 rounded-lg transition-all duration-300 ${
                               canJoin 
                                 ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 hover:border-green-400 hover:shadow-card cursor-pointer hover:-translate-y-1" 
-                                : isWaitingClaim
-                                  ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300 opacity-75 cursor-not-allowed"
+                                : (isExpired && game.playerCount > 0) || isFull
+                                  ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300 hover:border-yellow-400 hover:shadow-card cursor-pointer hover:-translate-y-1 opacity-90"
                                   : "bg-gradient-to-br from-gray-50 to-slate-50 border-gray-300 opacity-60 cursor-not-allowed"
                             }`}
-                            onClick={() => canJoin && handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)}
+                            onClick={() => {
+                              if (canJoin) {
+                                handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)
+                              } else if (isExpired && game.playerCount > 0) {
+                                // Allow viewing expired games with players
+                                handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)
+                              } else if (isFull) {
+                                // Allow viewing full games
+                                handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)
+                              }
+                            }}
                           >
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center space-x-3">
