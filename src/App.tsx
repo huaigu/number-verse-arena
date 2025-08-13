@@ -13,6 +13,7 @@ import CreateRoom from "./pages/CreateRoom";
 import JoinRoom from "./pages/JoinRoom";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
+import { Analytics } from "@vercel/analytics/react"
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          <Analytics />
         </TooltipProvider>
       </RainbowKitProvider>
     </QueryClientProvider>
