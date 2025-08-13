@@ -105,32 +105,42 @@ const JoinRoom = () => {
       return
     }
 
-    // 检查是否已过期且没有玩家参与
-    if (timeLeft <= 0 && playerCount === 0) {
-      toast({
-        title: "Game expired",
-        description: "This room has expired and cannot be joined.",
-        variant: "destructive"
-      })
-      return
+    // 检查是否已过期
+    if (timeLeft <= 0) {
+      if (playerCount === 0) {
+        toast({
+          title: "Game expired",
+          description: "This room has expired and cannot be joined.",
+          variant: "destructive"
+        })
+        return
+      } else {
+        // 过期但有玩家的游戏，允许查看结果
+        toast({
+          title: "Viewing expired game",
+          description: "This game has expired. Viewing results...",
+        })
+        navigate(`/game?room=${gameId.toString()}`)
+        return
+      }
     }
 
     // 检查游戏状态
     if (status === CONTRACT_CONFIG.GameStatus.Finished || status === CONTRACT_CONFIG.GameStatus.PrizeClaimed) {
       toast({
-        title: "Game finished",
-        description: "This room has already finished",
-        variant: "destructive"
+        title: "Viewing finished game",
+        description: "This game has finished. Viewing results...",
       })
+      navigate(`/game?room=${gameId.toString()}`)
       return
     }
 
     if (status === CONTRACT_CONFIG.GameStatus.Calculating) {
       toast({
-        title: "Game calculating",
+        title: "Viewing calculating game",
         description: "This game is calculating results...",
-        variant: "destructive"
       })
+      navigate(`/game?room=${gameId.toString()}`)
       return
     }
 
@@ -160,10 +170,14 @@ const JoinRoom = () => {
     navigate(`/game?room=${gameId.toString()}`)
   }
 
-  const getStatusBadge = (status: number, isExpired?: boolean) => {
-    // If expired, always show Expired badge regardless of status
+  const getStatusBadge = (status: number, isExpired?: boolean, playerCount?: number) => {
+    // If expired, show different badges based on whether there are players
     if (isExpired) {
-      return <Badge variant="destructive">Expired</Badge>
+      if (playerCount && playerCount > 0) {
+        return <Badge className="bg-blue-500 text-white">Expired (View Results)</Badge>
+      } else {
+        return <Badge variant="destructive">Expired</Badge>
+      }
     }
     
     switch (status) {
@@ -283,6 +297,8 @@ const JoinRoom = () => {
                         const isFull = game.playerCount >= game.maxPlayers
                         const isWaitingClaim = (isFull || isExpired) && game.status === CONTRACT_CONFIG.GameStatus.Open
                         const canJoin = game.status === CONTRACT_CONFIG.GameStatus.Open && !isExpired && !isFull
+                        const canView = isExpired && game.playerCount > 0
+                        const isClickable = canJoin || canView
                         
                         return (
                           <div
@@ -290,16 +306,18 @@ const JoinRoom = () => {
                             className={`p-4 border-2 rounded-lg transition-all duration-300 ${
                               canJoin 
                                 ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 hover:border-green-400 hover:shadow-card cursor-pointer hover:-translate-y-1" 
-                                : isWaitingClaim
-                                  ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300 opacity-75 cursor-not-allowed"
-                                  : "bg-gradient-to-br from-gray-50 to-slate-50 border-gray-300 opacity-60 cursor-not-allowed"
+                                : canView
+                                  ? "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-300 hover:border-blue-400 hover:shadow-card cursor-pointer hover:-translate-y-1"
+                                  : isWaitingClaim
+                                    ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300 opacity-75 cursor-not-allowed"
+                                    : "bg-gradient-to-br from-gray-50 to-slate-50 border-gray-300 opacity-60 cursor-not-allowed"
                             }`}
-                            onClick={() => canJoin && handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)}
+                            onClick={() => isClickable && handleJoinRoom(game.gameId, game.status, timeLeft, game.playerCount)}
                           >
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center space-x-3">
                                 <h3 className="font-semibold text-lg">{game.roomName || `Game ${game.gameId.toString()}`}</h3>
-                                {getStatusBadge(game.status, isExpired)}
+                                {getStatusBadge(game.status, isExpired, game.playerCount)}
                               </div>
                               <Badge variant="outline" className="font-mono">
                                 #{game.gameId.toString()}
