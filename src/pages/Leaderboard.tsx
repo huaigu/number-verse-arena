@@ -45,6 +45,7 @@ const Leaderboard = () => {
     recentWinners,
     userPosition,
     totalGames,
+    totalPlayers,
     totalPrizePool,
     isLoading,
     error,
@@ -148,7 +149,7 @@ const Leaderboard = () => {
                 <Users className="w-5 h-5 text-blue-500" />
                 <div>
                   <p className="text-sm font-medium">Total Players</p>
-                  <p className="text-2xl font-bold">{leaderboardData.length}</p>
+                  <p className="text-2xl font-bold">{totalPlayers}</p>
                 </div>
               </div>
             </CardContent>

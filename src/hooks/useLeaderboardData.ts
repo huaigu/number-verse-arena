@@ -17,6 +17,7 @@ export interface UseLeaderboardDataReturn {
   userPosition: { position: number; entry: LeaderboardEntry } | null;
   allWinnerRecords: WinnerRecord[];
   totalGames: number;
+  totalPlayers: number;
   totalPrizePool: bigint;
   isLoading: boolean;
   error: Error | null;
@@ -34,6 +35,7 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
   const [userPosition, setUserPosition] = useState<{ position: number; entry: LeaderboardEntry } | null>(null);
   const [allWinnerRecords, setAllWinnerRecords] = useState<WinnerRecord[]>([]);
   const [totalGames, setTotalGames] = useState(0);
+  const [totalPlayers, setTotalPlayers] = useState(0);
   const [totalPrizePool, setTotalPrizePool] = useState(BigInt(0));
   const [error, setError] = useState<Error | null>(null);
 
@@ -62,7 +64,7 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
   /**
    * Process and aggregate all winner data
    */
-  const processData = useCallback((allRecords: WinnerRecord[]) => {
+  const processData = useCallback((allRecords: WinnerRecord[], allGamesData?: typeof games) => {
     // Aggregate leaderboard
     const aggregated = aggregateLeaderboard(allRecords);
     setLeaderboardData(aggregated);
@@ -82,10 +84,19 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
     // Set all records
     setAllWinnerRecords(allRecords);
 
-    // Calculate totals
+    // Calculate totals from winner records
     setTotalGames(allRecords.length);
     const totalPrize = allRecords.reduce((sum, record) => sum + record.prize, BigInt(0));
     setTotalPrizePool(totalPrize);
+
+    // Calculate total players from all games data (all participants, not just winners)
+    if (allGamesData) {
+      const totalParticipants = allGamesData.reduce((sum, game) => sum + game.playerCount, 0);
+      setTotalPlayers(totalParticipants);
+    } else {
+      // Fallback: count unique winner addresses (underestimated but better than nothing)
+      setTotalPlayers(aggregated.length);
+    }
 
     setError(null);
   }, [userAddress]);
@@ -147,16 +158,16 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
           saveToCache(newRecords);
           // Combine with cached records for processing
           const allRecords = [...cachedRecords, ...newRecords];
-          processData(allRecords);
+          processData(allRecords, games);
         } else {
           // No new records, but update last refresh time
           updateLastRefresh();
           // Process with cached data
-          processData(cachedRecords);
+          processData(cachedRecords, games);
         }
       } else if (cachedData) {
         // No fresh data but we have cache
-        processData(cachedData.cachedResults);
+        processData(cachedData.cachedResults, games);
       }
     } catch (err) {
       console.error('Error processing leaderboard data:', err);
@@ -164,7 +175,7 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
       
       // Fallback to cached data
       if (cachedData) {
-        processData(cachedData.cachedResults);
+        processData(cachedData.cachedResults, games);
       }
     }
   }, [
@@ -198,6 +209,7 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
     userPosition,
     allWinnerRecords,
     totalGames,
+    totalPlayers,
     totalPrizePool,
     isLoading,
     error,
