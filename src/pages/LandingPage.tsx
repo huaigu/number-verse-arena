@@ -126,7 +126,14 @@ const LandingPage = () => {
             <span className="text-xl font-bold text-foreground">Unique Number</span>
           </div>
           <div className="flex items-center gap-4">
-            <ConnectButton />
+            <GradientButton 
+              variant="outline"
+              onClick={() => navigate("/leaderboard")}
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Leaderboard
+            </GradientButton>
+           
             <GradientButton 
               variant="outline" 
               onClick={handleQuickJoin}
@@ -134,6 +141,8 @@ const LandingPage = () => {
             >
               {gamesLoading ? "Loading..." : "Quick Join"}
             </GradientButton>
+
+             <ConnectButton />
           </div>
         </div>
       </header>
