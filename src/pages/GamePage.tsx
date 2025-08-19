@@ -25,6 +25,7 @@ const GamePage = () => {
   // 状态管理
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
   const [highlightedNumber, setHighlightedNumber] = useState<number | null>(null)
+  const [previousGameStatus, setPreviousGameStatus] = useState<number | null>(null)
   
   // 获取游戏详情
   const { 
@@ -246,6 +247,89 @@ const GamePage = () => {
     }
   }, [claimError, toast])
 
+  // 监听游戏状态变为 Calculating 并自动刷新结果
+  useEffect(() => {
+    const currentStatus = finalGameSummary?.status
+    
+    // 检查状态是否从非 Calculating 变为 Calculating
+    if (currentStatus === CONTRACT_CONFIG.GameStatus.Calculating && 
+        previousGameStatus !== null && 
+        previousGameStatus !== CONTRACT_CONFIG.GameStatus.Calculating) {
+      
+      toast({
+        title: "Game calculating! 🎲",
+        description: "Automatically fetching results...",
+      })
+      
+      // 立即刷新一次
+      refetchGame()
+      refetchCanFinalize()
+      
+      // 设置自动刷新机制，每3秒重试一次，最多8次
+      let retryCount = 0
+      const maxRetries = 8
+      
+      const autoRefreshInterval = setInterval(async () => {
+        try {
+          // 重新获取游戏数据
+          const result = await refetchGame()
+          
+          // 检查是否已获取到winner信息
+          const gameData = result.data as typeof finalGameSummary
+          const hasWinner = gameData?.winner && gameData.winner !== "0x0000000000000000000000000000000000000000"
+          
+          if (hasWinner) {
+            // 成功获取winner信息
+            clearInterval(autoRefreshInterval)
+            toast({
+              title: "Results loaded! 🎉",
+              description: "Game calculation complete.",
+            })
+          } else {
+            retryCount++
+            if (retryCount >= maxRetries) {
+              // 达到最大重试次数
+              clearInterval(autoRefreshInterval)
+              toast({
+                title: "Still calculating...",
+                description: "You can manually refresh for updates.",
+              })
+            } else {
+              // 继续重试，但不显示太多提示以避免spam
+              if (retryCount % 3 === 0) { // 每隔3次重试才显示一次提示
+                toast({
+                  title: `Checking results... (${retryCount}/${maxRetries})`,
+                  description: "Waiting for blockchain calculation.",
+                })
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error auto-fetching results:', error)
+          retryCount++
+          if (retryCount >= maxRetries) {
+            clearInterval(autoRefreshInterval)
+            toast({
+              title: "Auto-refresh stopped",
+              description: "Please refresh manually to see results.",
+              variant: "destructive"
+            })
+          }
+        }
+      }, 3000) // 每3秒重试一次
+      
+      // 清理函数
+      return () => {
+        clearInterval(autoRefreshInterval)
+      }
+    }
+    
+    // 更新之前的状态
+    if (currentStatus !== undefined) {
+      setPreviousGameStatus(currentStatus)
+    }
+  }, [finalGameSummary?.status, previousGameStatus, toast, refetchGame, refetchCanFinalize])
+
   // 计算剩余时间
   const getTimeLeft = () => {
     if (!finalGameSummary) return 0
@@ -395,8 +479,8 @@ const GamePage = () => {
     
     try {
       toast({
-        title: "Encrypting number...",
-        description: "Preparing your number with FHE encryption.",
+        title: "🔐 Encrypting your number...",
+        description: "This may take 10-30 seconds due to FHE encryption. Please wait...",
       })
       
       // 调用更新后的 submitNumber，它现在包含 FHE 加密
