@@ -191,7 +191,7 @@ const LandingPage = () => {
           </p>
           <div className="relative w-full max-w-3xl mx-auto aspect-video rounded-xl overflow-hidden shadow-2xl bg-card">
             <iframe
-              src="https://www.youtube.com/embed/5AlisRBd1tI"
+              src="https://www.youtube.com/embed/_eOtbshkZ5w"
               title="Unique Number Game Demo"
               className="w-full h-full"
               frameBorder="0"
