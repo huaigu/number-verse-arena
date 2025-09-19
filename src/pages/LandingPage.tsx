@@ -112,6 +112,13 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-background">
+      {/* Warning Banner */}
+      <div className="bg-destructive text-destructive-foreground py-3 px-4 text-center">
+        <p className="text-sm font-medium">
+          ⚠️ Due to ZAMA upgrading to v0.8.0, this DApp is currently under maintenance - games are temporarily unavailable
+        </p>
+      </div>
+      
       {/* Header */}
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
