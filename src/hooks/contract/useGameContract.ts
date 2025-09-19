@@ -129,7 +129,7 @@ export const useCreateGame = () => {
           entryFeeWei,
           params.deadlineDuration,
         ],
-      });
+      } as any);
     } catch (err) {
       console.error('Error creating game:', err);
       setIsCreating(false);
@@ -240,7 +240,7 @@ export const useSubmitNumber = () => {
         functionName: 'submitNumber',
         args: [gameId, encryptedData, inputProof],
         value: entryFeeWei,
-      });
+      } as any);
     } catch (err) {
       console.error('Error submitting number:', err);
       setIsSubmitting(false);
@@ -284,7 +284,7 @@ export const useFindWinner = () => {
         abi: contractABI.abi,
         functionName: 'findWinnerByDeadline',
         args: [gameId],
-      });
+      } as any);
     } catch (err) {
       console.error('Error finding winner:', err);
       setIsFinding(false);
@@ -365,7 +365,7 @@ export const useClaimPrize = () => {
         abi: contractABI.abi,
         functionName: 'claimPrize',
         args: [gameId],
-      });
+      } as any);
     } catch (err) {
       console.error('Error claiming prize:', err);
       setIsClaiming(false);
