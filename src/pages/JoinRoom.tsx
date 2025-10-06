@@ -9,11 +9,14 @@ import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useGetActiveGames, useGetAllGames, useGetGameSummary } from "@/hooks/contract/useGameContract"
 import { CONTRACT_CONFIG, getGameStatusText, formatETH } from "@/contracts/config"
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
 const JoinRoom = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { address, isConnected } = useAccount()
+  const { t } = useTranslation()
   
   // 获取活跃游戏列表
   const { 

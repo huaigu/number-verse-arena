@@ -14,11 +14,14 @@ import { useCreateGame } from "@/hooks/contract/useGameContract"
 import { useReadContract } from 'wagmi'
 import { CONTRACT_CONFIG } from "@/contracts/config"
 import contractABI from "@/contracts/UniqueNumberGameFactory.json"
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
 const CreateRoom = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { address, isConnected } = useAccount()
+  const { t } = useTranslation()
   
   // 使用智能合约hook
   const { 
@@ -53,8 +56,8 @@ const CreateRoom = () => {
   useEffect(() => {
     if (isSuccess) {
       toast({
-        title: "Room created successfully! 🎉",
-        description: `Transaction confirmed! Redirecting to game room...`,
+        title: t('toast.roomCreated.title'),
+        description: t('toast.roomCreated.description'),
       })
       
       // 延迟一下让用户看到成功提示，然后跳转
@@ -93,18 +96,18 @@ const CreateRoom = () => {
   useEffect(() => {
     if (error) {
       toast({
-        title: "Transaction failed",
-        description: error.message || "Please try again.",
+        title: t('toast.transactionFailed.title'),
+        description: error.message || t('toast.transactionFailed.description'),
         variant: "destructive"
       })
     }
-  }, [error, toast])
+  }, [error, toast, t])
 
   const handleCreateRoom = async () => {
     if (!isConnected) {
       toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to create a room.",
+        title: t('toast.walletNotConnected.title'),
+        description: t('toast.walletNotConnected.description'),
         variant: "destructive"
       })
       return
@@ -113,8 +116,8 @@ const CreateRoom = () => {
     // 验证房间设置
     if (!roomSettings.roomName.trim()) {
       toast({
-        title: "Room name required",
-        description: "Please enter a room name.",
+        title: t('toast.roomNameRequired.title'),
+        description: t('toast.roomNameRequired.description'),
         variant: "destructive"
       })
       return
@@ -122,8 +125,8 @@ const CreateRoom = () => {
 
     if (roomSettings.minNumber >= roomSettings.maxNumber) {
       toast({
-        title: "Invalid number range",
-        description: "Maximum number must be greater than minimum number.",
+        title: t('toast.invalidNumberRange.title'),
+        description: t('toast.invalidNumberRange.description'),
         variant: "destructive"
       })
       return
@@ -132,8 +135,8 @@ const CreateRoom = () => {
     try {
       // 显示开始创建的提示
       toast({
-        title: "Creating room...",
-        description: "Please confirm the transaction in your wallet.",
+        title: t('toast.creatingRoom.title'),
+        description: t('toast.creatingRoom.description'),
       })
 
       // 调用智能合约创建游戏
@@ -148,8 +151,8 @@ const CreateRoom = () => {
     } catch (err) {
       console.error('Error creating room:', err)
       toast({
-        title: "Failed to create room",
-        description: "Please try again or check your wallet connection.",
+        title: t('toast.roomCreationFailed.title'),
+        description: t('toast.roomCreationFailed.description'),
         variant: "destructive"
       })
     }
@@ -209,15 +212,16 @@ const CreateRoom = () => {
             <h1 className="text-xl font-bold text-foreground">Create Game Room</h1>
           </div>
           <div className="flex items-center space-x-2">
-            <GradientButton 
+            <GradientButton
               variant="outline"
               size="sm"
               onClick={() => navigate("/leaderboard")}
               disabled={isCreating}
             >
               <TrendingUp className="w-4 h-4 mr-2" />
-              Leaderboard
+              {t('common.leaderboard')}
             </GradientButton>
+            <LanguageSwitcher />
             <ConnectButton />
           </div>
         </div>

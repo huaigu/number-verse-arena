@@ -8,14 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { 
-  ArrowLeft, 
-  Trophy, 
-  Users, 
-  DollarSign, 
-  RefreshCw, 
-  Search, 
-  Copy, 
+import {
+  ArrowLeft,
+  Trophy,
+  Users,
+  DollarSign,
+  RefreshCw,
+  Search,
+  Copy,
   ExternalLink,
   Medal,
   Crown,
@@ -29,11 +29,14 @@ import { useToast } from "@/hooks/use-toast"
 import { useLeaderboardData } from "@/hooks/useLeaderboardData"
 import { formatAddress, formatETH } from "@/contracts/config"
 import { LeaderboardEntry, WinnerRecord } from "@/lib/leaderboard-utils"
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
 const Leaderboard = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { address, isConnected } = useAccount()
+  const { t } = useTranslation()
   
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)

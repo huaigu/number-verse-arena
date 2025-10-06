@@ -7,11 +7,14 @@ import { useAccount } from 'wagmi'
 import { useToast } from "@/hooks/use-toast"
 import { useGetActiveGames } from "@/hooks/contract/useGameContract"
 import { CONTRACT_CONFIG } from "@/contracts/config"
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
 const LandingPage = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { isConnected } = useAccount()
+  const { t } = useTranslation()
   
   // 获取活跃游戏列表
   const { activeGames, isLoading: gamesLoading } = useGetActiveGames()
@@ -20,8 +23,8 @@ const LandingPage = () => {
   const handleQuickJoin = () => {
     if (!isConnected) {
       toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to join a game.",
+        title: t('toast.walletNotConnected.title'),
+        description: t('toast.walletNotConnected.description'),
         variant: "destructive"
       })
       return
@@ -29,16 +32,16 @@ const LandingPage = () => {
 
     if (gamesLoading) {
       toast({
-        title: "Loading games...",
-        description: "Please wait while we fetch available rooms.",
+        title: t('toast.loadingGames.title'),
+        description: t('toast.loadingGames.description'),
       })
       return
     }
 
     if (!activeGames || activeGames.length === 0) {
       toast({
-        title: "No available rooms",
-        description: "Currently no open game rooms available. Create a new room to start playing!",
+        title: t('toast.noAvailableRooms.title'),
+        description: t('toast.noAvailableRooms.description'),
         variant: "destructive"
       })
       return
@@ -63,8 +66,8 @@ const LandingPage = () => {
 
     if (availableRooms.length === 0) {
       toast({
-        title: "No joinable rooms",
-        description: "All available rooms are either full or expired. Try creating a new room!",
+        title: t('toast.noJoinableRooms.title'),
+        description: t('toast.noJoinableRooms.description'),
         variant: "destructive"
       })
       return
@@ -78,10 +81,10 @@ const LandingPage = () => {
     })
 
     const bestRoom = sortedRooms[0]
-    
+
     toast({
-      title: "Joining room...",
-      description: `Found room with ${bestRoom.playerCount}/${bestRoom.maxPlayers} players!`,
+      title: t('toast.foundRoom.title'),
+      description: t('toast.foundRoom.description', { players: bestRoom.playerCount, maxPlayers: bestRoom.maxPlayers }),
     })
 
     navigate(`/game?room=${bestRoom.gameId.toString()}`)
@@ -90,23 +93,23 @@ const LandingPage = () => {
   const features = [
     {
       icon: Shield,
-      title: "FHE Privacy Protection",
-      description: "Your number choices remain encrypted on-chain using ZAMA's FHE technology until game completion"
+      title: t('landing.features.fhePrivacy.title'),
+      description: t('landing.features.fhePrivacy.description')
     },
     {
       icon: Lock,
-      title: "Confidential by Design",
-      description: "Game logic runs on encrypted data without revealing player selections, ensuring true privacy"
+      title: t('landing.features.confidential.title'),
+      description: t('landing.features.confidential.description')
     },
     {
       icon: Users,
-      title: "Trustless Multiplayer",
-      description: "No central authority can see your choices - privacy guaranteed by cryptographic proofs"
+      title: t('landing.features.trustless.title'),
+      description: t('landing.features.trustless.description')
     },
     {
       icon: Trophy,
-      title: "Verifiable Fairness",
-      description: "All game results are cryptographically verifiable while maintaining complete player privacy"
+      title: t('landing.features.verifiable.title'),
+      description: t('landing.features.verifiable.description')
     }
   ]
 
@@ -115,41 +118,42 @@ const LandingPage = () => {
       {/* Warning Banner */}
       <div className="bg-destructive text-destructive-foreground py-3 px-4 text-center">
         <p className="text-sm font-medium">
-          ⚠️ Due to ZAMA upgrading to v0.8.0, this DApp is currently under maintenance - games are temporarily unavailable
+          {t('landing.warningBanner')}
         </p>
       </div>
-      
+
       {/* Header */}
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
-              <img 
-                src="/uninum.png" 
-                alt="Unique Number Game Logo" 
+              <img
+                src="/uninum.png"
+                alt="Unique Number Game Logo"
                 className="w-full h-full object-cover"
               />
             </div>
             <span className="text-xl font-bold text-foreground">Unique Number</span>
           </div>
           <div className="flex items-center gap-4">
-            <GradientButton 
+            <GradientButton
               variant="outline"
               onClick={() => navigate("/leaderboard")}
             >
               <Trophy className="w-4 h-4 mr-2" />
-              Leaderboard
+              {t('common.leaderboard')}
             </GradientButton>
-           
-            <GradientButton 
-              variant="outline" 
+
+            <GradientButton
+              variant="outline"
               onClick={handleQuickJoin}
               disabled={gamesLoading}
             >
-              {gamesLoading ? "Loading..." : "Quick Join"}
+              {gamesLoading ? t('common.loading') : t('common.quickJoin')}
             </GradientButton>
 
-             <ConnectButton />
+            <LanguageSwitcher />
+            <ConnectButton />
           </div>
         </div>
       </header>
@@ -158,30 +162,30 @@ const LandingPage = () => {
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 animate-slide-in">
-            Unique Number Game
+            {t('landing.title')}
             <span className="block text-2xl md:text-4xl text-primary mt-2">
-              Powered by Zama's fhEVM
+              {t('landing.subtitle')}
             </span>
           </h1>
-          
+
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            The world's first privacy-preserving multiplayer number game using Fully Homomorphic Encryption. Your choices stay encrypted on-chain until reveal - no one can see your strategy!
+            {t('landing.description')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <GradientButton 
-              size="xl" 
+            <GradientButton
+              size="xl"
               onClick={() => navigate("/create-room")}
               className="animate-pulse-glow"
             >
-              Create Room
+              {t('common.createRoom')}
             </GradientButton>
-            <GradientButton 
-              variant="secondary" 
+            <GradientButton
+              variant="secondary"
               size="xl"
               onClick={() => navigate("/join-room")}
             >
-              Join Room
+              {t('common.joinRoom')}
             </GradientButton>
           </div>
         </div>
@@ -191,10 +195,10 @@ const LandingPage = () => {
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-foreground mb-8">
-            Watch How It Works
+            {t('landing.demoVideo.title')}
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            See the Unique Number Game in action and learn how privacy-preserving gameplay works
+            {t('landing.demoVideo.description')}
           </p>
           <div className="relative w-full max-w-3xl mx-auto aspect-video rounded-xl overflow-hidden shadow-2xl bg-card">
             <iframe
@@ -212,7 +216,7 @@ const LandingPage = () => {
       {/* Features */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center text-foreground mb-12">
-          Revolutionary Privacy Features
+          {t('landing.features.title')}
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -241,37 +245,37 @@ const LandingPage = () => {
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-foreground mb-12">
-            How to Play
+            {t('landing.howToPlay.title')}
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
                 1
               </div>
-              <h3 className="text-xl font-semibold mb-2">Create or Join Room</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('landing.howToPlay.step1.title')}</h3>
               <p className="text-muted-foreground">
-                Set game parameters (players, number range, rewards) or join existing rooms
+                {t('landing.howToPlay.step1.description')}
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
                 2
               </div>
-              <h3 className="text-xl font-semibold mb-2">Choose & Encrypt</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('landing.howToPlay.step2.title')}</h3>
               <p className="text-muted-foreground">
-                Select your number - it's encrypted using ZAMA FHE and hidden from all players until reveal
+                {t('landing.howToPlay.step2.description')}
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
                 3
               </div>
-              <h3 className="text-xl font-semibold mb-2">Cryptographic Reveal</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('landing.howToPlay.step3.title')}</h3>
               <p className="text-muted-foreground">
-                When time expires, FHE reveals all choices simultaneously - unique number holders win!
+                {t('landing.howToPlay.step3.description')}
               </p>
             </div>
           </div>
@@ -282,26 +286,26 @@ const LandingPage = () => {
       <footer className="bg-card py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <p className="text-muted-foreground mb-4">
-            © 2025 Unique Number Game. Challenge your strategic thinking and enjoy the fun!
+            {t('landing.footer.copyright')}
           </p>
           <div className="flex justify-center items-center space-x-6">
-            <a 
-              href="https://x.com/coder_chao" 
-              target="_blank" 
+            <a
+              href="https://x.com/coder_chao"
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors duration-200"
             >
               <TwitterIcon className="w-4 h-4" />
-              <span>Twitter</span>
+              <span>{t('landing.footer.twitter')}</span>
             </a>
-            <a 
-              href="http://github.com/huaigu" 
-              target="_blank" 
+            <a
+              href="http://github.com/huaigu"
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors duration-200"
             >
               <GithubIcon className="w-4 h-4" />
-              <span>GitHub</span>
+              <span>{t('landing.footer.github')}</span>
             </a>
           </div>
         </div>

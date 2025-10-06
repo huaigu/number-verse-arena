@@ -15,6 +15,7 @@ import JoinRoom from "./pages/JoinRoom";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import { Analytics } from "@vercel/analytics/react"
+import './i18n';
 
 const queryClient = new QueryClient();
 
