@@ -116,7 +116,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-background">
       {/* Warning Banner */}
-      <div className="bg-destructive text-destructive-foreground py-3 px-4 text-center">
+      <div className="bg-amber-100 border-b-2 border-amber-300 text-amber-900 py-3 px-4 text-center">
         <p className="text-sm font-medium">
           {t('landing.warningBanner')}
         </p>
