@@ -199,9 +199,9 @@ export const useCreateGame = () => {
 export const useSubmitNumber = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
-  
+
   const { writeContract, data: hash, error, isPending } = useWriteContract();
-  
+
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -209,14 +209,15 @@ export const useSubmitNumber = () => {
   const submitNumber = async (gameId: bigint, number: number, entryFeeETH: string) => {
     try {
       setIsSubmitting(true);
-      
+
       if (!address) {
         throw new Error('Wallet not connected');
       }
-      
-      // 动态导入 FHE 加密工具以避免 SSR 问题
-      const { encryptNumber } = await import('@/lib/fhe');
-      
+
+      // 动态导入 useFHEEncryption hook
+      const { useFHEEncryption } = await import('@/hooks/useFHEEncryption');
+      const { encryptNumber } = useFHEEncryption();
+
       // 使用 FHE 加密用户选择的数字
       console.log('Encrypting number:', number, 'for contract:', CONTRACT_CONFIG.address, 'user:', address);
       const { encryptedData, inputProof } = await encryptNumber(
@@ -224,16 +225,16 @@ export const useSubmitNumber = () => {
         CONTRACT_CONFIG.address,
         address
       );
-      
+
       const entryFeeWei = parseEther(entryFeeETH);
-      
+
       console.log('Submitting encrypted number to contract:', {
         gameId: gameId.toString(),
         encryptedData,
         inputProof,
         entryFee: entryFeeETH
       });
-      
+
       writeContract({
         address: CONTRACT_CONFIG.address,
         abi: contractABI.abi,

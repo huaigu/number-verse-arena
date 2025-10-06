@@ -7,6 +7,7 @@ import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { config } from './config/wagmi';
+import { FHEVMProvider } from './providers/FHEVMProvider';
 import LandingPage from "./pages/LandingPage";
 import GamePage from "./pages/GamePage";
 import CreateRoom from "./pages/CreateRoom";
@@ -21,22 +22,24 @@ const App = () => (
   <WagmiProvider config={config}>
     <QueryClientProvider client={queryClient}>
       <RainbowKitProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/game" element={<GamePage />} />
-              <Route path="/create-room" element={<CreateRoom />} />
-              <Route path="/join-room" element={<JoinRoom />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-          <Analytics />
-        </TooltipProvider>
+        <FHEVMProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/game" element={<GamePage />} />
+                <Route path="/create-room" element={<CreateRoom />} />
+                <Route path="/join-room" element={<JoinRoom />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+            <Analytics />
+          </TooltipProvider>
+        </FHEVMProvider>
       </RainbowKitProvider>
     </QueryClientProvider>
   </WagmiProvider>
