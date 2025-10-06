@@ -25,7 +25,7 @@ export default {
     title: "唯一数字游戏",
     subtitle: "由 Zama fhEVM 提供支持",
     description: "全球首款使用全同态加密的隐私保护多人数字游戏。您的选择在揭晓前保持链上加密 - 没有人能看到您的策略！",
-    warningBanner: "⚠️ 由于 ZAMA 升级到 v0.8.0，此 DApp 目前正在维护中 - 游戏暂时不可用",
+    warningBanner: "⚠️ 由于 ZAMA 升级到 v0.8.0，需要重新部署合约 - 原有数据无法显示",
 
     features: {
       title: "革命性隐私特性",

@@ -25,7 +25,7 @@ export default {
     title: "Unique Number Game",
     subtitle: "Powered by Zama's fhEVM",
     description: "The world's first privacy-preserving multiplayer number game using Fully Homomorphic Encryption. Your choices stay encrypted on-chain until reveal - no one can see your strategy!",
-    warningBanner: "⚠️ Due to ZAMA upgrading to v0.8.0, this DApp is currently under maintenance - games are temporarily unavailable",
+    warningBanner: "⚠️ Due to ZAMA upgrading to v0.8.0, contracts need to be redeployed - previous data cannot be displayed",
 
     features: {
       title: "Revolutionary Privacy Features",
