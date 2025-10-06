@@ -160,19 +160,19 @@ const CreateRoom = () => {
 
   const presets = [
     {
-      name: "Quick Game",
-      description: "4 players, fast start",
-      settings: { roomName: "Quick Game", maxPlayers: 4, minNumber: 1, maxNumber: 9, entryFee: 0.05, timeLimit: 900 }
+      name: t('createRoom.presets.quick.name'),
+      description: t('createRoom.presets.quick.description'),
+      settings: { roomName: t('createRoom.presets.quick.name'), maxPlayers: 4, minNumber: 1, maxNumber: 9, entryFee: 0.05, timeLimit: 900 }
     },
     {
-      name: "Standard Game",
-      description: "6 players standard",
-      settings: { roomName: "Standard Game", maxPlayers: 6, minNumber: 1, maxNumber: 16, entryFee: 0.1, timeLimit: 1800 }
+      name: t('createRoom.presets.standard.name'),
+      description: t('createRoom.presets.standard.description'),
+      settings: { roomName: t('createRoom.presets.standard.name'), maxPlayers: 6, minNumber: 1, maxNumber: 16, entryFee: 0.1, timeLimit: 1800 }
     },
     {
-      name: "Challenge Mode",
-      description: "8 players, high difficulty",
-      settings: { roomName: "Challenge Mode", maxPlayers: 8, minNumber: 1, maxNumber: 25, entryFee: 0.2, timeLimit: 3600 }
+      name: t('createRoom.presets.challenge.name'),
+      description: t('createRoom.presets.challenge.description'),
+      settings: { roomName: t('createRoom.presets.challenge.name'), maxPlayers: 8, minNumber: 1, maxNumber: 25, entryFee: 0.2, timeLimit: 3600 }
     }
   ]
 
@@ -183,9 +183,9 @@ const CreateRoom = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-card p-8 rounded-lg shadow-lg text-center">
             <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-            <h3 className="text-xl font-semibold mb-2">Creating Game Room</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('createRoom.creating')}</h3>
             <p className="text-muted-foreground mb-4">
-              Please confirm the transaction in your wallet and wait for confirmation...
+              {t('toast.creatingRoom.description')}
             </p>
             {transactionHash && (
               <p className="text-xs text-muted-foreground">
@@ -207,9 +207,9 @@ const CreateRoom = () => {
               disabled={isCreating}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              {t('common.back')}
             </GradientButton>
-            <h1 className="text-xl font-bold text-foreground">Create Game Room</h1>
+            <h1 className="text-xl font-bold text-foreground">{t('createRoom.title')}</h1>
           </div>
           <div className="flex items-center space-x-2">
             <GradientButton
@@ -232,8 +232,8 @@ const CreateRoom = () => {
             {/* Quick Presets */}
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle>Quick Setup</CardTitle>
-                <CardDescription>Choose preset configurations to start quickly</CardDescription>
+                <CardTitle>{t('createRoom.quickSetup')}</CardTitle>
+                <CardDescription>{t('createRoom.quickSetupDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {presets.map((preset, index) => (
@@ -263,16 +263,16 @@ const CreateRoom = () => {
             {/* Custom Settings */}
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle>Custom Settings</CardTitle>
-                <CardDescription>Adjust game parameters to fit your needs</CardDescription>
+                <CardTitle>{t('createRoom.customSettings')}</CardTitle>
+                <CardDescription>{t('createRoom.customSettingsDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Room Name */}
                 <div className="space-y-2">
-                  <Label>Room Name</Label>
+                  <Label>{t('createRoom.settings.roomName')}</Label>
                   <Input
                     type="text"
-                    placeholder="Enter room name"
+                    placeholder={t('createRoom.settings.roomNamePlaceholder')}
                     value={roomSettings.roomName}
                     onChange={(e) => setRoomSettings(prev => ({ ...prev, roomName: e.target.value }))}
                     disabled={isCreating}
@@ -283,7 +283,7 @@ const CreateRoom = () => {
                 <div className="space-y-3">
                   <Label className="flex items-center space-x-2">
                     <Users className="w-4 h-4" />
-                    <span>Max Players: {roomSettings.maxPlayers}</span>
+                    <span>{t('createRoom.settings.maxPlayers')}: {roomSettings.maxPlayers}</span>
                   </Label>
                   <Slider
                     value={[roomSettings.maxPlayers]}
@@ -305,7 +305,7 @@ const CreateRoom = () => {
                   <div className="space-y-2">
                     <Label className="flex items-center space-x-2">
                       <Target className="w-4 h-4" />
-                      <span>Min Number</span>
+                      <span>{t('createRoom.settings.minNumber')}</span>
                     </Label>
                     <Input
                       type="number"
@@ -319,7 +319,7 @@ const CreateRoom = () => {
                   <div className="space-y-2">
                     <Label className="flex items-center space-x-2">
                       <Target className="w-4 h-4" />
-                      <span>Max Number</span>
+                      <span>{t('createRoom.settings.maxNumber')}</span>
                     </Label>
                     <Input
                       type="number"
@@ -336,7 +336,7 @@ const CreateRoom = () => {
                 <div className="space-y-3">
                   <Label className="flex items-center space-x-2">
                     <Trophy className="w-4 h-4" />
-                    <span>Entry Fee: {roomSettings.entryFee} ETH</span>
+                    <span>{t('createRoom.settings.entryFee')}: {roomSettings.entryFee} ETH</span>
                   </Label>
                   <Slider
                     value={[roomSettings.entryFee]}
@@ -357,7 +357,7 @@ const CreateRoom = () => {
                 <div className="space-y-3">
                   <Label className="flex items-center space-x-2">
                     <Timer className="w-4 h-4" />
-                    <span>Time Limit: {Math.floor(roomSettings.timeLimit / 60)} minutes</span>
+                    <span>{t('createRoom.settings.timeLimit')}: {Math.floor(roomSettings.timeLimit / 60)} {t('createRoom.settings.minutes')}</span>
                   </Label>
                   <Slider
                     value={[roomSettings.timeLimit]}
@@ -381,8 +381,8 @@ const CreateRoom = () => {
           <div className="space-y-6">
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle>Room Preview</CardTitle>
-                <CardDescription>Review your room settings</CardDescription>
+                <CardTitle>{t('createRoom.preview.title')}</CardTitle>
+                <CardDescription>{t('createRoom.preview.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -391,7 +391,7 @@ const CreateRoom = () => {
                     <div className="text-2xl font-bold text-secondary-foreground">
                       {roomSettings.maxPlayers}
                     </div>
-                    <div className="text-sm text-secondary-foreground/70">Max Players</div>
+                    <div className="text-sm text-secondary-foreground/70">{t('createRoom.preview.maxPlayersLabel')}</div>
                   </div>
 
                   <div className="text-center p-4 bg-gradient-primary rounded-lg">
@@ -399,7 +399,7 @@ const CreateRoom = () => {
                     <div className="text-2xl font-bold text-primary-foreground">
                       {roomSettings.minNumber}-{roomSettings.maxNumber}
                     </div>
-                    <div className="text-sm text-primary-foreground/70">Number Range</div>
+                    <div className="text-sm text-primary-foreground/70">{t('createRoom.preview.numberRangeLabel')}</div>
                   </div>
 
                   <div className="text-center p-4 bg-game-grid rounded-lg">
@@ -407,7 +407,7 @@ const CreateRoom = () => {
                     <div className="text-2xl font-bold text-primary-foreground">
                       {roomSettings.entryFee} ETH
                     </div>
-                    <div className="text-sm text-primary-foreground/70">Entry Fee</div>
+                    <div className="text-sm text-primary-foreground/70">{t('createRoom.preview.entryFeeLabel')}</div>
                   </div>
 
                   <div className="text-center p-4 bg-accent rounded-lg">
@@ -415,18 +415,18 @@ const CreateRoom = () => {
                     <div className="text-2xl font-bold text-accent-foreground">
                       {Math.floor(roomSettings.timeLimit / 60)}m
                     </div>
-                    <div className="text-sm text-accent-foreground/70">Time Limit</div>
+                    <div className="text-sm text-accent-foreground/70">{t('createRoom.preview.timeLimitLabel')}</div>
                   </div>
                 </div>
 
                 {/* Game Rules Preview */}
                 <div className="mt-6 p-4 bg-muted rounded-lg">
-                  <h4 className="font-semibold mb-2">Game Rules</h4>
+                  <h4 className="font-semibold mb-2">{t('createRoom.preview.rules.title')}</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Each player can only choose one number</li>
-                    <li>• Players who choose unique numbers get rewards</li>
-                    <li>• Duplicate number choices earn no points</li>
-                    <li>• Must complete selection within {Math.floor(roomSettings.timeLimit / 60)} minutes</li>
+                    <li>{t('createRoom.preview.rules.rule1')}</li>
+                    <li>{t('createRoom.preview.rules.rule2')}</li>
+                    <li>{t('createRoom.preview.rules.rule3')}</li>
+                    <li>{t('createRoom.preview.rules.rule4', { minutes: Math.floor(roomSettings.timeLimit / 60) })}</li>
                   </ul>
                 </div>
               </CardContent>
@@ -438,7 +438,7 @@ const CreateRoom = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-2 text-orange-700">
                     <Wallet className="w-4 h-4" />
-                    <span className="text-sm">Connect your wallet to create a room</span>
+                    <span className="text-sm">{t('createRoom.warnings.connectWallet')}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -453,12 +453,12 @@ const CreateRoom = () => {
               {isCreating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating Room...
+                  {t('createRoom.buttons.creating')}
                 </>
               ) : !isConnected ? (
-                "Connect Wallet First"
+                t('createRoom.buttons.connectFirst')
               ) : (
-                "Create Room"
+                t('createRoom.buttons.createRoom')
               )}
             </GradientButton>
 
@@ -469,7 +469,7 @@ const CreateRoom = () => {
               onClick={() => navigate("/join-room")}
               disabled={isCreating}
             >
-              Or Join Existing Room
+              {t('createRoom.buttons.joinExisting')}
             </GradientButton>
           </div>
         </div>

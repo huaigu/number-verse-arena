@@ -72,8 +72,8 @@ const Leaderboard = () => {
   const handleCopyAddress = (address: string) => {
     navigator.clipboard.writeText(address)
     toast({
-      title: "Address copied",
-      description: "Wallet address copied to clipboard",
+      title: t('toast.addressCopied.title'),
+      description: t('toast.addressCopied.description'),
     })
   }
 
@@ -104,20 +104,23 @@ const Leaderboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <GradientButton 
-              variant="outline" 
+            <GradientButton
+              variant="outline"
               size="sm"
               onClick={() => navigate("/")}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              {t('common.back')}
             </GradientButton>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Leaderboard</h1>
+              <h1 className="text-3xl font-bold text-foreground">{t('leaderboard.title')}</h1>
               <p className="text-muted-foreground">Top players and recent winners</p>
             </div>
           </div>
-          <ConnectButton />
+          <div className="flex items-center space-x-2">
+            <LanguageSwitcher />
+            <ConnectButton />
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -127,31 +130,31 @@ const Leaderboard = () => {
               <div className="flex items-center space-x-2">
                 <Trophy className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-sm font-medium">Total Games</p>
+                  <p className="text-sm font-medium">{t('leaderboard.stats.totalGames')}</p>
                   <p className="text-2xl font-bold">{totalGames}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
                 <DollarSign className="w-5 h-5 text-green-500" />
                 <div>
-                  <p className="text-sm font-medium">Total Prizes</p>
+                  <p className="text-sm font-medium">{t('leaderboard.stats.totalPrizes')}</p>
                   <p className="text-2xl font-bold">{formatETH(totalPrizePool)} ETH</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-blue-500" />
                 <div>
-                  <p className="text-sm font-medium">Total Players</p>
+                  <p className="text-sm font-medium">{t('leaderboard.stats.totalPlayers')}</p>
                   <p className="text-2xl font-bold">{totalPlayers}</p>
                 </div>
               </div>
@@ -163,7 +166,7 @@ const Leaderboard = () => {
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-5 h-5 text-purple-500" />
                 <div>
-                  <p className="text-sm font-medium">Avg. Prize</p>
+                  <p className="text-sm font-medium">{t('leaderboard.stats.avgPrize')}</p>
                   <p className="text-2xl font-bold">
                     {totalGames > 0 ? formatETH(totalPrizePool / BigInt(totalGames)) : "0.00"} ETH
                   </p>
@@ -182,9 +185,9 @@ const Leaderboard = () => {
                   <div className="flex items-center space-x-2">
                     {getRankIcon(userPosition.position)}
                     <div>
-                      <p className="font-semibold">Your Position: #{userPosition.position}</p>
+                      <p className="font-semibold">{t('leaderboard.userStats.yourRank')}: #{userPosition.position}</p>
                       <p className="text-sm text-muted-foreground">
-                        {userPosition.entry.gamesWon} wins • {formatETH(userPosition.entry.totalEarnings)} ETH earned
+                        {userPosition.entry.gamesWon} {t('leaderboard.topPlayers.wins')} • {formatETH(userPosition.entry.totalEarnings)} ETH earned
                       </p>
                     </div>
                   </div>
@@ -204,7 +207,7 @@ const Leaderboard = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Top Players</CardTitle>
+                    <CardTitle>{t('leaderboard.topPlayers.title')}</CardTitle>
                     <CardDescription>Ranked by total winnings</CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -215,16 +218,16 @@ const Leaderboard = () => {
                       disabled={isLoading}
                     >
                       <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                      Refresh
+                      {t('common.refresh')}
                     </GradientButton>
                   </div>
                 </div>
-                
+
                 {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by address..."
+                    placeholder={t('leaderboard.search.placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -247,7 +250,7 @@ const Leaderboard = () => {
                     <h3 className="text-lg font-semibold mb-2">Error Loading Data</h3>
                     <p className="text-muted-foreground mb-4">{error.message}</p>
                     <GradientButton onClick={refetch}>
-                      Try Again
+                      {t('gamePage.actions.tryAgain')}
                     </GradientButton>
                   </div>
                 ) : isLoading && leaderboardData.length === 0 ? (
@@ -266,11 +269,11 @@ const Leaderboard = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-16">Rank</TableHead>
-                          <TableHead>Player</TableHead>
-                          <TableHead className="text-center">Wins</TableHead>
-                          <TableHead className="text-right">Earnings</TableHead>
-                          <TableHead className="text-right">Avg Win</TableHead>
+                          <TableHead className="w-16">{t('leaderboard.topPlayers.rank')}</TableHead>
+                          <TableHead>{t('leaderboard.topPlayers.player')}</TableHead>
+                          <TableHead className="text-center">{t('leaderboard.topPlayers.wins')}</TableHead>
+                          <TableHead className="text-right">{t('leaderboard.topPlayers.totalPrizes')}</TableHead>
+                          <TableHead className="text-right">{t('leaderboard.topPlayers.winRate')}</TableHead>
                           <TableHead className="w-20"></TableHead>
                         </TableRow>
                       </TableHeader>
@@ -295,7 +298,7 @@ const Leaderboard = () => {
                                     {formatAddress(entry.address)}
                                   </code>
                                   {isCurrentUser && (
-                                    <Badge variant="secondary" className="text-xs">You</Badge>
+                                    <Badge variant="secondary" className="text-xs">{t('gamePage.players.you')}</Badge>
                                   )}
                                 </div>
                               </TableCell>
@@ -336,10 +339,10 @@ const Leaderboard = () => {
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
                           >
-                            Previous
+                            {t('leaderboard.pagination.previous')}
                           </GradientButton>
                           <span className="text-sm">
-                            Page {currentPage} of {totalPages}
+                            {t('leaderboard.pagination.page')} {currentPage} {t('leaderboard.pagination.of')} {totalPages}
                           </span>
                           <GradientButton
                             variant="outline"
@@ -347,7 +350,7 @@ const Leaderboard = () => {
                             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
                           >
-                            Next
+                            {t('leaderboard.pagination.next')}
                           </GradientButton>
                         </div>
                       </div>
@@ -356,7 +359,7 @@ const Leaderboard = () => {
                 ) : (
                   <div className="text-center py-12">
                     <Trophy className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No Players Found</h3>
+                    <h3 className="text-lg font-semibold mb-2">{t('leaderboard.topPlayers.noData')}</h3>
                     <p className="text-muted-foreground">
                       {searchQuery ? 'No players match your search.' : 'No completed games with winners yet.'}
                     </p>
@@ -372,7 +375,7 @@ const Leaderboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Clock className="w-5 h-5" />
-                  <span>Recent Winners</span>
+                  <span>{t('leaderboard.recentWinners.title')}</span>
                 </CardTitle>
                 <CardDescription>Latest game results</CardDescription>
               </CardHeader>
@@ -402,7 +405,7 @@ const Leaderboard = () => {
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">
-                            Number: {winner.winningNumber}
+                            {t('leaderboard.recentWinners.number')}: {winner.winningNumber}
                           </span>
                           <span className="font-semibold text-green-600">
                             {formatETH(winner.prize)} ETH
@@ -417,7 +420,7 @@ const Leaderboard = () => {
                 ) : (
                   <div className="text-center py-8">
                     <Clock className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">No recent winners</p>
+                    <p className="text-sm text-muted-foreground">{t('leaderboard.recentWinners.noWinners')}</p>
                   </div>
                 )}
               </CardContent>

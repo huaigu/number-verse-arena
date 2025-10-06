@@ -48,8 +48,8 @@ const JoinRoom = () => {
   const handleJoinRoom = (gameId: bigint, status: number, timeLeft: number, playerCount: number) => {
     if (!isConnected) {
       toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to join a room.",
+        title: t('toast.walletNotConnected.title'),
+        description: t('toast.walletNotConnected.description'),
         variant: "destructive"
       })
       return
@@ -59,16 +59,16 @@ const JoinRoom = () => {
     if (timeLeft <= 0) {
       if (playerCount === 0) {
         toast({
-          title: "Game expired",
-          description: "This room has expired and cannot be joined.",
+          title: t('toast.gameExpired.title'),
+          description: t('toast.gameExpired.description'),
           variant: "destructive"
         })
         return
       } else {
         // 过期但有玩家的游戏，允许查看结果
         toast({
-          title: "Viewing expired game",
-          description: "This game has expired. Viewing results...",
+          title: t('toast.viewingExpiredGame.title'),
+          description: t('toast.viewingExpiredGame.description'),
         })
         navigate(`/game?room=${gameId.toString()}`)
         return
@@ -78,8 +78,8 @@ const JoinRoom = () => {
     // 检查游戏状态
     if (status === CONTRACT_CONFIG.GameStatus.Finished || status === CONTRACT_CONFIG.GameStatus.PrizeClaimed) {
       toast({
-        title: "Viewing finished game",
-        description: "This game has finished. Viewing results...",
+        title: t('toast.viewingFinishedGame.title'),
+        description: t('toast.viewingFinishedGame.description'),
       })
       navigate(`/game?room=${gameId.toString()}`)
       return
@@ -87,16 +87,16 @@ const JoinRoom = () => {
 
     if (status === CONTRACT_CONFIG.GameStatus.Calculating) {
       toast({
-        title: "Viewing calculating game",
-        description: "This game is calculating results...",
+        title: t('toast.viewingCalculatingGame.title'),
+        description: t('toast.viewingCalculatingGame.description'),
       })
       navigate(`/game?room=${gameId.toString()}`)
       return
     }
 
     toast({
-      title: "Joining room...",
-      description: `Room ID: ${gameId.toString()}`,
+      title: t('toast.joiningRoom.title'),
+      description: t('toast.joiningRoom.description', { roomId: gameId.toString() }),
     })
 
     navigate(`/game?room=${gameId.toString()}`)
@@ -105,15 +105,15 @@ const JoinRoom = () => {
   const handleViewFinishedGame = (gameId: bigint) => {
     if (!isConnected) {
       toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to view finished games.",
+        title: t('toast.walletNotConnected.title'),
+        description: t('toast.walletNotConnected.description'),
         variant: "destructive"
       })
       return
     }
 
     toast({
-      title: "Loading game...",
+      title: t('gamePage.loading'),
       description: `Room ID: ${gameId.toString()}`,
     })
 
@@ -124,21 +124,21 @@ const JoinRoom = () => {
     // If expired, show different badges based on whether there are players
     if (isExpired) {
       if (playerCount && playerCount > 0) {
-        return <Badge className="bg-blue-500 text-white">Expired (View Results)</Badge>
+        return <Badge className="bg-blue-500 text-white">{t('joinRoom.roomCard.expired')} ({t('common.viewGame')})</Badge>
       } else {
-        return <Badge variant="destructive">Expired</Badge>
+        return <Badge variant="destructive">{t('joinRoom.roomCard.expired')}</Badge>
       }
     }
-    
+
     switch (status) {
       case CONTRACT_CONFIG.GameStatus.Open:
-        return <Badge variant="secondary">Open</Badge>
+        return <Badge variant="secondary">{t('joinRoom.status.open')}</Badge>
       case CONTRACT_CONFIG.GameStatus.Calculating:
-        return <Badge className="bg-yellow-500 text-white">Calculating</Badge>
+        return <Badge className="bg-yellow-500 text-white">{t('joinRoom.status.calculating')}</Badge>
       case CONTRACT_CONFIG.GameStatus.Finished:
-        return <Badge variant="destructive">Finished</Badge>
+        return <Badge variant="destructive">{t('joinRoom.status.finished')}</Badge>
       case CONTRACT_CONFIG.GameStatus.PrizeClaimed:
-        return <Badge className="bg-green-500 text-white">Completed</Badge>
+        return <Badge className="bg-green-500 text-white">{t('joinRoom.status.claimed')}</Badge>
       default:
         return <Badge variant="outline">Unknown</Badge>
     }
@@ -175,25 +175,26 @@ const JoinRoom = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <GradientButton 
-              variant="outline" 
+            <GradientButton
+              variant="outline"
               size="sm"
               onClick={() => navigate("/")}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              {t('common.back')}
             </GradientButton>
-            <h1 className="text-xl font-bold text-foreground">Join Game Room</h1>
+            <h1 className="text-xl font-bold text-foreground">{t('joinRoom.title')}</h1>
           </div>
           <div className="flex items-center space-x-2">
-            <GradientButton 
+            <GradientButton
               variant="outline"
               size="sm"
               onClick={() => navigate("/leaderboard")}
             >
               <TrendingUp className="w-4 h-4 mr-2" />
-              Leaderboard
+              {t('common.leaderboard')}
             </GradientButton>
+            <LanguageSwitcher />
             <ConnectButton />
           </div>
         </div>
@@ -207,8 +208,8 @@ const JoinRoom = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Available Rooms</CardTitle>
-                    <CardDescription>Choose a room to quickly join the game</CardDescription>
+                    <CardTitle>{t('joinRoom.activeRooms')}</CardTitle>
+                    <CardDescription>{t('joinRoom.quickJoin')}</CardDescription>
                   </div>
                   <GradientButton
                     variant="outline"
@@ -220,7 +221,7 @@ const JoinRoom = () => {
                     disabled={gamesLoading || allGamesLoading}
                   >
                     <RefreshCw className={`w-4 h-4 mr-2 ${(gamesLoading || allGamesLoading) ? 'animate-spin' : ''}`} />
-                    Refresh
+                    {t('common.refresh')}
                   </GradientButton>
                 </div>
               </CardHeader>
@@ -228,7 +229,7 @@ const JoinRoom = () => {
                 {gamesLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <span className="ml-2 text-muted-foreground">Loading rooms...</span>
+                    <span className="ml-2 text-muted-foreground">{t('joinRoom.loadingRooms')}</span>
                   </div>
                 ) : gamesError ? (
                   <div className="text-center py-12">
@@ -238,7 +239,7 @@ const JoinRoom = () => {
                       Unable to fetch game rooms from the blockchain.
                     </p>
                     <GradientButton onClick={() => refetchGames()}>
-                      Try Again
+                      {t('gamePage.actions.tryAgain')}
                     </GradientButton>
                   </div>
                 ) : activeGames && activeGames.length > 0 ? (
@@ -320,18 +321,18 @@ const JoinRoom = () => {
                             {/* Entry fee info and action hint */}
                             <div className="mt-2 flex items-center justify-between">
                               <div className="text-xs text-muted-foreground">
-                                Entry Fee: {formatETH(game.entryFee)} ETH
+                                {t('joinRoom.roomCard.entryFee')}: {formatETH(game.entryFee)} ETH
                               </div>
-                              
+
                               {canJoin && (
                                 <div className="text-xs text-green-600 font-medium">
-                                  Click to Join
+                                  {t('joinRoom.roomCard.joinButton')}
                                 </div>
                               )}
-                              
+
                               {(isExpired || isFull) && !canJoin && (
                                 <div className="text-xs text-amber-600 font-medium">
-                                  {isExpired ? "Click to View (Expired)" : "Click to View (Full)"}
+                                  {isExpired ? t('joinRoom.roomCard.viewButton') + ' (' + t('joinRoom.roomCard.expired') + ')' : t('joinRoom.roomCard.viewButton') + ' (' + t('joinRoom.roomCard.fullButton') + ')'}
                                 </div>
                               )}
                             </div>
@@ -342,12 +343,12 @@ const JoinRoom = () => {
                 ) : (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🎮</div>
-                    <h3 className="text-xl font-semibold mb-2">No Available Rooms</h3>
+                    <h3 className="text-xl font-semibold mb-2">{t('joinRoom.noActiveRooms')}</h3>
                     <p className="text-muted-foreground mb-4">
-                      Currently no open game rooms available. Create a new room to start playing!
+                      {t('joinRoom.noActiveRoomsDesc')}
                     </p>
                     <GradientButton onClick={() => navigate("/create-room")}>
-                      Create Room
+                      {t('common.createRoom')}
                     </GradientButton>
                   </div>
                 )}
@@ -361,7 +362,7 @@ const JoinRoom = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Finished Games</CardTitle>
+                    <CardTitle>{t('joinRoom.allRooms')}</CardTitle>
                     <CardDescription>View completed games and claim rewards if you won</CardDescription>
                   </div>
                   <GradientButton
@@ -371,7 +372,7 @@ const JoinRoom = () => {
                     disabled={allGamesLoading}
                   >
                     <RefreshCw className={`w-4 h-4 mr-2 ${allGamesLoading ? 'animate-spin' : ''}`} />
-                    Refresh
+                    {t('common.refresh')}
                   </GradientButton>
                 </div>
               </CardHeader>
@@ -379,7 +380,7 @@ const JoinRoom = () => {
                 {allGamesLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <span className="ml-2 text-muted-foreground">Loading finished games...</span>
+                    <span className="ml-2 text-muted-foreground">{t('joinRoom.loadingRooms')}</span>
                   </div>
                 ) : allGamesError ? (
                   <div className="text-center py-12">
@@ -389,7 +390,7 @@ const JoinRoom = () => {
                       Unable to fetch finished games from the blockchain.
                     </p>
                     <GradientButton onClick={() => refetchAllGames()}>
-                      Try Again
+                      {t('gamePage.actions.tryAgain')}
                     </GradientButton>
                   </div>
                 ) : (
@@ -435,10 +436,10 @@ const JoinRoom = () => {
                               </div>
                             </div>
 
-                            
+
                             {/* Entry fee info */}
                             <div className="mt-2 text-xs text-muted-foreground">
-                              Entry Fee: {formatETH(game.entryFee)} ETH
+                              {t('joinRoom.roomCard.entryFee')}: {formatETH(game.entryFee)} ETH
                             </div>
                           </div>
                         )
@@ -446,12 +447,12 @@ const JoinRoom = () => {
                     ) : (
                       <div className="text-center py-12 col-span-full">
                         <div className="text-6xl mb-4">🏆</div>
-                        <h3 className="text-xl font-semibold mb-2">No Finished Games</h3>
+                        <h3 className="text-xl font-semibold mb-2">{t('joinRoom.noAllRooms')}</h3>
                         <p className="text-muted-foreground mb-4">
-                          No completed games found. Join some active games to see them here later!
+                          {t('joinRoom.noAllRoomsDesc')}
                         </p>
                         <GradientButton onClick={() => navigate("/create-room")}>
-                          Create Your First Room
+                          {t('common.createRoom')}
                         </GradientButton>
                       </div>
                     )}

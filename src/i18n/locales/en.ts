@@ -161,6 +161,7 @@ export default {
       players: "Players",
       numberRange: "Number Range",
       entryFee: "Entry Fee",
+      prizePool: "Prize Pool",
       timeLeft: "Time Left",
       expired: "Expired",
       status: "Status",
@@ -238,7 +239,12 @@ export default {
     stats: {
       totalGames: "Total Games",
       totalPlayers: "Total Players",
-      totalPrizes: "Total Prizes"
+      totalPrizes: "Total Prizes",
+      avgPrize: "Avg Prize/Game"
+    },
+
+    actions: {
+      clearCache: "Clear Cache"
     },
 
     topPlayers: {

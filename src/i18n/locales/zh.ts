@@ -161,6 +161,7 @@ export default {
       players: "玩家",
       numberRange: "数字范围",
       entryFee: "入场费",
+      prizePool: "奖池",
       timeLeft: "剩余时间",
       expired: "已过期",
       status: "状态",
@@ -238,7 +239,12 @@ export default {
     stats: {
       totalGames: "总游戏数",
       totalPlayers: "总玩家数",
-      totalPrizes: "总奖金"
+      totalPrizes: "总奖金",
+      avgPrize: "平均奖金/局"
+    },
+
+    actions: {
+      clearCache: "清除缓存"
     },
 
     topPlayers: {
