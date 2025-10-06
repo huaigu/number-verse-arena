@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useFHEVM } from '@/providers/FHEVMProvider';
+import { useFhevm } from '@/fhevm-react/useFhevm';
+import { usePublicClient } from 'wagmi';
 
 interface EncryptionResult {
   encryptedData: string;
@@ -15,12 +16,20 @@ interface UseEncryptionReturn {
 /**
  * Hook for encrypting numbers using FHEVM
  *
+ * Now uses @fhevm/react hooks instead of @zama-fhe/relayer-sdk
+ *
  * @example
  * const { encryptNumber, isEncrypting } = useFHEEncryption();
  * const result = await encryptNumber(42, contractAddress, userAddress);
  */
 export const useFHEEncryption = (): UseEncryptionReturn => {
-  const { instance, isInitialized } = useFHEVM();
+  const publicClient = usePublicClient();
+  const { instance, status } = useFhevm({
+    provider: publicClient ? publicClient : undefined,
+    chainId: publicClient?.chain?.id,
+    enabled: true,
+  });
+
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [encryptionError, setEncryptionError] = useState<string | null>(null);
 
@@ -29,8 +38,8 @@ export const useFHEEncryption = (): UseEncryptionReturn => {
     contractAddress: string,
     userAddress: string
   ): Promise<EncryptionResult> => {
-    if (!instance || !isInitialized) {
-      throw new Error('FHEVM instance not initialized');
+    if (!instance || status !== 'ready') {
+      throw new Error(`FHEVM instance not ready (status: ${status})`);
     }
 
     setIsEncrypting(true);

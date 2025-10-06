@@ -1,6 +1,6 @@
 export const CONTRACT_CONFIG = {
   // 已部署的 UniqueNumberGameFactory 合约地址 - Sepolia Testnet
-  address: '0xB1fd5432362aAd52f9B71160cDB9C585A0Ea8577' as `0x${string}`,
+  address: '0x6B674fDfC6A70ff1932CfED6F0C53d57e7F4F27a' as `0x${string}`,
   
   // 游戏状态枚举
   GameStatus: {

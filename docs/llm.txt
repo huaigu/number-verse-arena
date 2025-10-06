@@ -1,0 +1,2606 @@
+# Zama FHEVM Complete Developer Documentation
+
+> Comprehensive technical documentation for Zama's Fully Homomorphic Encryption Virtual Machine (FHEVM) - enabling confidential smart contracts on blockchain with encrypted computation. This document contains the complete knowledge base for building privacy-preserving applications using FHEVM.
+
+## Overview
+
+The Zama Confidential Blockchain Protocol (Zama Protocol) enables encrypted computation on smart contracts using Fully Homomorphic Encryption (FHE). FHEVM serves as the core technology, comprising six key interconnected components that enable confidential smart contract execution across EVM-compatible blockchains.
+
+FHEVM allows developers to build confidential smart contracts that can perform computations on encrypted data without ever decrypting it, maintaining privacy while ensuring verifiability and decentralization.
+
+## Core Architecture Components
+
+### 1. FHEVM Solidity Library
+
+**Purpose**: Abstraction layer enabling developers to build confidential smart contracts without cryptographic expertise.
+
+**Key Features**:
+
+#### Encrypted Data Types
+User-defined value types implemented as `bytes32` handles:
+- Booleans: `ebool`
+- Unsigned integers: `euint8`, `euint16`, `euint32`, `euint64`, `euint128`, `euint256`
+- Signed integers: `eint8`, `eint16`, `eint32`, `eint64`, `eint128`, `eint256`
+- Addresses: `eaddress`
+
+**Type System Details:**
+```solidity
+// Basic type declarations
+ebool encryptedBool;
+euint8 smallValue;      // 8-bit encrypted unsigned integer
+euint32 mediumValue;    // 32-bit encrypted unsigned integer
+euint64 largeValue;     // 64-bit encrypted unsigned integer
+eaddress userAddress;   // Encrypted Ethereum address
+
+// Type characteristics
+// - Encrypted integers function similarly to Solidity's native types
+// - Operations are unchecked (wrap around on overflow for confidentiality)
+// - All types prefixed with 'e' for encrypted
+// - Abstracted using ciphertext handles for security
+```
+
+#### FHE Operations
+Full suite of operations on encrypted values:
+
+**Arithmetic Operations:**
+```solidity
+euint32 a = FHE.asEuint32(10);
+euint32 b = FHE.asEuint32(20);
+
+euint32 sum = FHE.add(a, b);        // Addition
+euint32 diff = FHE.sub(a, b);       // Subtraction
+euint32 product = FHE.mul(a, b);    // Multiplication
+euint32 quotient = FHE.div(a, b);   // Division
+euint32 remainder = FHE.rem(a, b);  // Remainder
+euint32 negated = FHE.neg(a);       // Negation
+```
+
+**Logic Operations:**
+```solidity
+ebool x = FHE.asEbool(true);
+ebool y = FHE.asEbool(false);
+
+ebool andResult = FHE.and(x, y);    // Logical AND
+ebool orResult = FHE.or(x, y);      // Logical OR
+ebool xorResult = FHE.xor(x, y);    // Logical XOR
+ebool notResult = FHE.not(x);       // Logical NOT
+```
+
+**Comparison Operations:**
+```solidity
+euint32 a = FHE.asEuint32(10);
+euint32 b = FHE.asEuint32(20);
+
+ebool lt = FHE.lt(a, b);    // Less than
+ebool le = FHE.le(a, b);    // Less than or equal
+ebool gt = FHE.gt(a, b);    // Greater than
+ebool ge = FHE.ge(a, b);    // Greater than or equal
+ebool eq = FHE.eq(a, b);    // Equal
+ebool ne = FHE.ne(a, b);    // Not equal
+
+euint32 minimum = FHE.min(a, b);    // Minimum value
+euint32 maximum = FHE.max(a, b);    // Maximum value
+```
+
+**Bitwise Operations:**
+```solidity
+euint32 value = FHE.asEuint32(0b11010110);
+uint8 positions = 2;
+
+euint32 leftShift = FHE.shl(value, positions);   // Shift left
+euint32 rightShift = FHE.shr(value, positions);  // Shift right
+euint32 rotateLeft = FHE.rotl(value, positions); // Rotate left
+euint32 rotateRight = FHE.rotr(value, positions); // Rotate right
+```
+
+#### Conditional Logic
+`select` operator for confidentiality-preserving branching:
+```solidity
+ebool condition = FHE.lte(x, y);
+euint64 result = FHE.select(condition, valueIfTrue, valueIfFalse);
+
+// Example: Maximum function using select
+function encryptedMax(euint32 a, euint32 b) internal pure returns (euint32) {
+    ebool aGreaterThanB = FHE.gt(a, b);
+    return FHE.select(aGreaterThanB, a, b);
+}
+```
+
+#### External Input Handling
+`fromExternal` function validates attestations and extracts encrypted handles:
+```solidity
+function processEncryptedInput(
+    externalEuint32 inputEuint32,
+    bytes calldata inputProof
+) external {
+    euint32 encryptedValue = FHE.fromExternal(inputEuint32, inputProof);
+
+    // Grant permissions
+    FHE.allowThis(encryptedValue);
+    FHE.allow(encryptedValue, msg.sender);
+
+    // Use in computations
+    euint32 doubled = FHE.mul(encryptedValue, FHE.asEuint32(2));
+}
+```
+
+#### Access Control Methods
+```solidity
+// Grant persistent access to encrypted value
+FHE.allow(handle, address);
+
+// Grant transaction-scope access
+FHE.allowTransient(handle, address);
+
+// Enable public decryption
+FHE.allowForDecryption(handle);
+
+// Check access permissions
+bool hasAccess = FHE.isAllowed(handle, address);
+
+// Contract self-access (for internal operations)
+FHE.allowThis(handle);
+```
+
+#### Pseudo-Random Generation
+Deterministic encrypted random values:
+```solidity
+// Generate random encrypted integers
+euint8 randomU8 = FHE.randEuint8();
+euint16 randomU16 = FHE.randEuint16();
+euint32 randomU32 = FHE.randEuint32();
+euint64 randomU64 = FHE.randEuint64();
+
+// Bounded random generation
+euint32 boundedRandom = FHE.randEuint32Bounded(100); // 0 to 99
+
+// Random boolean
+ebool randomBool = FHE.randEbool();
+```
+
+#### Type Casting and Conversion
+```solidity
+// Trivial encryption (convert plaintext to encrypted)
+euint32 encryptedFromPlain = FHE.asEuint32(42);
+
+// Casting between encrypted types
+euint64 larger = FHE.asEuint64(FHE.asEuint32(value));
+
+// Convert to bytes for decryption requests
+bytes32 handle = FHE.toBytes32(encryptedValue);
+```
+
+### 2. Host Contracts
+
+**Purpose**: Trusted on-chain bridges between applications and FHEVM protocol, deployed on any supported blockchain.
+
+**Core Responsibilities**:
+- **Access Control Management**: Maintain and enforce ACLs for ciphertexts
+- **Event Emission**: Trigger coprocessor execution through standardized events
+- **Permission Validation**: Enforce persistent, transient, and decryption permissions
+
+**Security Role**:
+- ACL-based gating enforcement
+- Authorization validation before computation/decryption
+- Protection against misuse of encrypted data
+- Critical protocol security through on-chain enforcement
+
+**Configuration Example:**
+```solidity
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+pragma solidity ^0.8.24;
+
+import { FHE, euint32, externalEuint32 } from "@fhevm/solidity/lib/FHE.sol";
+import { SepoliaConfig } from "@fhevm/solidity/config/ZamaConfig.sol";
+
+contract MyFHEVMContract is SepoliaConfig {
+    // Inherit configuration for ACL, KMS, etc.
+    // Automatically configures:
+    // - aclAddress: 0x687820221192C5B662b25367F70076A37bc79b6c
+    // - kmsVerifierAddress: 0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC
+    // - inputVerifierAddress: 0xbc91f3daD1A5F19F8390c400196e58073B6a0BC4
+}
+```
+
+### 3. Coprocessor
+
+**Purpose**: Decentralized off-chain computation engine performing FHE operations with verifiable results.
+
+**Core Functions**:
+- **Input Verification**: Validate encrypted inputs with ZK proofs
+- **FHE Execution**: Process symbolic on-chain events with real FHE computations
+- **ACL Replication**: Maintain synchronized access control state
+- **Ciphertext Commitment**: Provide verifiable computation results
+
+**Operational Flow**:
+1. Listen to host chain and Gateway events
+2. Verify ZKPoK for encrypted inputs
+3. Execute FHE operations using TFHE-rs library
+4. Store results under deterministic handles
+5. Publish commitments to Gateway for verification
+
+**Security Model**:
+- Majority-honest assumption (>50% honest coprocessors)
+- Cryptographic commitments for all operations
+- Economic incentives through $ZAMA token staking
+- Slashing mechanisms for misbehavior
+- Public verifiability of all computations
+
+### 4. Gateway
+
+**Purpose**: Central orchestrator implemented as Arbitrum rollup, coordinating all protocol interactions.
+
+**Core Responsibilities**:
+- **Input Validation**: Verify encrypted values with ZKPoK proofs
+- **Cross-Chain Bridging**: Enable encrypted data transfer between chains
+- **Decryption Orchestration**: Coordinate KMS operations
+- **Consensus Enforcement**: Aggregate coprocessor responses
+- **Protocol Administration**: Manage operator registration and workflows
+
+**Key Operations**:
+- Encrypted input attestation through coprocessor consensus
+- ACL synchronization across all host chains
+- Decryption request routing to KMS
+- Cross-chain handle generation and validation
+- Fraud detection and slashing enforcement
+
+### 5. Key Management Service (KMS)
+
+**Purpose**: Decentralized MPC network for secure FHE key generation, management, and threshold decryption.
+
+**Architecture**:
+- 13 MPC nodes operated by independent organizations
+- Threshold secret sharing (9 of 13 parties required)
+- AWS Nitro Enclave secure execution environments
+- mTLS with gRPC for secure inter-node communication
+
+**Key Responsibilities**:
+- **Global Key Generation**: Secure FHE public/private key pair creation
+- **Threshold Decryption**: MPC-based decryption supporting:
+  - Public decryption for smart contracts
+  - Private user decryption with re-encryption
+- **ZK Proof Support**: Generate Common Reference Strings for ZKPoK validation
+
+**Security Features**:
+- Honest majority assumption (robust against 1/3 malicious nodes)
+- Guaranteed output delivery despite node failures
+- Insider risk mitigation through secure enclaves
+- Cryptographically signed and verifiable outputs
+
+### 6. Relayer & Oracle
+
+**Purpose**: Lightweight off-chain services providing user and contract interfaces to the protocol.
+
+#### Oracle
+**Responsibilities**:
+- Listen for on-chain decryption requests from contracts
+- Forward requests to Gateway on behalf of contracts
+- Retrieve KMS-signed plaintexts
+- Execute contract callbacks with verified results
+
+#### Relayer
+**Responsibilities**:
+- Submit user encrypted inputs to Gateway
+- Handle user decryption requests with EIP-712 authentication
+- Collect KMS responses re-encrypted for users
+- Deliver results to user applications
+
+## Smart Contract Development Guide
+
+### Getting Started with FHEVM
+
+#### Environment Setup
+
+**1. Project Initialization:**
+```bash
+npx hardhat init
+npm install @fhevm/solidity hardhat-plugin-fhevm
+```
+
+**2. Hardhat Configuration:**
+```typescript
+// hardhat.config.ts
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-plugin-fhevm";
+
+const config: HardhatUserConfig = {
+  solidity: "0.8.24",
+  defaultNetwork: "sepolia",
+  networks: {
+    sepolia: {
+      url: "https://eth-sepolia.public.blastapi.io",
+      accounts: [process.env.PRIVATE_KEY || ""],
+    },
+  },
+  typechain: {
+    outDir: "types",
+    target: "ethers-v6",
+  },
+};
+
+export default config;
+```
+
+**3. VSCode Extensions (Recommended):**
+- Solidity Language & Themes (Hardhat)
+- Prettier - Code formatter
+
+#### Basic Contract Template
+
+**Simple Counter Example:**
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import { FHE, euint32, externalEuint32 } from "@fhevm/solidity/lib/FHE.sol";
+import { SepoliaConfig } from "@fhevm/solidity/config/ZamaConfig.sol";
+
+contract FHECounter is SepoliaConfig {
+    euint32 private _count;
+
+    constructor() {
+        _count = FHE.asEuint32(0);
+        FHE.allowThis(_count);
+    }
+
+    function getCount() external view returns (euint32) {
+        return _count;
+    }
+
+    function increment(externalEuint32 inputEuint32, bytes calldata inputProof) external {
+        euint32 encryptedValue = FHE.fromExternal(inputEuint32, inputProof);
+        _count = FHE.add(_count, encryptedValue);
+
+        // Grant permissions
+        FHE.allowThis(_count);
+        FHE.allow(_count, msg.sender);
+    }
+
+    function decrement(externalEuint32 inputEuint32, bytes calldata inputProof) external {
+        euint32 encryptedValue = FHE.fromExternal(inputEuint32, inputProof);
+        _count = FHE.sub(_count, encryptedValue);
+
+        FHE.allowThis(_count);
+        FHE.allow(_count, msg.sender);
+    }
+}
+```
+
+#### Converting Regular Contracts to FHEVM
+
+**Before (Regular Solidity):**
+```solidity
+contract SimpleVoting {
+    uint256 public yesVotes;
+    uint256 public noVotes;
+
+    function vote(bool choice) external {
+        if (choice) {
+            yesVotes++;
+        } else {
+            noVotes++;
+        }
+    }
+}
+```
+
+**After (FHEVM Confidential):**
+```solidity
+contract ConfidentialVoting is SepoliaConfig {
+    euint32 private yesVotes;
+    euint32 private noVotes;
+
+    constructor() {
+        yesVotes = FHE.asEuint32(0);
+        noVotes = FHE.asEuint32(0);
+        FHE.allowThis(yesVotes);
+        FHE.allowThis(noVotes);
+    }
+
+    function vote(externalEbool choice, bytes calldata inputProof) external {
+        ebool encryptedChoice = FHE.fromExternal(choice, inputProof);
+
+        euint32 increment = FHE.asEuint32(1);
+
+        // Add to yes votes if choice is true, otherwise add to no votes
+        yesVotes = FHE.select(encryptedChoice, FHE.add(yesVotes, increment), yesVotes);
+        noVotes = FHE.select(encryptedChoice, noVotes, FHE.add(noVotes, increment));
+
+        FHE.allowThis(yesVotes);
+        FHE.allowThis(noVotes);
+    }
+
+    function getYesVotes() external view returns (euint32) {
+        return yesVotes;
+    }
+
+    function getNoVotes() external view returns (euint32) {
+        return noVotes;
+    }
+}
+```
+
+### Advanced Smart Contract Patterns
+
+#### Access Control Lists (ACL)
+
+**Permanent vs Transient Permissions:**
+```solidity
+contract AdvancedACL is SepoliaConfig {
+    mapping(address => euint64) private balances;
+
+    function setBalance(
+        address user,
+        externalEuint64 amount,
+        bytes calldata inputProof
+    ) external {
+        euint64 encryptedAmount = FHE.fromExternal(amount, inputProof);
+        balances[user] = encryptedAmount;
+
+        // Permanent permissions
+        FHE.allowThis(balances[user]);
+        FHE.allow(balances[user], user);           // User can always read
+        FHE.allow(balances[user], msg.sender);     // Caller can read
+    }
+
+    function transfer(
+        address to,
+        externalEuint64 amount,
+        bytes calldata inputProof
+    ) external {
+        euint64 transferAmount = FHE.fromExternal(amount, inputProof);
+
+        // Temporary permission for computation
+        FHE.allowTransient(transferAmount, address(this));
+
+        euint64 senderBalance = balances[msg.sender];
+        euint64 receiverBalance = balances[to];
+
+        // Update balances
+        balances[msg.sender] = FHE.sub(senderBalance, transferAmount);
+        balances[to] = FHE.add(receiverBalance, transferAmount);
+
+        // Update permissions
+        FHE.allowThis(balances[msg.sender]);
+        FHE.allowThis(balances[to]);
+        FHE.allow(balances[msg.sender], msg.sender);
+        FHE.allow(balances[to], to);
+    }
+}
+```
+
+#### Overflow Protection
+
+**Preventing Overflow Attacks:**
+```solidity
+function safeAdd(euint32 a, euint32 b) internal pure returns (euint32) {
+    euint32 result = FHE.add(a, b);
+
+    // Check for overflow by comparing with MAX_UINT32
+    ebool hasOverflow = FHE.lt(result, a);
+
+    // Return 0 if overflow detected, otherwise return result
+    return FHE.select(hasOverflow, FHE.asEuint32(0), result);
+}
+
+function safeSub(euint32 a, euint32 b) internal pure returns (euint32) {
+    // Check for underflow
+    ebool hasUnderflow = FHE.lt(a, b);
+
+    // Return 0 if underflow detected, otherwise return subtraction
+    return FHE.select(hasUnderflow, FHE.asEuint32(0), FHE.sub(a, b));
+}
+```
+
+#### Conditional Execution Patterns
+
+**Complex Conditional Logic:**
+```solidity
+contract ConditionalTransfer is SepoliaConfig {
+    mapping(address => euint64) private balances;
+    euint64 private minimumBalance;
+
+    function conditionalTransfer(
+        address to,
+        externalEuint64 amount,
+        bytes calldata inputProof
+    ) external {
+        euint64 transferAmount = FHE.fromExternal(amount, inputProof);
+        euint64 senderBalance = balances[msg.sender];
+
+        // Multiple conditions
+        ebool hasEnoughBalance = FHE.ge(senderBalance, transferAmount);
+        ebool meetsMinimum = FHE.ge(
+            FHE.sub(senderBalance, transferAmount),
+            minimumBalance
+        );
+        ebool canTransfer = FHE.and(hasEnoughBalance, meetsMinimum);
+
+        // Conditional execution
+        euint64 newSenderBalance = FHE.select(
+            canTransfer,
+            FHE.sub(senderBalance, transferAmount),
+            senderBalance
+        );
+
+        euint64 newReceiverBalance = FHE.select(
+            canTransfer,
+            FHE.add(balances[to], transferAmount),
+            balances[to]
+        );
+
+        // Update state
+        balances[msg.sender] = newSenderBalance;
+        balances[to] = newReceiverBalance;
+
+        // Update permissions
+        FHE.allowThis(balances[msg.sender]);
+        FHE.allowThis(balances[to]);
+    }
+}
+```
+
+### Decryption Patterns
+
+#### Public Decryption (Asynchronous)
+
+**Single Value Decryption:**
+```solidity
+contract PublicDecryption is SepoliaConfig {
+    euint32 private encryptedValue;
+    uint32 private decryptedValue;
+    bool private isDecrypted;
+
+    function requestDecryption() external {
+        require(!isDecrypted, "Already decrypted");
+
+        bytes32[] memory ciphertexts = new bytes32[](1);
+        ciphertexts[0] = FHE.toBytes32(encryptedValue);
+
+        FHE.requestDecryption(
+            ciphertexts,
+            this.decryptionCallback.selector
+        );
+    }
+
+    function decryptionCallback(
+        uint256 requestID,
+        bytes memory cleartexts,
+        bytes memory decryptionProof
+    ) external {
+        // CRITICAL: Always verify signatures
+        FHE.checkSignatures(requestID, cleartexts, decryptionProof);
+
+        uint32 decrypted = abi.decode(cleartexts, (uint32));
+        decryptedValue = decrypted;
+        isDecrypted = true;
+    }
+
+    function getDecryptedValue() external view returns (uint32) {
+        require(isDecrypted, "Not yet decrypted");
+        return decryptedValue;
+    }
+}
+```
+
+**Multiple Values Decryption:**
+```solidity
+function requestMultipleDecryption() external {
+    bytes32[] memory ciphertexts = new bytes32[](3);
+    ciphertexts[0] = FHE.toBytes32(encryptedBool);
+    ciphertexts[1] = FHE.toBytes32(encryptedUint32);
+    ciphertexts[2] = FHE.toBytes32(encryptedUint64);
+
+    FHE.requestDecryption(
+        ciphertexts,
+        this.multipleDecryptionCallback.selector
+    );
+}
+
+function multipleDecryptionCallback(
+    uint256 requestID,
+    bytes memory cleartexts,
+    bytes memory decryptionProof
+) external {
+    FHE.checkSignatures(requestID, cleartexts, decryptionProof);
+
+    (bool boolValue, uint32 uint32Value, uint64 uint64Value) =
+        abi.decode(cleartexts, (bool, uint32, uint64));
+
+    // Store decrypted values
+    decryptedBool = boolValue;
+    decryptedUint32 = uint32Value;
+    decryptedUint64 = uint64Value;
+}
+```
+
+#### User Decryption (Private)
+
+User decryption is handled client-side with the Relayer SDK and doesn't require special contract logic, only proper ACL permissions.
+
+### Testing FHEVM Contracts
+
+#### Test Setup
+
+**Basic Test Structure:**
+```typescript
+import { expect } from "chai";
+import { ethers, fhevm } from "hardhat";
+import { FhevmType } from "@fhevm/hardhat-plugin";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+
+describe("FHECounter", function () {
+    let contract: FHECounter;
+    let contractAddress: string;
+    let owner: HardhatEthersSigner;
+    let alice: HardhatEthersSigner;
+
+    beforeEach(async () => {
+        [owner, alice] = await ethers.getSigners();
+
+        const factory = await ethers.getContractFactory("FHECounter");
+        contract = await factory.deploy();
+        contractAddress = await contract.getAddress();
+    });
+
+    it("should increment counter correctly", async function () {
+        const incrementValue = 5;
+
+        // Create encrypted input
+        const encryptedInput = await fhevm
+            .createEncryptedInput(contractAddress, alice.address)
+            .add32(incrementValue)
+            .encrypt();
+
+        // Call contract function
+        await contract.connect(alice).increment(
+            encryptedInput.handles[0],
+            encryptedInput.inputProof
+        );
+
+        // Get encrypted result
+        const encryptedCount = await contract.getCount();
+
+        // Decrypt for verification
+        const decryptedCount = await fhevm.userDecryptEuint(
+            FhevmType.euint32,
+            encryptedCount,
+            contractAddress,
+            alice
+        );
+
+        expect(decryptedCount).to.equal(incrementValue);
+    });
+});
+```
+
+#### Advanced Testing Patterns
+
+**Multiple Operations Test:**
+```typescript
+it("should handle multiple operations correctly", async function () {
+    // First increment
+    let input = await fhevm
+        .createEncryptedInput(contractAddress, alice.address)
+        .add32(10)
+        .encrypt();
+
+    await contract.connect(alice).increment(input.handles[0], input.inputProof);
+
+    // Second increment
+    input = await fhevm
+        .createEncryptedInput(contractAddress, alice.address)
+        .add32(15)
+        .encrypt();
+
+    await contract.connect(alice).increment(input.handles[0], input.inputProof);
+
+    // Decrement
+    input = await fhevm
+        .createEncryptedInput(contractAddress, alice.address)
+        .add32(5)
+        .encrypt();
+
+    await contract.connect(alice).decrement(input.handles[0], input.inputProof);
+
+    // Verify final result (10 + 15 - 5 = 20)
+    const encryptedCount = await contract.getCount();
+    const decryptedCount = await fhevm.userDecryptEuint(
+        FhevmType.euint32,
+        encryptedCount,
+        contractAddress,
+        alice
+    );
+
+    expect(decryptedCount).to.equal(20);
+});
+```
+
+**Testing Public Decryption:**
+```typescript
+it("should handle public decryption correctly", async function () {
+    // Set up initial value
+    await contract.initializeValue(42);
+
+    // Request decryption
+    await contract.requestDecryption();
+
+    // Wait for oracle to process
+    await fhevm.awaitDecryptionOracle();
+
+    // Verify decrypted value
+    const decryptedValue = await contract.getDecryptedValue();
+    expect(decryptedValue).to.equal(43); // 42 + 1 from contract logic
+});
+```
+
+## Complete Application Examples
+
+### 1. Confidential ERC20 Token (ERC7984)
+
+**Full Implementation:**
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {Ownable2Step, Ownable} from "@openzeppelin/contracts/access/Ownable2Step.sol";
+import {FHE, externalEuint64, euint64} from "@fhevm/solidity/lib/FHE.sol";
+import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
+import {ERC7984} from "@openzeppelin/confidential-contracts/token/ERC7984.sol";
+
+contract ConfidentialERC20 is SepoliaConfig, ERC7984, Ownable2Step {
+    mapping(address => euint64) private _balances;
+    mapping(address => mapping(address => euint64)) private _allowances;
+    euint64 private _totalSupply;
+
+    constructor(
+        address owner,
+        uint64 initialSupply,
+        string memory name_,
+        string memory symbol_
+    ) ERC7984(name_, symbol_, "") Ownable(owner) {
+        euint64 encryptedSupply = FHE.asEuint64(initialSupply);
+        _balances[owner] = encryptedSupply;
+        _totalSupply = encryptedSupply;
+
+        FHE.allowThis(_balances[owner]);
+        FHE.allow(_balances[owner], owner);
+        FHE.allowThis(_totalSupply);
+    }
+
+    function confidentialBalanceOf(address account) public view returns (euint64) {
+        return _balances[account];
+    }
+
+    function confidentialTransfer(
+        address to,
+        externalEuint64 encryptedAmount,
+        bytes calldata inputProof
+    ) external returns (euint64) {
+        euint64 amount = FHE.fromExternal(encryptedAmount, inputProof);
+        return _confidentialTransfer(msg.sender, to, amount);
+    }
+
+    function confidentialTransferFrom(
+        address from,
+        address to,
+        externalEuint64 encryptedAmount,
+        bytes calldata inputProof
+    ) external returns (euint64) {
+        euint64 amount = FHE.fromExternal(encryptedAmount, inputProof);
+
+        // Check allowance
+        euint64 currentAllowance = _allowances[from][msg.sender];
+        euint64 newAllowance = FHE.sub(currentAllowance, amount);
+        _allowances[from][msg.sender] = newAllowance;
+
+        FHE.allowThis(_allowances[from][msg.sender]);
+        FHE.allow(_allowances[from][msg.sender], from);
+        FHE.allow(_allowances[from][msg.sender], msg.sender);
+
+        return _confidentialTransfer(from, to, amount);
+    }
+
+    function confidentialApprove(
+        address spender,
+        externalEuint64 encryptedAmount,
+        bytes calldata inputProof
+    ) external {
+        euint64 amount = FHE.fromExternal(encryptedAmount, inputProof);
+        _allowances[msg.sender][spender] = amount;
+
+        FHE.allowThis(_allowances[msg.sender][spender]);
+        FHE.allow(_allowances[msg.sender][spender], msg.sender);
+        FHE.allow(_allowances[msg.sender][spender], spender);
+    }
+
+    function _confidentialTransfer(
+        address from,
+        address to,
+        euint64 amount
+    ) internal returns (euint64) {
+        euint64 fromBalance = _balances[from];
+        euint64 toBalance = _balances[to];
+
+        // Update balances
+        _balances[from] = FHE.sub(fromBalance, amount);
+        _balances[to] = FHE.add(toBalance, amount);
+
+        // Update permissions
+        FHE.allowThis(_balances[from]);
+        FHE.allowThis(_balances[to]);
+        FHE.allow(_balances[from], from);
+        FHE.allow(_balances[to], to);
+
+        return amount;
+    }
+
+    function mint(address to, uint64 amount) external onlyOwner {
+        euint64 encryptedAmount = FHE.asEuint64(amount);
+        _balances[to] = FHE.add(_balances[to], encryptedAmount);
+        _totalSupply = FHE.add(_totalSupply, encryptedAmount);
+
+        FHE.allowThis(_balances[to]);
+        FHE.allow(_balances[to], to);
+        FHE.allowThis(_totalSupply);
+    }
+}
+```
+
+### 2. Sealed-Bid Auction
+
+**Complete Auction Implementation:**
+```solidity
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+pragma solidity ^0.8.24;
+
+import {FHE, externalEuint64, euint64, eaddress, ebool} from "@fhevm/solidity/lib/FHE.sol";
+import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
+import {Ownable2Step, Ownable} from "@openzeppelin/contracts/access/Ownable2Step.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
+contract SealedBidAuction is SepoliaConfig, ReentrancyGuard, Ownable2Step {
+    address public beneficiary;
+    IERC721 public nftContract;
+    uint256 public tokenId;
+
+    uint256 public auctionStartTime;
+    uint256 public auctionEndTime;
+
+    euint64 private highestBid;
+    eaddress private winningAddress;
+    address public winnerAddress;
+    bool public isWinnerRevealed;
+    bool public isNftClaimed;
+
+    mapping(address => euint64) private bids;
+
+    event AuctionStarted(uint256 startTime, uint256 endTime);
+    event BidPlaced(address indexed bidder);
+    event WinnerRevealed(address indexed winner);
+    event PrizeClaimed(address indexed winner);
+
+    error TooEarlyError(uint256 time);
+    error TooLateError(uint256 time);
+    error AuctionNotEndedError();
+    error WinnerNotRevealedError();
+
+    modifier onlyDuringAuction() {
+        if (block.timestamp < auctionStartTime) revert TooEarlyError(auctionStartTime);
+        if (block.timestamp >= auctionEndTime) revert TooLateError(auctionEndTime);
+        _;
+    }
+
+    modifier onlyAfterEnd() {
+        if (block.timestamp < auctionEndTime) revert TooEarlyError(auctionEndTime);
+        _;
+    }
+
+    modifier onlyAfterWinnerRevealed() {
+        if (!isWinnerRevealed) revert WinnerNotRevealedError();
+        _;
+    }
+
+    constructor(
+        address _beneficiary,
+        address _nftContract,
+        uint256 _tokenId,
+        uint256 _auctionDuration
+    ) Ownable(msg.sender) {
+        beneficiary = _beneficiary;
+        nftContract = IERC721(_nftContract);
+        tokenId = _tokenId;
+        auctionStartTime = block.timestamp;
+        auctionEndTime = block.timestamp + _auctionDuration;
+
+        emit AuctionStarted(auctionStartTime, auctionEndTime);
+    }
+
+    function bid(
+        externalEuint64 encryptedAmount,
+        bytes calldata inputProof
+    ) external payable onlyDuringAuction nonReentrant {
+        euint64 amount = FHE.fromExternal(encryptedAmount, inputProof);
+
+        // Add to existing bid
+        euint64 previousBid = bids[msg.sender];
+        euint64 newBid;
+
+        if (FHE.isInitialized(previousBid)) {
+            newBid = FHE.add(previousBid, amount);
+        } else {
+            newBid = amount;
+        }
+
+        bids[msg.sender] = newBid;
+        FHE.allowThis(bids[msg.sender]);
+        FHE.allow(bids[msg.sender], msg.sender);
+
+        // Update highest bid
+        if (FHE.isInitialized(highestBid)) {
+            ebool isNewHighest = FHE.gt(newBid, highestBid);
+            highestBid = FHE.select(isNewHighest, newBid, highestBid);
+            winningAddress = FHE.select(isNewHighest, FHE.asEaddress(msg.sender), winningAddress);
+        } else {
+            highestBid = newBid;
+            winningAddress = FHE.asEaddress(msg.sender);
+        }
+
+        FHE.allowThis(highestBid);
+        FHE.allowThis(winningAddress);
+
+        emit BidPlaced(msg.sender);
+    }
+
+    function revealWinner() external onlyAfterEnd {
+        require(!isWinnerRevealed, "Winner already revealed");
+
+        bytes32[] memory ciphertexts = new bytes32[](1);
+        ciphertexts[0] = FHE.toBytes32(winningAddress);
+
+        FHE.requestDecryption(ciphertexts, this.setWinner.selector);
+    }
+
+    function setWinner(
+        uint256 requestID,
+        bytes memory cleartexts,
+        bytes memory decryptionProof
+    ) external {
+        FHE.checkSignatures(requestID, cleartexts, decryptionProof);
+
+        address winner = abi.decode(cleartexts, (address));
+        winnerAddress = winner;
+        isWinnerRevealed = true;
+
+        emit WinnerRevealed(winner);
+    }
+
+    function claimPrize() external onlyAfterWinnerRevealed {
+        require(msg.sender == winnerAddress, "Only winner can claim");
+        require(!isNftClaimed, "Prize already claimed");
+
+        isNftClaimed = true;
+
+        // Transfer NFT to winner
+        nftContract.safeTransferFrom(address(this), msg.sender, tokenId);
+
+        emit PrizeClaimed(msg.sender);
+    }
+
+    function getBid(address bidder) external view returns (euint64) {
+        return bids[bidder];
+    }
+}
+```
+
+### 3. Vesting Wallet with Encrypted Schedules
+
+**Implementation:**
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {FHE, ebool, euint64, euint128, externalEuint64} from "@fhevm/solidity/lib/FHE.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
+import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
+import {IERC7984} from "@openzeppelin/confidential-contracts/interfaces/IERC7984.sol";
+
+contract ConfidentialVestingWallet is Ownable, ReentrancyGuardTransient, SepoliaConfig {
+    mapping(address => euint128) private _tokenReleased;
+    uint64 private _start;
+    uint64 private _duration;
+
+    event VestingWalletConfidentialTokenReleased(address indexed token, euint64 amount);
+
+    constructor(
+        address beneficiary,
+        uint48 startTimestamp,
+        uint48 durationSeconds
+    ) Ownable(beneficiary) {
+        _start = startTimestamp;
+        _duration = durationSeconds;
+    }
+
+    function start() public view returns (uint64) {
+        return _start;
+    }
+
+    function duration() public view returns (uint64) {
+        return _duration;
+    }
+
+    function end() public view returns (uint64) {
+        return start() + duration();
+    }
+
+    function released(address token) public view returns (euint128) {
+        return _tokenReleased[token];
+    }
+
+    function releasable(address token) public returns (euint64) {
+        euint128 vestedAmount_ = vestedAmount(token, uint48(block.timestamp));
+        euint128 releasedAmount = released(token);
+
+        ebool canRelease = FHE.ge(vestedAmount_, releasedAmount);
+        euint128 releasableAmount = FHE.select(
+            canRelease,
+            FHE.sub(vestedAmount_, releasedAmount),
+            FHE.asEuint128(0)
+        );
+
+        return FHE.asEuint64(releasableAmount);
+    }
+
+    function release(address token) public nonReentrant {
+        euint64 amount = releasable(token);
+
+        // Transfer tokens to beneficiary
+        FHE.allowTransient(amount, token);
+        euint64 amountSent = IERC7984(token).confidentialTransfer(owner(), amount);
+
+        // Update released amount
+        euint128 newReleasedAmount = FHE.add(released(token), amountSent);
+        FHE.allow(newReleasedAmount, owner());
+        FHE.allowThis(newReleasedAmount);
+        _tokenReleased[token] = newReleasedAmount;
+
+        emit VestingWalletConfidentialTokenReleased(token, amountSent);
+    }
+
+    function vestedAmount(address token, uint48 timestamp) public returns (euint128) {
+        euint128 totalAllocation = IERC7984(token).confidentialBalanceOf(address(this));
+        totalAllocation = FHE.add(totalAllocation, released(token));
+
+        return _vestingSchedule(totalAllocation, timestamp);
+    }
+
+    function _vestingSchedule(euint128 totalAllocation, uint48 timestamp) internal returns (euint128) {
+        if (timestamp < start()) {
+            return FHE.asEuint128(0);
+        } else if (timestamp >= end()) {
+            return totalAllocation;
+        } else {
+            // Linear vesting
+            euint128 timeElapsed = FHE.asEuint128(timestamp - start());
+            euint128 totalDuration = FHE.asEuint128(duration());
+
+            return FHE.div(FHE.mul(totalAllocation, timeElapsed), totalDuration);
+        }
+    }
+}
+```
+
+## Relayer SDK Integration
+
+### Installation and Setup
+
+**NPM Installation:**
+```bash
+npm install @zama-fhe/relayer-sdk
+```
+
+**Basic Setup:**
+```typescript
+import { createInstance, SepoliaConfig } from '@zama-fhe/relayer-sdk';
+
+// Simple configuration
+const instance = await createInstance(SepoliaConfig);
+
+// Custom configuration
+const instance = await createInstance({
+    aclContractAddress: '0x687820221192C5B662b25367F70076A37bc79b6c',
+    kmsContractAddress: '0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC',
+    inputVerifierContractAddress: '0xbc91f3daD1A5F19F8390c400196e58073B6a0BC4',
+    verifyingContractAddressDecryption: '0xb6E160B1ff80D67Bfe90A85eE06Ce0A2613607D1',
+    verifyingContractAddressInputVerification: '0x7048C39f048125eDa9d678AEbaDfB22F7900a29F',
+    chainId: 11155111,
+    gatewayChainId: 55815,
+    network: 'https://eth-sepolia.public.blastapi.io',
+    relayerUrl: 'https://relayer.testnet.zama.cloud',
+});
+```
+
+### Input Encryption
+
+**Single Value Encryption:**
+```typescript
+// Create encryption buffer
+const input = instance.createEncryptedInput(contractAddress, userAddress);
+
+// Add different types of values
+input.add64(BigInt(123456789));
+input.addBool(true);
+input.add32(42);
+input.addAddress('0xa5e1defb98EFe38EBb2D958CEe052410247F4c80');
+
+// Encrypt and get handles
+const encryptedInputs = await input.encrypt();
+
+// Use in contract call
+await contract.someFunction(
+    encryptedInputs.handles[0],  // euint64
+    encryptedInputs.handles[1],  // ebool
+    encryptedInputs.handles[2],  // euint32
+    encryptedInputs.handles[3],  // eaddress
+    encryptedInputs.inputProof
+);
+```
+
+**Complex Encryption Example:**
+```typescript
+const encryptUserData = async (
+    userData: {
+        age: number;
+        salary: bigint;
+        isActive: boolean;
+        walletAddress: string;
+    },
+    contractAddress: string,
+    userAddress: string
+) => {
+    const input = instance.createEncryptedInput(contractAddress, userAddress);
+
+    input.add8(userData.age);           // euint8 for age
+    input.add64(userData.salary);       // euint64 for salary
+    input.addBool(userData.isActive);   // ebool for status
+    input.addAddress(userData.walletAddress); // eaddress
+
+    const encrypted = await input.encrypt();
+
+    return {
+        handles: encrypted.handles,
+        proof: encrypted.inputProof
+    };
+};
+```
+
+### User Decryption
+
+**Complete User Decryption Flow:**
+```typescript
+const performUserDecryption = async (
+    ciphertextHandle: string,
+    contractAddress: string,
+    signer: Signer
+) => {
+    // Generate keypair for decryption
+    const keypair = instance.generateKeypair();
+
+    // Define handle-contract pairs
+    const handleContractPairs = [{
+        handle: ciphertextHandle,
+        contractAddress: contractAddress,
+    }];
+
+    // Create EIP-712 signature
+    const startTimeStamp = Math.floor(Date.now() / 1000).toString();
+    const durationDays = '10';
+    const contractAddresses = [contractAddress];
+
+    const eip712 = instance.createEIP712(
+        keypair.publicKey,
+        contractAddresses,
+        startTimeStamp,
+        durationDays,
+    );
+
+    const signature = await signer.signTypedData(
+        eip712.domain,
+        { UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification },
+        eip712.message,
+    );
+
+    // Perform decryption
+    const result = await instance.userDecrypt(
+        handleContractPairs,
+        keypair.privateKey,
+        keypair.publicKey,
+        signature.replace('0x', ''),
+        contractAddresses,
+        await signer.getAddress(),
+        startTimeStamp,
+        durationDays,
+    );
+
+    return result[ciphertextHandle];
+};
+```
+
+**Batch User Decryption:**
+```typescript
+const batchUserDecryption = async (
+    handles: string[],
+    contractAddress: string,
+    signer: Signer
+) => {
+    const keypair = instance.generateKeypair();
+
+    const handleContractPairs = handles.map(handle => ({
+        handle,
+        contractAddress
+    }));
+
+    const startTimeStamp = Math.floor(Date.now() / 1000).toString();
+    const durationDays = '10';
+    const contractAddresses = [contractAddress];
+
+    const eip712 = instance.createEIP712(
+        keypair.publicKey,
+        contractAddresses,
+        startTimeStamp,
+        durationDays,
+    );
+
+    const signature = await signer.signTypedData(
+        eip712.domain,
+        { UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification },
+        eip712.message,
+    );
+
+    const results = await instance.userDecrypt(
+        handleContractPairs,
+        keypair.privateKey,
+        keypair.publicKey,
+        signature.replace('0x', ''),
+        contractAddresses,
+        await signer.getAddress(),
+        startTimeStamp,
+        durationDays,
+    );
+
+    return results;
+};
+```
+
+### Public Decryption
+
+**Public Decryption (Global Visibility):**
+```typescript
+// Public decryption - anyone can see results
+const handles = [
+    '0x830a61b343d2f3de67ec59cb18961fd086085c1c73ff0000000000aa36a70000',
+    '0x98ee526413903d4613feedb9c8fa44fe3f4ed0dd00ff0000000000aa36a70400',
+];
+
+const decryptedValues = await instance.publicDecrypt(handles);
+
+// Returns object with handle -> value mapping
+console.log(decryptedValues);
+// {
+//   '0x830a61b343...': true,
+//   '0x98ee526413...': 242n
+// }
+```
+
+### Frontend Integration Patterns
+
+**React Hook for FHEVM:**
+```typescript
+import { useState, useEffect } from 'react';
+import { createInstance, SepoliaConfig } from '@zama-fhe/relayer-sdk';
+
+export const useFHEVM = () => {
+    const [fhevmInstance, setFhevmInstance] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const initFHEVM = async () => {
+            try {
+                const instance = await createInstance({
+                    ...SepoliaConfig,
+                    network: window.ethereum
+                });
+                setFhevmInstance(instance);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        initFHEVM();
+    }, []);
+
+    const encryptValue = async (value, type, contractAddress, userAddress) => {
+        if (!fhevmInstance) throw new Error('FHEVM not initialized');
+
+        const input = fhevmInstance.createEncryptedInput(contractAddress, userAddress);
+
+        switch (type) {
+            case 'uint8': input.add8(value); break;
+            case 'uint32': input.add32(value); break;
+            case 'uint64': input.add64(value); break;
+            case 'bool': input.addBool(value); break;
+            case 'address': input.addAddress(value); break;
+            default: throw new Error(`Unsupported type: ${type}`);
+        }
+
+        return await input.encrypt();
+    };
+
+    const decryptValue = async (handle, contractAddress, signer) => {
+        if (!fhevmInstance) throw new Error('FHEVM not initialized');
+
+        const keypair = fhevmInstance.generateKeypair();
+        const startTimeStamp = Math.floor(Date.now() / 1000).toString();
+        const durationDays = '10';
+        const contractAddresses = [contractAddress];
+
+        const eip712 = fhevmInstance.createEIP712(
+            keypair.publicKey,
+            contractAddresses,
+            startTimeStamp,
+            durationDays,
+        );
+
+        const signature = await signer.signTypedData(
+            eip712.domain,
+            { UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification },
+            eip712.message,
+        );
+
+        const result = await fhevmInstance.userDecrypt(
+            [{ handle, contractAddress }],
+            keypair.privateKey,
+            keypair.publicKey,
+            signature.replace('0x', ''),
+            contractAddresses,
+            await signer.getAddress(),
+            startTimeStamp,
+            durationDays,
+        );
+
+        return result[handle];
+    };
+
+    return {
+        fhevmInstance,
+        isLoading,
+        error,
+        encryptValue,
+        decryptValue
+    };
+};
+```
+
+**Complete React Component Example:**
+```typescript
+import React, { useState } from 'react';
+import { ethers } from 'ethers';
+import { useFHEVM } from './useFHEVM';
+
+const ConfidentialCounter = ({ contractAddress, abi }) => {
+    const [count, setCount] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const { fhevmInstance, encryptValue, decryptValue } = useFHEVM();
+
+    const [provider, setProvider] = useState(null);
+    const [signer, setSigner] = useState(null);
+    const [contract, setContract] = useState(null);
+
+    useEffect(() => {
+        const init = async () => {
+            if (window.ethereum && fhevmInstance) {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, abi, signer);
+
+                setProvider(provider);
+                setSigner(signer);
+                setContract(contract);
+            }
+        };
+        init();
+    }, [fhevmInstance, contractAddress, abi]);
+
+    const incrementCounter = async (value) => {
+        if (!contract || !signer) return;
+
+        setLoading(true);
+        try {
+            const userAddress = await signer.getAddress();
+            const encrypted = await encryptValue(value, 'uint32', contractAddress, userAddress);
+
+            const tx = await contract.increment(encrypted.handles[0], encrypted.inputProof);
+            await tx.wait();
+
+            console.log('Counter incremented successfully');
+        } catch (error) {
+            console.error('Error incrementing counter:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getCount = async () => {
+        if (!contract || !signer) return;
+
+        setLoading(true);
+        try {
+            const encryptedCount = await contract.getCount();
+            const decryptedCount = await decryptValue(encryptedCount, contractAddress, signer);
+            setCount(decryptedCount);
+        } catch (error) {
+            console.error('Error getting count:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div>
+            <h2>Confidential Counter</h2>
+            {count !== null && <p>Current Count: {count.toString()}</p>}
+
+            <button onClick={() => incrementCounter(1)} disabled={loading}>
+                Increment by 1
+            </button>
+            <button onClick={() => incrementCounter(5)} disabled={loading}>
+                Increment by 5
+            </button>
+            <button onClick={getCount} disabled={loading}>
+                Get Count
+            </button>
+
+            {loading && <p>Loading...</p>}
+        </div>
+    );
+};
+```
+
+## Development Tools and Best Practices
+
+### Gas Optimization
+
+**Choosing Appropriate Types:**
+```solidity
+// Use smallest type that fits your needs
+euint8 smallValue;    // 0-255, uses less gas
+euint32 mediumValue;  // 0-4294967295
+euint64 largeValue;   // Large numbers only
+
+// Avoid unnecessary large types
+// ❌ Using euint256 for small values
+euint256 overkill = FHE.asEuint256(42);
+
+// ✅ Use appropriate size
+euint8 efficient = FHE.asEuint8(42);
+```
+
+**Scalar Operations (More Efficient):**
+```solidity
+// When one operand is known plaintext, use scalar operations
+euint32 encrypted = FHE.asEuint32(100);
+uint32 plaintext = 50;
+
+// ✅ More efficient - scalar operation
+euint32 result = FHE.add(encrypted, plaintext);
+
+// ❌ Less efficient - both encrypted
+euint32 inefficient = FHE.add(encrypted, FHE.asEuint32(plaintext));
+```
+
+### Security Best Practices
+
+**Always Verify Signatures:**
+```solidity
+function decryptionCallback(
+    uint256 requestID,
+    bytes memory cleartexts,
+    bytes memory decryptionProof
+) external {
+    // CRITICAL: Always verify signatures first
+    FHE.checkSignatures(requestID, cleartexts, decryptionProof);
+
+    // Then process the decrypted data
+    (uint32 value) = abi.decode(cleartexts, (uint32));
+    processDecryptedValue(value);
+}
+```
+
+**Proper ACL Management:**
+```solidity
+function transferTokens(
+    address to,
+    externalEuint64 amount,
+    bytes calldata proof
+) external {
+    euint64 transferAmount = FHE.fromExternal(amount, proof);
+
+    // Update balances
+    balances[msg.sender] = FHE.sub(balances[msg.sender], transferAmount);
+    balances[to] = FHE.add(balances[to], transferAmount);
+
+    // CRITICAL: Update permissions for new values
+    FHE.allowThis(balances[msg.sender]);
+    FHE.allowThis(balances[to]);
+    FHE.allow(balances[msg.sender], msg.sender);
+    FHE.allow(balances[to], to);
+}
+```
+
+**Preventing Inference Attacks:**
+```solidity
+// ❌ Vulnerable to inference attacks
+function vulnerableTransfer(euint64 amount) external {
+    if (FHE.decrypt(FHE.gt(balance, amount))) {
+        // This reveals information about the balance
+        balance = FHE.sub(balance, amount);
+    }
+}
+
+// ✅ Secure implementation
+function secureTransfer(euint64 amount) external {
+    ebool canTransfer = FHE.ge(balance, amount);
+
+    // Always update, but conditionally
+    euint64 newBalance = FHE.select(
+        canTransfer,
+        FHE.sub(balance, amount),
+        balance
+    );
+
+    balance = newBalance;
+    FHE.allowThis(balance);
+}
+```
+
+### Testing Strategies
+
+**Comprehensive Test Suite:**
+```typescript
+describe("ConfidentialToken", function () {
+    let token: ConfidentialToken;
+    let tokenAddress: string;
+    let owner: HardhatEthersSigner;
+    let alice: HardhatEthersSigner;
+    let bob: HardhatEthersSigner;
+
+    beforeEach(async () => {
+        [owner, alice, bob] = await ethers.getSigners();
+
+        const factory = await ethers.getContractFactory("ConfidentialToken");
+        token = await factory.deploy("ConfidentialToken", "CT", 1000000);
+        tokenAddress = await token.getAddress();
+    });
+
+    describe("Transfers", function () {
+        it("should transfer tokens correctly", async function () {
+            const transferAmount = 1000;
+
+            // Encrypt transfer amount
+            const encryptedAmount = await fhevm
+                .createEncryptedInput(tokenAddress, alice.address)
+                .add64(transferAmount)
+                .encrypt();
+
+            // Perform transfer
+            await token.connect(owner).confidentialTransfer(
+                alice.address,
+                encryptedAmount.handles[0],
+                encryptedAmount.inputProof
+            );
+
+            // Verify alice's balance
+            const aliceBalance = await token.confidentialBalanceOf(alice.address);
+            const decryptedBalance = await fhevm.userDecryptEuint(
+                FhevmType.euint64,
+                aliceBalance,
+                tokenAddress,
+                alice
+            );
+
+            expect(decryptedBalance).to.equal(transferAmount);
+        });
+
+        it("should handle multiple transfers", async function () {
+            // First transfer
+            let encrypted = await fhevm
+                .createEncryptedInput(tokenAddress, alice.address)
+                .add64(500)
+                .encrypt();
+
+            await token.connect(owner).confidentialTransfer(
+                alice.address,
+                encrypted.handles[0],
+                encrypted.inputProof
+            );
+
+            // Second transfer
+            encrypted = await fhevm
+                .createEncryptedInput(tokenAddress, alice.address)
+                .add64(300)
+                .encrypt();
+
+            await token.connect(alice).confidentialTransfer(
+                bob.address,
+                encrypted.handles[0],
+                encrypted.inputProof
+            );
+
+            // Verify balances
+            const aliceBalance = await fhevm.userDecryptEuint(
+                FhevmType.euint64,
+                await token.confidentialBalanceOf(alice.address),
+                tokenAddress,
+                alice
+            );
+
+            const bobBalance = await fhevm.userDecryptEuint(
+                FhevmType.euint64,
+                await token.confidentialBalanceOf(bob.address),
+                tokenAddress,
+                bob
+            );
+
+            expect(aliceBalance).to.equal(200); // 500 - 300
+            expect(bobBalance).to.equal(300);
+        });
+    });
+
+    describe("Public Decryption", function () {
+        it("should handle public decryption correctly", async function () {
+            const initialSupply = 1000000;
+
+            // Request public decryption of total supply
+            await token.requestTotalSupplyDecryption();
+
+            // Wait for oracle
+            await fhevm.awaitDecryptionOracle();
+
+            // Verify decrypted value
+            const decryptedSupply = await token.getDecryptedTotalSupply();
+            expect(decryptedSupply).to.equal(initialSupply);
+        });
+    });
+});
+```
+
+### Error Handling
+
+**Common Error Patterns:**
+```typescript
+// Handle encryption errors
+const encryptValue = async (value, type, contractAddress, userAddress) => {
+    try {
+        const input = instance.createEncryptedInput(contractAddress, userAddress);
+
+        switch (type) {
+            case 'uint32':
+                if (value < 0 || value > 4294967295) {
+                    throw new Error('Value out of range for uint32');
+                }
+                input.add32(value);
+                break;
+            // ... other types
+        }
+
+        return await input.encrypt();
+    } catch (error) {
+        console.error('Encryption failed:', error);
+        throw new Error(`Failed to encrypt ${type} value: ${error.message}`);
+    }
+};
+
+// Handle contract interaction errors
+const callContract = async (contractFunction, ...args) => {
+    try {
+        const tx = await contractFunction(...args);
+        const receipt = await tx.wait();
+
+        if (receipt.status === 0) {
+            throw new Error('Transaction failed');
+        }
+
+        return receipt;
+    } catch (error) {
+        if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
+            throw new Error('Gas estimation failed - check contract state');
+        } else if (error.code === 'INSUFFICIENT_FUNDS') {
+            throw new Error('Insufficient funds for transaction');
+        } else {
+            throw new Error(`Contract call failed: ${error.message}`);
+        }
+    }
+};
+```
+
+## Protocol Workflows and Security Model
+
+### Complete FHEVM Application Flow
+
+**1. User Input Encryption:**
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Relayer
+    participant Gateway
+    participant Coprocessor
+
+    User->>Frontend: Input sensitive data
+    Frontend->>Frontend: Encrypt with FHE public key
+    Frontend->>Relayer: Submit encrypted input + ZKPoK
+    Relayer->>Gateway: Forward input for attestation
+    Gateway->>Coprocessor: Verify ZKPoK proof
+    Coprocessor->>Gateway: Sign attestation
+    Gateway->>Frontend: Return attestation
+    Frontend->>Blockchain: Submit transaction with attestation
+```
+
+**2. FHE Computation:**
+```mermaid
+sequenceDiagram
+    participant Blockchain
+    participant Coprocessor
+    participant Gateway
+
+    Blockchain->>Blockchain: Execute symbolic FHE operations
+    Blockchain->>Coprocessor: Emit computation events
+    Coprocessor->>Coprocessor: Perform real FHE operations
+    Coprocessor->>Gateway: Submit computation results
+    Gateway->>Gateway: Aggregate coprocessor responses
+    Gateway->>Blockchain: Commit final results
+```
+
+**3. Decryption Process:**
+```mermaid
+sequenceDiagram
+    participant Contract
+    participant Oracle
+    participant Gateway
+    participant KMS
+
+    Contract->>Oracle: Request decryption
+    Oracle->>Gateway: Forward decryption request
+    Gateway->>KMS: Request threshold decryption
+    KMS->>KMS: Perform MPC decryption
+    KMS->>Gateway: Return signed plaintext
+    Gateway->>Oracle: Forward result
+    Oracle->>Contract: Execute callback with plaintext
+```
+
+### Security Assumptions
+
+**1. Cryptographic Security:**
+- FHE scheme provides semantic security
+- ZK proofs ensure input validity
+- Threshold signatures prevent forgery
+
+**2. Network Security:**
+- Majority honest coprocessors (>50%)
+- Threshold honest KMS nodes (>66%)
+- Economic incentives align with honest behavior
+
+**3. Implementation Security:**
+- Smart contracts properly manage ACLs
+- Signatures always verified in callbacks
+- No plaintext leakage through side channels
+
+### Performance Characteristics
+
+**Gas Costs (Approximate):**
+```solidity
+// Operation costs on FHEVM (testnet)
+FHE.add(euint32, euint32)     // ~100,000 gas
+FHE.mul(euint32, euint32)     // ~150,000 gas
+FHE.select(ebool, euint32, euint32) // ~120,000 gas
+FHE.decrypt() request         // ~80,000 gas
+FHE.fromExternal()           // ~90,000 gas
+```
+
+**Optimization Guidelines:**
+- Use smallest appropriate integer types
+- Prefer scalar operations when possible
+- Batch multiple values in single encryption
+- Minimize public decryptions
+- Cache encrypted values when feasible
+
+### Deployment Configuration
+
+**Network Configurations:**
+
+**Sepolia Testnet:**
+```typescript
+export const SepoliaConfig = {
+    aclContractAddress: '0x687820221192C5B662b25367F70076A37bc79b6c',
+    kmsContractAddress: '0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC',
+    inputVerifierContractAddress: '0xbc91f3daD1A5F19F8390c400196e58073B6a0BC4',
+    verifyingContractAddressDecryption: '0xb6E160B1ff80D67Bfe90A85eE06Ce0A2613607D1',
+    verifyingContractAddressInputVerification: '0x7048C39f048125eDa9d678AEbaDfB22F7900a29F',
+    chainId: 11155111,
+    gatewayChainId: 55815,
+    network: 'https://eth-sepolia.public.blastapi.io',
+    relayerUrl: 'https://relayer.testnet.zama.cloud',
+};
+```
+
+**Local Development:**
+```typescript
+export const LocalConfig = {
+    // Use mock environment for testing
+    chainId: 31337,
+    network: 'http://localhost:8545',
+    // ... mock contract addresses
+};
+```
+
+## Roadmap and Future Development
+
+### Upcoming Features (2025)
+
+**Enhanced Type System:**
+- Signed integer types (`eint8`, `eint16`, `eint32`, `eint64`)
+- Overflow-safe arithmetic operations
+- Enhanced error handling with controlled information leakage
+
+**New Operations:**
+- Native division and remainder for all types
+- Set inclusion and membership operations
+- Advanced bitwise operations
+
+**Development Tools:**
+- Foundry template with native FHEVM support
+- Enhanced debugging tools for encrypted values
+- Gas optimization analysis tools
+
+**Performance Improvements:**
+- Optimized coprocessor coordination
+- Reduced gas costs for common operations
+- Faster encryption/decryption processes
+
+### Long-term Vision
+
+**Scalability:**
+- Support for more EVM-compatible chains
+- Horizontal scaling of coprocessor network
+- Cross-chain encrypted state synchronization
+
+**Usability:**
+- Simplified developer APIs
+- Visual development tools
+- Automated ACL management
+
+**Advanced Cryptography:**
+- Support for additional FHE schemes
+- Privacy-preserving machine learning
+- Confidential multi-party computation
+
+This comprehensive documentation provides complete knowledge for building confidential smart contracts with FHEVM, from basic concepts to advanced applications, covering protocol architecture, development patterns, security considerations, and practical implementation examples.
+
+## FHEVM React Hooks Integration Patterns
+
+### Overview
+
+Building FHEVM applications requires specialized React hooks that handle encrypted data flow, wallet integration, and user decryption workflows. The following patterns are extracted from production FHEVM applications and provide comprehensive solutions for frontend integration.
+
+### Multi-Value Encryption Patterns
+
+**Core Pattern: Encrypting Multiple Numbers Separately**
+
+The most common pattern in FHEVM applications is encrypting multiple numeric values (coordinates, amounts, etc.) that need to be processed together but encrypted separately for security.
+
+```typescript
+// Multi-coordinate encryption example from treasure hunt game
+const makeGuess = async (x: number, y: number) => {
+  if (!contractWithSigner || !instance || !canMakeGuess) return;
+
+  setIsMakingGuess(true);
+  setMessage(`Making guess at position (${x}, ${y})...`);
+
+  try {
+    // Get signer address for encryption context
+    const signerAddress = await ethersSigner!.getAddress();
+
+    // Encrypt X coordinate separately
+    const encryptedInputX = await instance
+      .createEncryptedInput(contractAddress, signerAddress)
+      .add8(x)  // Using euint8 for coordinate (0-255 range)
+      .encrypt();
+
+    // Encrypt Y coordinate separately
+    const encryptedInputY = await instance
+      .createEncryptedInput(contractAddress, signerAddress)
+      .add8(y)  // Using euint8 for coordinate (0-255 range)
+      .encrypt();
+
+    setMessage("Submitting encrypted guess...");
+
+    // Submit both encrypted values with separate proofs
+    const tx = await contractWithSigner.guess(
+      encryptedInputX.handles[0],     // First encrypted value handle
+      encryptedInputY.handles[0],     // Second encrypted value handle
+      encryptedInputX.inputProof,     // Proof for first value
+      encryptedInputY.inputProof      // Proof for second value
+    );
+
+    setMessage("Transaction submitted, waiting for confirmation...");
+    await tx.wait();
+
+    setMessage("Guess submitted successfully! Click 'Decrypt Distance' to see the result.");
+
+    // Refresh to get the new encrypted result
+    await refreshGameState();
+  } catch (error) {
+    console.error("Error making guess:", error);
+    setMessage("Error making guess");
+  }
+
+  setIsMakingGuess(false);
+};
+```
+
+**Advanced Multi-Value Encryption Patterns**
+
+```typescript
+// Encrypting different numeric types together
+const encryptMixedValues = async (
+  smallValue: number,    // 0-255 range
+  mediumValue: number,   // 0-4294967295 range
+  largeValue: bigint,    // Large numbers
+  contractAddress: string,
+  userAddress: string,
+  instance: FhevmInstance
+) => {
+  // Create single input buffer for multiple values
+  const input = instance.createEncryptedInput(contractAddress, userAddress);
+
+  // Add different types to same encryption batch
+  input.add8(smallValue);      // euint8
+  input.add32(mediumValue);    // euint32
+  input.add64(largeValue);     // euint64
+
+  // Encrypt all values together with shared proof
+  const encrypted = await input.encrypt();
+
+  return {
+    smallHandle: encrypted.handles[0],    // euint8 handle
+    mediumHandle: encrypted.handles[1],   // euint32 handle
+    largeHandle: encrypted.handles[2],    // euint64 handle
+    sharedProof: encrypted.inputProof     // Single proof for all values
+  };
+};
+
+// Usage in contract call
+const processMultipleValues = async () => {
+  const encrypted = await encryptMixedValues(
+    42,           // Small value
+    1000000,      // Medium value
+    BigInt("9223372036854775807"), // Large value
+    contractAddress,
+    userAddress,
+    instance
+  );
+
+  // Call contract with multiple encrypted parameters
+  const tx = await contract.processValues(
+    encrypted.smallHandle,
+    encrypted.mediumHandle,
+    encrypted.largeHandle,
+    encrypted.sharedProof  // Single proof validates all inputs
+  );
+
+  await tx.wait();
+};
+```
+
+**Encryption State Management Pattern**
+
+```typescript
+interface EncryptionState {
+  isEncrypting: boolean;
+  encryptedValues: Record<string, string>; // key -> handle mapping
+  encryptionError: string | null;
+}
+
+const useMultiValueEncryption = (
+  instance: FhevmInstance | undefined,
+  contractAddress: string,
+  userAddress: string
+) => {
+  const [state, setState] = useState<EncryptionState>({
+    isEncrypting: false,
+    encryptedValues: {},
+    encryptionError: null
+  });
+
+  const encryptValues = async (values: Record<string, { value: number | bigint, type: 'uint8' | 'uint32' | 'uint64' }>) => {
+    if (!instance) {
+      setState(prev => ({ ...prev, encryptionError: 'FHEVM instance not available' }));
+      return null;
+    }
+
+    setState(prev => ({ ...prev, isEncrypting: true, encryptionError: null }));
+
+    try {
+      const input = instance.createEncryptedInput(contractAddress, userAddress);
+      const keys = Object.keys(values);
+
+      // Add all values to encryption buffer
+      keys.forEach(key => {
+        const { value, type } = values[key];
+        switch (type) {
+          case 'uint8': input.add8(Number(value)); break;
+          case 'uint32': input.add32(Number(value)); break;
+          case 'uint64': input.add64(BigInt(value)); break;
+        }
+      });
+
+      const encrypted = await input.encrypt();
+
+      // Map handles back to original keys
+      const encryptedValues: Record<string, string> = {};
+      keys.forEach((key, index) => {
+        encryptedValues[key] = encrypted.handles[index];
+      });
+
+      setState(prev => ({
+        ...prev,
+        isEncrypting: false,
+        encryptedValues,
+        encryptionError: null
+      }));
+
+      return {
+        handles: encryptedValues,
+        proof: encrypted.inputProof
+      };
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        isEncrypting: false,
+        encryptionError: error instanceof Error ? error.message : 'Encryption failed'
+      }));
+      return null;
+    }
+  };
+
+  return { ...state, encryptValues };
+};
+```
+
+### User Decryption Workflows
+
+**Complete User Decryption Implementation**
+
+The user decryption process involves signature management, private key handling, and secure client-side decryption of FHEVM ciphertexts.
+
+```typescript
+// Complete decryption workflow from useTreasureHunt
+const decryptDistance = async () => {
+  if (!instance || !encryptedDistance || !canDecrypt) return;
+
+  setIsDecrypting(true);
+  setMessage("Decrypting distance...");
+
+  try {
+    // Step 1: Load or create decryption signature
+    // This manages EIP-712 signatures for user authorization
+    const sig: FhevmDecryptionSignature | null = await FhevmDecryptionSignature.loadOrSign(
+      instance,                                    // FHEVM instance
+      [contractAddress as `0x${string}`],         // Contracts user can decrypt from
+      ethersSigner!,                              // User's signer for EIP-712
+      fhevmDecryptionSignatureStorage             // Storage for signature persistence
+    );
+
+    if (!sig) {
+      setMessage("Unable to build FHEVM decryption signature");
+      return;
+    }
+
+    setMessage("Call FHEVM userDecrypt...");
+
+    // Step 2: Perform client-side decryption
+    const decryptionResult = await instance.userDecrypt(
+      [{
+        handle: encryptedDistance,              // Encrypted value handle
+        contractAddress: contractAddress        // Contract that owns the ciphertext
+      }],
+      sig.privateKey,                           // User's private key for decryption
+      sig.publicKey,                            // User's public key
+      sig.signature,                            // EIP-712 signature for authorization
+      sig.contractAddresses,                    // Authorized contract addresses
+      sig.userAddress,                          // User's address
+      sig.startTimestamp,                       // Signature validity start
+      sig.durationDays                          // Signature validity duration
+    );
+
+    // Step 3: Process decrypted result
+    const decrypted = Number(decryptionResult[encryptedDistance]);
+    setDecryptedDistance(decrypted);
+    setIsDecrypted(true);
+
+    setMessage("FHEVM userDecrypt completed!");
+
+    // Step 4: Application-specific result handling
+    if (decrypted === 0) {
+      setMessage("🎉 CONGRATULATIONS! You found the treasure!");
+    } else if (decrypted <= 2) {
+      setMessage(`🔥 Very close! Distance: ${decrypted}`);
+    } else if (decrypted <= 5) {
+      setMessage(`🌡️ Getting warmer... Distance: ${decrypted}`);
+    } else if (decrypted <= 10) {
+      setMessage(`❄️ Getting colder... Distance: ${decrypted}`);
+    } else {
+      setMessage(`🧊 Very cold! Distance: ${decrypted}`);
+    }
+  } catch (error) {
+    console.error("Error decrypting distance:", error);
+    setMessage("Error decrypting distance");
+  }
+
+  setIsDecrypting(false);
+};
+```
+
+**Batch User Decryption Pattern**
+
+```typescript
+interface DecryptionRequest {
+  handle: string;
+  contractAddress: string;
+  name: string;  // Human-readable identifier
+}
+
+const useBatchUserDecryption = (
+  instance: FhevmInstance | undefined,
+  fhevmDecryptionSignatureStorage: GenericStringStorage,
+  ethersSigner: any
+) => {
+  const [isDecrypting, setIsDecrypting] = useState(false);
+  const [decryptedValues, setDecryptedValues] = useState<Record<string, number>>({});
+  const [decryptionError, setDecryptionError] = useState<string | null>(null);
+
+  const decryptMultipleValues = async (requests: DecryptionRequest[]) => {
+    if (!instance || !ethersSigner) {
+      setDecryptionError('FHEVM instance or signer not available');
+      return;
+    }
+
+    setIsDecrypting(true);
+    setDecryptionError(null);
+
+    try {
+      // Get unique contract addresses for signature
+      const contractAddresses = [...new Set(requests.map(r => r.contractAddress))];
+
+      // Create or load decryption signature for all contracts
+      const sig = await FhevmDecryptionSignature.loadOrSign(
+        instance,
+        contractAddresses as `0x${string}`[],
+        ethersSigner,
+        fhevmDecryptionSignatureStorage
+      );
+
+      if (!sig) {
+        setDecryptionError('Unable to create decryption signature');
+        return;
+      }
+
+      // Prepare decryption requests
+      const decryptionRequests = requests.map(req => ({
+        handle: req.handle,
+        contractAddress: req.contractAddress
+      }));
+
+      // Perform batch decryption
+      const results = await instance.userDecrypt(
+        decryptionRequests,
+        sig.privateKey,
+        sig.publicKey,
+        sig.signature,
+        sig.contractAddresses,
+        sig.userAddress,
+        sig.startTimestamp,
+        sig.durationDays
+      );
+
+      // Process results with human-readable names
+      const processedResults: Record<string, number> = {};
+      requests.forEach(req => {
+        processedResults[req.name] = Number(results[req.handle]);
+      });
+
+      setDecryptedValues(processedResults);
+    } catch (error) {
+      console.error('Batch decryption error:', error);
+      setDecryptionError(error instanceof Error ? error.message : 'Decryption failed');
+    }
+
+    setIsDecrypting(false);
+  };
+
+  return {
+    isDecrypting,
+    decryptedValues,
+    decryptionError,
+    decryptMultipleValues,
+    clearDecryptedValues: () => setDecryptedValues({})
+  };
+};
+
+// Usage example
+const GameResults = () => {
+  const { decryptMultipleValues, isDecrypting, decryptedValues } = useBatchUserDecryption(
+    instance,
+    storage,
+    signer
+  );
+
+  const handleDecryptAll = async () => {
+    await decryptMultipleValues([
+      { handle: playerXHandle, contractAddress: gameContract, name: 'playerX' },
+      { handle: playerYHandle, contractAddress: gameContract, name: 'playerY' },
+      { handle: distanceHandle, contractAddress: gameContract, name: 'distance' },
+      { handle: scoreHandle, contractAddress: gameContract, name: 'score' }
+    ]);
+  };
+
+  return (
+    <div>
+      <button onClick={handleDecryptAll} disabled={isDecrypting}>
+        {isDecrypting ? 'Decrypting...' : 'Decrypt All Values'}
+      </button>
+
+      {Object.keys(decryptedValues).length > 0 && (
+        <div>
+          <h3>Decrypted Results:</h3>
+          <p>Player Position: ({decryptedValues.playerX}, {decryptedValues.playerY})</p>
+          <p>Distance: {decryptedValues.distance}</p>
+          <p>Score: {decryptedValues.score}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+**Decryption Signature Management**
+
+```typescript
+interface DecryptionSignatureManager {
+  loadOrCreateSignature: (contractAddresses: string[]) => Promise<FhevmDecryptionSignature | null>;
+  isValidSignature: (signature: FhevmDecryptionSignature) => boolean;
+  refreshSignature: (contractAddresses: string[]) => Promise<FhevmDecryptionSignature | null>;
+}
+
+const useDecryptionSignatureManager = (
+  instance: FhevmInstance | undefined,
+  ethersSigner: any,
+  storage: GenericStringStorage
+): DecryptionSignatureManager => {
+
+  const loadOrCreateSignature = async (contractAddresses: string[]) => {
+    if (!instance || !ethersSigner) return null;
+
+    try {
+      // Try to load existing signature
+      const sig = await FhevmDecryptionSignature.loadOrSign(
+        instance,
+        contractAddresses as `0x${string}`[],
+        ethersSigner,
+        storage
+      );
+
+      return sig;
+    } catch (error) {
+      console.error('Failed to load/create signature:', error);
+      return null;
+    }
+  };
+
+  const isValidSignature = (signature: FhevmDecryptionSignature): boolean => {
+    const now = Math.floor(Date.now() / 1000);
+    const expirationTime = parseInt(signature.startTimestamp) + (parseInt(signature.durationDays) * 24 * 60 * 60);
+
+    return now < expirationTime;
+  };
+
+  const refreshSignature = async (contractAddresses: string[]) => {
+    // Force refresh by clearing storage first
+    const storageKey = `fhevm_signature_${contractAddresses.join('_')}`;
+    await storage.removeItem(storageKey);
+
+    return loadOrCreateSignature(contractAddresses);
+  };
+
+  return {
+    loadOrCreateSignature,
+    isValidSignature,
+    refreshSignature
+  };
+};
+```
+
+### Provider Setup and Integration
+
+**Complete Provider Stack**
+
+```typescript
+// App.tsx - Complete provider setup for FHEVM application
+import { MetaMaskProvider } from './hooks/metamask/useMetaMaskProvider';
+import { MetaMaskEthersSignerProvider } from './hooks/metamask/useMetaMaskEthersSigner';
+import { InMemoryStorageProvider } from './hooks/useInMemoryStorage';
+
+const App = () => {
+  // Mock chains for development (optional)
+  const mockChains = {
+    31337: 'http://localhost:8545',  // Local hardhat
+    11155111: undefined              // Sepolia testnet
+  };
+
+  return (
+    <MetaMaskProvider>
+      <MetaMaskEthersSignerProvider initialMockChains={mockChains}>
+        <InMemoryStorageProvider>
+          <FHEVMApplicationContent />
+        </InMemoryStorageProvider>
+      </MetaMaskEthersSignerProvider>
+    </MetaMaskProvider>
+  );
+};
+
+// FHEVMApplicationContent.tsx - Main application with FHEVM integration
+import { useFhevmInstance } from '@fhevm/react';
+import { useMetaMaskEthersSigner } from './hooks/metamask/useMetaMaskEthersSigner';
+import { useInMemoryStorage } from './hooks/useInMemoryStorage';
+import { useTreasureHunt } from './hooks/useTreasureHunt';
+
+const FHEVMApplicationContent = () => {
+  const {
+    provider,
+    chainId,
+    ethersSigner,
+    ethersReadonlyProvider,
+    sameChain,
+    sameSigner,
+    isConnected
+  } = useMetaMaskEthersSigner();
+
+  const { storage } = useInMemoryStorage();
+
+  // Initialize FHEVM instance
+  const instance = useFhevmInstance({
+    chainId,
+    provider: ethersReadonlyProvider,
+  });
+
+  // Use complete FHEVM application hook
+  const treasureHunt = useTreasureHunt({
+    instance,
+    fhevmDecryptionSignatureStorage: storage,
+    eip1193Provider: provider,
+    chainId,
+    ethersSigner,
+    ethersReadonlyProvider,
+    sameChain,
+    sameSigner,
+  });
+
+  if (!isConnected) {
+    return <WalletConnection />;
+  }
+
+  return (
+    <TreasureHuntGame {...treasureHunt} />
+  );
+};
+```
+
+**Custom FHEVM Hook Pattern**
+
+```typescript
+interface FHEVMAppState {
+  // Instance and connection
+  instance: FhevmInstance | undefined;
+  isConnected: boolean;
+  chainId: number | undefined;
+
+  // Contract interaction
+  contract: Contract | null;
+  contractAddress: string;
+
+  // Encryption/Decryption
+  canEncrypt: boolean;
+  canDecrypt: boolean;
+
+  // Actions
+  encryptAndSubmit: (values: any[]) => Promise<void>;
+  decryptValue: (handle: string) => Promise<number>;
+  refreshState: () => Promise<void>;
+}
+
+const useFHEVMApp = (contractABI: any[], addressMap: Record<number, string>): FHEVMAppState => {
+  const { ethersSigner, ethersReadonlyProvider, chainId, isConnected } = useMetaMaskEthersSigner();
+  const { storage } = useInMemoryStorage();
+
+  const instance = useFhevmInstance({
+    chainId,
+    provider: ethersReadonlyProvider,
+  });
+
+  const contractAddress = useMemo(() => {
+    return chainId ? addressMap[chainId] || '' : '';
+  }, [chainId, addressMap]);
+
+  const contract = useMemo(() => {
+    if (!contractAddress || !ethersReadonlyProvider) return null;
+    return new Contract(contractAddress, contractABI, ethersReadonlyProvider);
+  }, [contractAddress, ethersReadonlyProvider, contractABI]);
+
+  const contractWithSigner = useMemo(() => {
+    if (!contractAddress || !ethersSigner) return null;
+    return new Contract(contractAddress, contractABI, ethersSigner);
+  }, [contractAddress, ethersSigner, contractABI]);
+
+  const canEncrypt = useMemo(() => {
+    return !!(instance && contractAddress && ethersSigner && isConnected);
+  }, [instance, contractAddress, ethersSigner, isConnected]);
+
+  const canDecrypt = useMemo(() => {
+    return !!(instance && ethersSigner && storage);
+  }, [instance, ethersSigner, storage]);
+
+  const encryptAndSubmit = async (values: any[]) => {
+    if (!canEncrypt || !contractWithSigner) return;
+
+    const userAddress = await ethersSigner!.getAddress();
+    const input = instance!.createEncryptedInput(contractAddress, userAddress);
+
+    // Add values based on their types
+    values.forEach(value => {
+      if (typeof value === 'boolean') {
+        input.addBool(value);
+      } else if (typeof value === 'number') {
+        if (value <= 255) input.add8(value);
+        else if (value <= 4294967295) input.add32(value);
+        else input.add64(BigInt(value));
+      } else if (typeof value === 'bigint') {
+        input.add64(value);
+      }
+    });
+
+    const encrypted = await input.encrypt();
+
+    // Submit to contract (implementation specific)
+    const tx = await contractWithSigner.submitEncryptedData(
+      encrypted.handles,
+      encrypted.inputProof
+    );
+
+    await tx.wait();
+  };
+
+  const decryptValue = async (handle: string): Promise<number> => {
+    if (!canDecrypt) throw new Error('Cannot decrypt');
+
+    const sig = await FhevmDecryptionSignature.loadOrSign(
+      instance!,
+      [contractAddress as `0x${string}`],
+      ethersSigner!,
+      storage
+    );
+
+    if (!sig) throw new Error('Failed to create signature');
+
+    const result = await instance!.userDecrypt(
+      [{ handle, contractAddress }],
+      sig.privateKey,
+      sig.publicKey,
+      sig.signature,
+      sig.contractAddresses,
+      sig.userAddress,
+      sig.startTimestamp,
+      sig.durationDays
+    );
+
+    return Number(result[handle]);
+  };
+
+  const refreshState = async () => {
+    // Implementation specific state refresh
+    if (contract) {
+      // Refresh contract state, user balances, etc.
+    }
+  };
+
+  return {
+    instance,
+    isConnected,
+    chainId,
+    contract,
+    contractAddress,
+    canEncrypt,
+    canDecrypt,
+    encryptAndSubmit,
+    decryptValue,
+    refreshState,
+  };
+};
+```
+
+### Error Handling and Edge Cases
+
+**Comprehensive Error Handling Pattern**
+
+```typescript
+interface FHEVMError {
+  type: 'connection' | 'encryption' | 'decryption' | 'contract' | 'signature';
+  message: string;
+  code?: string;
+  details?: any;
+}
+
+const useFHEVMErrorHandler = () => {
+  const [error, setError] = useState<FHEVMError | null>(null);
+
+  const handleError = (error: any, operation: string) => {
+    let fhevmError: FHEVMError;
+
+    if (error.code === 'ACTION_REJECTED') {
+      fhevmError = {
+        type: 'signature',
+        message: 'User rejected the signature request',
+        code: error.code
+      };
+    } else if (error.message?.includes('insufficient funds')) {
+      fhevmError = {
+        type: 'contract',
+        message: 'Insufficient funds for transaction',
+        details: error
+      };
+    } else if (error.message?.includes('FHEVM')) {
+      fhevmError = {
+        type: 'encryption',
+        message: `FHEVM operation failed: ${error.message}`,
+        details: error
+      };
+    } else if (operation.includes('decrypt')) {
+      fhevmError = {
+        type: 'decryption',
+        message: 'Failed to decrypt value. Please try refreshing your signature.',
+        details: error
+      };
+    } else {
+      fhevmError = {
+        type: 'connection',
+        message: 'Unknown error occurred',
+        details: error
+      };
+    }
+
+    setError(fhevmError);
+    console.error(`FHEVM ${operation} error:`, error);
+  };
+
+  const clearError = () => setError(null);
+
+  return { error, handleError, clearError };
+};
+```
+
+These React hook patterns provide production-ready solutions for integrating FHEVM into frontend applications, with special emphasis on multi-value encryption workflows and secure user decryption processes.

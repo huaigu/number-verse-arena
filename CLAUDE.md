@@ -192,3 +192,4 @@ Contract docs in `contracts/docs/`:
 - `DEPLOYMENT.md` - Contract deployment
 
 提交代码的comment总是用英文，不要太复杂，简洁清晰。
+- 任何涉及UI的修改，包括Html元素和使用代码控制UI元素的显示，文字部分都要实现中英双语，默认英语

@@ -3,6 +3,7 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { parseEther, decodeEventLog } from 'viem';
 import { CONTRACT_CONFIG, Game, GameSummary, CreateGameParams } from '@/contracts/config';
 import contractABI from '@/contracts/UniqueNumberGameFactory.json';
+import { useFHEEncryption } from '@/hooks/useFHEEncryption';
 
 // 获取所有游戏
 export const useGetAllGames = () => {
@@ -199,6 +200,7 @@ export const useCreateGame = () => {
 export const useSubmitNumber = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
+  const { encryptNumber } = useFHEEncryption();
 
   const { writeContract, data: hash, error, isPending } = useWriteContract();
 
@@ -213,10 +215,6 @@ export const useSubmitNumber = () => {
       if (!address) {
         throw new Error('Wallet not connected');
       }
-
-      // 动态导入 useFHEEncryption hook
-      const { useFHEEncryption } = await import('@/hooks/useFHEEncryption');
-      const { encryptNumber } = useFHEEncryption();
 
       // 使用 FHE 加密用户选择的数字
       console.log('Encrypting number:', number, 'for contract:', CONTRACT_CONFIG.address, 'user:', address);
