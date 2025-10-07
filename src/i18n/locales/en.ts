@@ -63,6 +63,42 @@ export default {
       }
     },
 
+    faq: {
+      title: "Frequently Asked Questions",
+      q1: {
+        question: "How many players can join a game?",
+        answer: "Each game room can have between 2 to 10 players. The room creator sets the maximum number of players when creating the game."
+      },
+      q2: {
+        question: "What number range can I choose?",
+        answer: "You can choose any custom number range, but the difference between the maximum and minimum numbers must be less than 256 for optimal FHE performance."
+      },
+      q3: {
+        question: "How much does it cost to play?",
+        answer: "The entry fee is set by the room creator when creating the game. All players pay the same entry fee, which forms the prize pool for the winner."
+      },
+      q4: {
+        question: "What happens if no one wins?",
+        answer: "If no player chooses a unique number, 90% of the total prize pool is refunded to all participants proportionally, and 10% is collected as a platform fee."
+      },
+      q5: {
+        question: "How is my privacy guaranteed?",
+        answer: "Your chosen number is encrypted using ZAMA's Fully Homomorphic Encryption (FHE) technology. It remains completely hidden from all players and even the smart contract until the reveal phase."
+      },
+      q6: {
+        question: "When does the game end?",
+        answer: "The game ends either when the deadline expires or when all player slots are filled and all players have submitted their numbers."
+      },
+      q7: {
+        question: "How do I claim my prize?",
+        answer: "If you win, you can claim your prize by clicking the 'Claim Prize' button on the game page after the game finishes. The prize will be transferred directly to your wallet."
+      },
+      q8: {
+        question: "Can I see others' numbers before the reveal?",
+        answer: "No, it's impossible! All numbers are encrypted on the blockchain using FHE. They can only be revealed simultaneously when the game ends, ensuring complete fairness."
+      }
+    },
+
     demoVideo: {
       title: "Watch How It Works",
       description: "See the Unique Number Game in action and learn how privacy-preserving gameplay works"

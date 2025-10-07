@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Trophy, Users, Target, Gamepad2, TwitterIcon, GithubIcon, Shield, Lock } from "lucide-react"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount } from 'wagmi'
@@ -279,6 +280,89 @@ const LandingPage = () => {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="container mx-auto px-4 py-16 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">
+            {t('landing.faq.title')}
+          </h2>
+
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            <AccordionItem value="item-1" className="bg-card border rounded-lg px-6">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold">{t('landing.faq.q1.question')}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {t('landing.faq.q1.answer')}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2" className="bg-card border rounded-lg px-6">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold">{t('landing.faq.q2.question')}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {t('landing.faq.q2.answer')}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3" className="bg-card border rounded-lg px-6">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold">{t('landing.faq.q3.question')}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {t('landing.faq.q3.answer')}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4" className="bg-card border rounded-lg px-6">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold">{t('landing.faq.q4.question')}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {t('landing.faq.q4.answer')}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5" className="bg-card border rounded-lg px-6">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold">{t('landing.faq.q5.question')}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {t('landing.faq.q5.answer')}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-6" className="bg-card border rounded-lg px-6">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold">{t('landing.faq.q6.question')}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {t('landing.faq.q6.answer')}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-7" className="bg-card border rounded-lg px-6">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold">{t('landing.faq.q7.question')}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {t('landing.faq.q7.answer')}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-8" className="bg-card border rounded-lg px-6">
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold">{t('landing.faq.q8.question')}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {t('landing.faq.q8.answer')}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
 
