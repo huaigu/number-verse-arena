@@ -154,8 +154,8 @@ export default {
       rules: {
         title: "Game Rules",
         rule1: "• Each player can only choose one number",
-        rule2: "• Players who choose unique numbers get rewards",
-        rule3: "• Duplicate number choices earn no points",
+        rule2: "• Players who choose unique numbers win the prize pool",
+        rule3: "• Duplicate number choices cannot win (no ETH reward)",
         rule4: (minutes: number) => `• Must complete selection within ${minutes} minutes`
       }
     },

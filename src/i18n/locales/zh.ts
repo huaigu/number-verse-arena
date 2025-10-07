@@ -154,8 +154,8 @@ export default {
       rules: {
         title: "游戏规则",
         rule1: "• 每位玩家只能选择一个数字",
-        rule2: "• 选择唯一数字的玩家获得奖励",
-        rule3: "• 重复的数字选择不得分",
+        rule2: "• 选择唯一数字的玩家赢得奖金池",
+        rule3: "• 重复的数字无法获胜（无 ETH 奖励）",
         rule4: (minutes: number) => `• 必须在 ${minutes} 分钟内完成选择`
       }
     },
