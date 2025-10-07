@@ -11,11 +11,14 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useToast } from "@/hooks/use-toast"
 import { useGetGameSummary, useHasPlayerSubmitted, useSubmitNumber, useFindWinner, useClaimPrize, useHasPlayerClaimed, useCanFinalizeGame, useGetAllGames } from "@/hooks/contract/useGameContract"
 import { CONTRACT_CONFIG, formatETH, formatAddress, Game, GameSummary } from "@/contracts/config"
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
 const GamePage = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { address, isConnected } = useAccount()
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   
   // 从URL参数获取游戏ID
@@ -123,31 +126,31 @@ const GamePage = () => {
   useEffect(() => {
     if (submitSuccess) {
       toast({
-        title: "Number submitted successfully! 🎉",
-        description: "Your number has been submitted to the blockchain.",
+        title: t('toast.numberSubmitted.title'),
+        description: t('toast.numberSubmitted.description'),
       })
       refetchGame()
       refetchHasSubmitted()
     }
-  }, [submitSuccess, toast, refetchGame, refetchHasSubmitted])
-  
+  }, [submitSuccess, toast, refetchGame, refetchHasSubmitted, t])
+
   // 处理提交错误
   useEffect(() => {
     if (submitError) {
       toast({
-        title: "Submission failed",
-        description: submitError.message || "Please try again.",
+        title: t('toast.submissionFailed.title'),
+        description: submitError.message || t('toast.submissionFailed.description'),
         variant: "destructive"
       })
     }
-  }, [submitError, toast])
+  }, [submitError, toast, t])
   
   // 处理开奖成功 - 添加重试机制获取winner信息
   useEffect(() => {
     if (findSuccess) {
       toast({
-        title: "Game revealed! 🎉",
-        description: "Fetching winner information...",
+        title: t('toast.gameFinalized.title'),
+        description: t('toast.gameFinalized.description'),
       })
       
       // 立即刷新一次
@@ -171,8 +174,8 @@ const GamePage = () => {
             // 成功获取winner信息
             clearInterval(retryInterval)
             toast({
-              title: "Winner information loaded! 🎉",
-              description: "Game results are now available.",
+              title: t('toast.winnerInfoLoaded.title'),
+              description: t('toast.winnerInfoLoaded.description'),
             })
           } else {
             retryCount++
@@ -180,15 +183,15 @@ const GamePage = () => {
               // 达到最大重试次数
               clearInterval(retryInterval)
               toast({
-                title: "Winner information pending",
-                description: "Please refresh the page manually to see results.",
+                title: t('toast.winnerInfoPending.title'),
+                description: t('toast.winnerInfoPending.description'),
                 variant: "destructive"
               })
             } else {
               // 继续重试
               toast({
-                title: `Fetching winner... (${retryCount}/${maxRetries})`,
-                description: "Waiting for blockchain confirmation.",
+                title: t('toast.fetchingWinner.title', { retryCount, maxRetries }),
+                description: t('toast.fetchingWinner.description'),
               })
             }
           }
@@ -198,8 +201,8 @@ const GamePage = () => {
           if (retryCount >= maxRetries) {
             clearInterval(retryInterval)
             toast({
-              title: "Error fetching winner",
-              description: "Please refresh the page to see results.",
+              title: t('toast.errorFetchingWinner.title'),
+              description: t('toast.errorFetchingWinner.description'),
               variant: "destructive"
             })
           }
@@ -211,41 +214,41 @@ const GamePage = () => {
         clearInterval(retryInterval)
       }
     }
-  }, [findSuccess, toast, refetchGame, refetchCanFinalize, finalGameSummary])
+  }, [findSuccess, toast, refetchGame, refetchCanFinalize, finalGameSummary, t])
   
   // 处理开奖错误
   useEffect(() => {
     if (findError) {
       toast({
-        title: "Reveal failed",
-        description: findError.message || "Please try again.",
+        title: t('toast.revealFailed.title'),
+        description: findError.message || t('toast.revealFailed.description'),
         variant: "destructive"
       })
     }
-  }, [findError, toast])
+  }, [findError, toast, t])
   
   // 处理领取成功
   useEffect(() => {
     if (claimSuccess) {
       toast({
-        title: "Prize claimed! 🎉",
-        description: "Your winnings have been transferred to your wallet.",
+        title: t('toast.prizeClaimed.title'),
+        description: t('toast.prizeClaimed.description'),
       })
       refetchGame()
       refetchHasClaimed()
     }
-  }, [claimSuccess, toast, refetchGame, refetchHasClaimed])
+  }, [claimSuccess, toast, refetchGame, refetchHasClaimed, t])
   
   // 处理领取错误
   useEffect(() => {
     if (claimError) {
       toast({
-        title: "Claim failed",
-        description: claimError.message || "Please try again.",
+        title: t('toast.claimFailed.title'),
+        description: claimError.message || t('toast.claimFailed.description'),
         variant: "destructive"
       })
     }
-  }, [claimError, toast])
+  }, [claimError, toast, t])
 
   // 监听游戏状态变为 Calculating 并自动刷新结果
   useEffect(() => {
@@ -257,8 +260,8 @@ const GamePage = () => {
         previousGameStatus !== CONTRACT_CONFIG.GameStatus.Calculating) {
       
       toast({
-        title: "Game calculating! 🎲",
-        description: "Automatically fetching results...",
+        title: t('toast.gameCalculating.title'),
+        description: t('toast.gameCalculating.description'),
       })
       
       // 立即刷新一次
@@ -282,8 +285,8 @@ const GamePage = () => {
             // 成功获取winner信息
             clearInterval(autoRefreshInterval)
             toast({
-              title: "Results loaded! 🎉",
-              description: "Game calculation complete.",
+              title: t('toast.resultsLoaded.title'),
+              description: t('toast.resultsLoaded.description'),
             })
           } else {
             retryCount++
@@ -291,15 +294,15 @@ const GamePage = () => {
               // 达到最大重试次数
               clearInterval(autoRefreshInterval)
               toast({
-                title: "Still calculating...",
-                description: "You can manually refresh for updates.",
+                title: t('toast.stillCalculating.title'),
+                description: t('toast.stillCalculating.description'),
               })
             } else {
               // 继续重试，但不显示太多提示以避免spam
               if (retryCount % 3 === 0) { // 每隔3次重试才显示一次提示
                 toast({
-                  title: `Checking results... (${retryCount}/${maxRetries})`,
-                  description: "Waiting for blockchain calculation.",
+                  title: t('toast.checkingResults.title', { retryCount, maxRetries }),
+                  description: t('toast.checkingResults.description'),
                 })
               }
             }
@@ -310,8 +313,8 @@ const GamePage = () => {
           if (retryCount >= maxRetries) {
             clearInterval(autoRefreshInterval)
             toast({
-              title: "Auto-refresh stopped",
-              description: "Please refresh manually to see results.",
+              title: t('toast.autoRefreshStopped.title'),
+              description: t('toast.autoRefreshStopped.description'),
               variant: "destructive"
             })
           }
@@ -328,7 +331,7 @@ const GamePage = () => {
     if (currentStatus !== undefined) {
       setPreviousGameStatus(currentStatus)
     }
-  }, [finalGameSummary?.status, previousGameStatus, toast, refetchGame, refetchCanFinalize])
+  }, [finalGameSummary?.status, previousGameStatus, toast, refetchGame, refetchCanFinalize, t])
 
   // 计算剩余时间
   const getTimeLeft = () => {
@@ -340,17 +343,17 @@ const GamePage = () => {
 
   // 格式化时间显示
   const formatTimeLeft = (seconds: number) => {
-    if (seconds <= 0) return "Expired"
-    
+    if (seconds <= 0) return t('gamePage.roomInfo.expired')
+
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     const secs = seconds % 60
-    
+
     const parts = []
     if (hours > 0) parts.push(`${hours}h`)
     if (minutes > 0) parts.push(`${minutes}m`)
     if (secs > 0) parts.push(`${secs}s`)
-    
+
     return parts.join(' ') || '0s'
   }
   
@@ -436,8 +439,8 @@ const GamePage = () => {
   const handleNumberSelect = (number: number) => {
     if (!isConnected) {
       toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to make a selection.",
+        title: t('toast.walletNotConnected.title'),
+        description: t('toast.walletNotConnected.description'),
         variant: "destructive"
       })
       return
@@ -446,8 +449,8 @@ const GamePage = () => {
     // Prevent selection if user has already submitted
     if (hasSubmitted) {
       toast({
-        title: "Already submitted",
-        description: "You have already submitted your number for this game.",
+        title: t('toast.alreadySubmitted.title'),
+        description: t('toast.alreadySubmitted.description'),
         variant: "destructive"
       })
       return
@@ -456,8 +459,8 @@ const GamePage = () => {
     // Check if game is still open
     if (!finalGameSummary || finalGameSummary.status !== CONTRACT_CONFIG.GameStatus.Open) {
       toast({
-        title: "Game not available",
-        description: "This game is no longer accepting submissions.",
+        title: t('toast.gameNotAvailable.title'),
+        description: t('toast.gameNotAvailable.description'),
         variant: "destructive"
       })
       return
@@ -470,8 +473,8 @@ const GamePage = () => {
   const handleConfirmChoice = async () => {
     if (!isConnected || !selectedNumber || !finalGameSummary) {
       toast({
-        title: "Cannot submit",
-        description: "Please make sure you're connected and have selected a number.",
+        title: t('toast.cannotSubmit.title'),
+        description: t('toast.cannotSubmit.description'),
         variant: "destructive"
       })
       return
@@ -479,16 +482,16 @@ const GamePage = () => {
     
     try {
       toast({
-        title: "🔐 Encrypting your number...",
-        description: "This may take 10-30 seconds due to FHE encryption. Please wait...",
+        title: t('toast.encryptingNumber.title'),
+        description: t('toast.encryptingNumber.description'),
       })
       
       // 调用更新后的 submitNumber，它现在包含 FHE 加密
       await submitNumber(gameId, selectedNumber, formatETH(finalGameSummary.entryFee))
       
       toast({
-        title: "Transaction submitted",
-        description: "Please confirm the transaction in your wallet.",
+        title: t('toast.transactionSubmitted.title'),
+        description: t('toast.transactionSubmitted.description'),
       })
     } catch (error) {
       console.error('Error submitting number:', error)
@@ -506,7 +509,7 @@ const GamePage = () => {
       }
       
       toast({
-        title: "Submission failed",
+        title: t('toast.submissionFailed.title'),
         description: errorMessage,
         variant: "destructive"
       })
@@ -517,8 +520,8 @@ const GamePage = () => {
   const handleRevealWinner = async () => {
     if (gameId === undefined) {
       toast({
-        title: "Cannot reveal",
-        description: "Game ID is missing.",
+        title: t('toast.cannotReveal.title'),
+        description: t('toast.cannotReveal.description'),
         variant: "destructive"
       })
       return
@@ -527,8 +530,8 @@ const GamePage = () => {
     try {
       await findWinner(gameId)
       toast({
-        title: "Revealing winner...",
-        description: "Please confirm the transaction in your wallet.",
+        title: t('toast.revealingWinner.title'),
+        description: t('toast.revealingWinner.description'),
       })
     } catch (error) {
       console.error('Error revealing winner:', error)
@@ -539,8 +542,8 @@ const GamePage = () => {
   const handleClaimPrize = async () => {
     if (gameId === undefined) {
       toast({
-        title: "Cannot claim",
-        description: "Game ID is missing.",
+        title: t('toast.cannotClaim.title'),
+        description: t('toast.cannotClaim.description'),
         variant: "destructive"
       })
       return
@@ -549,8 +552,8 @@ const GamePage = () => {
     try {
       await claimPrize(gameId)
       toast({
-        title: "Claiming prize...",
-        description: "Please confirm the transaction in your wallet.",
+        title: t('toast.claimingPrize.title'),
+        description: t('toast.claimingPrize.description'),
       })
     } catch (error) {
       console.error('Error claiming prize:', error)
@@ -577,12 +580,12 @@ const GamePage = () => {
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-            <h3 className="text-xl font-semibold mb-2">Invalid Room</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('gamePage.notFound')}</h3>
             <p className="text-muted-foreground mb-4">
-              No room ID provided. Please use a valid room link.
+              {t('gamePage.notFoundDesc')}
             </p>
             <GradientButton onClick={() => navigate("/join-room")}>
-              Browse Rooms
+              {t('common.joinRoom')}
             </GradientButton>
           </CardContent>
         </Card>
@@ -599,9 +602,9 @@ const GamePage = () => {
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-            <h3 className="text-xl font-semibold mb-2">Loading Game</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('gamePage.loading')}</h3>
             <p className="text-muted-foreground">
-              Fetching game data from blockchain...
+              {t('common.loading')}
             </p>
           </CardContent>
         </Card>
@@ -625,24 +628,21 @@ const GamePage = () => {
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-            <h3 className="text-xl font-semibold mb-2">Game Load Error</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('gamePage.notFound')}</h3>
             <p className="text-muted-foreground mb-2">
-              Room #{gameId?.toString()} could not be loaded.
+              {t('gamePage.roomInfo.roomId')} #{gameId?.toString()} {t('gamePage.notFoundDesc')}
             </p>
             {(gameError || gameErrorDetails) && (
               <div className="text-sm text-muted-foreground mb-4 p-2 bg-muted rounded">
                 <strong>Error:</strong> {gameErrorDetails?.message || 'Unknown error'}
               </div>
             )}
-            <p className="text-xs text-muted-foreground mb-4">
-              This might be an expired game or network issue.
-            </p>
             <div className="space-y-2">
               <GradientButton onClick={() => refetchGame()} className="w-full">
-                Try Again
+                {t('gamePage.actions.tryAgain')}
               </GradientButton>
               <GradientButton variant="outline" onClick={() => navigate("/join-room")} className="w-full">
-                Browse Other Rooms
+                {t('common.joinRoom')}
               </GradientButton>
             </div>
           </CardContent>
@@ -659,37 +659,38 @@ const GamePage = () => {
         {/* Compact Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
-            <GradientButton 
-              variant="outline" 
+            <GradientButton
+              variant="outline"
               size="sm"
               onClick={() => navigate("/")}
             >
               <Home className="w-4 h-4 mr-1" />
-              Home
+              {t('common.home')}
             </GradientButton>
             <Badge variant="secondary" className="px-3 py-1">
-              Room #{gameId.toString()}
+              {t('gamePage.roomInfo.roomId')} #{gameId.toString()}
             </Badge>
-            <Badge 
+            <Badge
               variant={finalGameSummary.status === CONTRACT_CONFIG.GameStatus.Open ? "default" : "destructive"}
               className="px-3 py-1"
             >
-              {CONTRACT_CONFIG.GameStatus.Open === finalGameSummary.status ? "Open" : 
-               CONTRACT_CONFIG.GameStatus.Calculating === finalGameSummary.status ? "Calculating" : 
-               CONTRACT_CONFIG.GameStatus.Finished === finalGameSummary.status ? "Finished" : "Completed"}
+              {CONTRACT_CONFIG.GameStatus.Open === finalGameSummary.status ? t('joinRoom.status.open') :
+               CONTRACT_CONFIG.GameStatus.Calculating === finalGameSummary.status ? t('joinRoom.status.calculating') :
+               CONTRACT_CONFIG.GameStatus.Finished === finalGameSummary.status ? t('joinRoom.status.finished') : t('joinRoom.status.claimed')}
             </Badge>
           </div>
           
           <div className="flex items-center space-x-3">
+            <LanguageSwitcher />
             <ConnectButton />
-            <GradientButton 
-              variant="secondary" 
+            <GradientButton
+              variant="secondary"
               size="sm"
               onClick={() => refetchGame()}
               disabled={gameLoading}
             >
               <RotateCcw className={`w-4 h-4 mr-1 ${gameLoading ? 'animate-spin' : ''}`} />
-              Refresh
+              {t('common.refresh')}
             </GradientButton>
           </div>
         </div>
@@ -711,7 +712,7 @@ const GamePage = () => {
                       {formatTimeLeft(timeLeft)}
                     </span>
                   </div>
-                  <div className="text-xs text-muted-foreground">Time Left</div>
+                  <div className="text-xs text-muted-foreground">{t('gamePage.roomInfo.timeLeft')}</div>
                 </CardContent>
               </Card>
 
@@ -721,7 +722,7 @@ const GamePage = () => {
                   <div className="text-sm font-bold text-primary-foreground">
                     {formatETH(finalGameSummary.prizePool)} ETH
                   </div>
-                  <div className="text-xs text-primary-foreground/80">Prize Pool</div>
+                  <div className="text-xs text-primary-foreground/80">{t('gamePage.roomInfo.prizePool')}</div>
                 </CardContent>
               </Card>
             </div>
@@ -734,15 +735,15 @@ const GamePage = () => {
                     {selectedNumber || "?"}
                   </div>
                   {hasSubmitted && selectedNumber && (
-                    <Badge variant="default" className="text-xs mb-1">Submitted</Badge>
+                    <Badge variant="default" className="text-xs mb-1">{t('gamePage.gameArea.submitted')}</Badge>
                   )}
                   {isSubmitting && (
                     <Badge variant="outline" className="text-xs mb-1">
                       <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                      Submitting...
+                      {t('gamePage.gameArea.submitting')}
                     </Badge>
                   )}
-                  <div className="text-xs text-secondary-foreground/80">My Choice</div>
+                  <div className="text-xs text-secondary-foreground/80">{t('gamePage.gameArea.myChoice')}</div>
                 </CardContent>
               </Card>
 
@@ -752,7 +753,7 @@ const GamePage = () => {
                   <div className="text-sm font-bold text-primary">
                     {finalGameSummary.playerCount}/{finalGameSummary.maxPlayers}
                   </div>
-                  <div className="text-xs text-muted-foreground">Players</div>
+                  <div className="text-xs text-muted-foreground">{t('gamePage.roomInfo.players')}</div>
                 </CardContent>
               </Card>
             </div>
@@ -762,13 +763,10 @@ const GamePage = () => {
               <CardContent className="p-3 text-center space-y-1">
                 <div className="flex items-center justify-center space-x-2">
                   <Wallet className="w-4 h-4 text-primary-foreground" />
-                  <span className="text-sm font-medium text-primary-foreground">Entry Fee Required</span>
+                  <span className="text-sm font-medium text-primary-foreground">{t('joinRoom.roomCard.entryFee')}</span>
                 </div>
                 <div className="text-xl font-bold text-primary-foreground">
                   {formatETH(finalGameSummary.entryFee)} ETH
-                </div>
-                <div className="text-xs text-primary-foreground/80">
-                  To participate in this room
                 </div>
               </CardContent>
             </Card>
@@ -780,28 +778,28 @@ const GamePage = () => {
                   <div className="text-center">
                     <h4 className="font-semibold text-sm mb-1">{finalGameSummary.roomName}</h4>
                     <p className="text-xs text-muted-foreground">
-                      Numbers: {finalGameSummary.minNumber}-{finalGameSummary.maxNumber}
+                      {t('gamePage.roomInfo.numberRange')}: {finalGameSummary.minNumber}-{finalGameSummary.maxNumber}
                     </p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="text-center p-2 bg-muted/20 rounded">
                       <div className="font-semibold">{formatETH(finalGameSummary.entryFee)} ETH</div>
-                      <div className="text-muted-foreground">Entry Fee</div>
+                      <div className="text-muted-foreground">{t('joinRoom.roomCard.entryFee')}</div>
                     </div>
                     <div className="text-center p-2 bg-muted/20 rounded">
                       <div className="font-semibold">
-                        {finalGameSummary.winner !== "0x0000000000000000000000000000000000000000" ? 
+                        {finalGameSummary.winner !== "0x0000000000000000000000000000000000000000" ?
                           formatAddress(finalGameSummary.winner) : "TBD"}
                       </div>
-                      <div className="text-muted-foreground">Winner</div>
+                      <div className="text-muted-foreground">{t('gamePage.gameArea.results.winner')}</div>
                     </div>
                   </div>
-                  
+
                   {/* Player capacity bar */}
                   <div>
                     <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>Players</span>
+                      <span>{t('gamePage.roomInfo.players')}</span>
                       <span>{finalGameSummary.playerCount}/{finalGameSummary.maxPlayers}</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
@@ -871,7 +869,7 @@ const GamePage = () => {
                     <div className="p-2 bg-orange-50 border border-orange-200 rounded text-center">
                       <div className="flex items-center justify-center space-x-2 text-orange-700">
                         <Wallet className="w-4 h-4" />
-                        <span className="text-sm">Connect wallet to play</span>
+                        <span className="text-sm">{t('common.connectWallet')}</span>
                       </div>
                     </div>
                   )}
@@ -882,9 +880,9 @@ const GamePage = () => {
                       <div className="flex items-center justify-center space-x-2 text-yellow-700">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm">
-                          {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating ? "Waiting for game results..." :
-                           finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Finished ? "Game has finished" :
-                           "Game is no longer accepting submissions"}
+                          {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating ? t('gamePage.gameArea.waitingResults') :
+                           finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Finished ? t('joinRoom.status.finished') :
+                           t('toast.gameNotAvailable.description')}
                         </span>
                       </div>
                     </div>
@@ -894,7 +892,7 @@ const GamePage = () => {
                   {selectedNumber && !hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
                     <div className="p-2 bg-accent/20 rounded text-center">
                       <span className="text-sm text-accent-foreground">
-                        Selected: <span className="font-bold text-lg">{selectedNumber}</span>
+                        {t('gamePage.gameArea.selected')}: <span className="font-bold text-lg">{selectedNumber}</span>
                       </span>
                     </div>
                   )}
@@ -902,8 +900,8 @@ const GamePage = () => {
                   {/* Action Buttons - Enhanced */}
                   {!hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
                     <div className="grid grid-cols-2 gap-4">
-                      <GradientButton 
-                        variant="game" 
+                      <GradientButton
+                        variant="game"
                         size="lg"
                         disabled={!selectedNumber || isSubmitting || timeLeft === 0}
                         className="w-full h-12 text-base font-semibold"
@@ -912,23 +910,23 @@ const GamePage = () => {
                         {isSubmitting ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Submitting...
+                            {t('gamePage.gameArea.submitting')}
                           </>
                         ) : timeLeft === 0 ? (
-                          "Time Expired"
+                          t('gamePage.roomInfo.expired')
                         ) : (
-                          "Confirm Choice"
+                          t('common.confirm')
                         )}
                       </GradientButton>
-                      
-                      <GradientButton 
-                        variant="outline" 
+
+                      <GradientButton
+                        variant="outline"
                         size="lg"
                         onClick={() => setSelectedNumber(null)}
                         className="w-full h-12 text-base"
                         disabled={isSubmitting}
                       >
-                        Clear Selection
+                        {t('common.cancel')}
                       </GradientButton>
                     </div>
                   )}
@@ -939,7 +937,7 @@ const GamePage = () => {
                       <div className="flex items-center justify-center space-x-2 text-green-700">
                         <Trophy className="w-5 h-5" />
                         <span className="text-sm font-medium">
-                          Number submitted successfully! Waiting for other players...
+                          {t('gamePage.gameArea.waitingPlayers')}
                         </span>
                       </div>
                     </div>
@@ -951,7 +949,7 @@ const GamePage = () => {
                       <div className="flex items-center justify-center space-x-2 text-red-700">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm font-medium">
-                          Time expired! No players joined this game.
+                          {t('gamePage.gameArea.noPlayersJoined')}
                         </span>
                       </div>
                     </div>
@@ -963,29 +961,29 @@ const GamePage = () => {
                       {/* Header Section */}
                       <div className="text-center">
                         <Trophy className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-xl font-bold text-purple-800">Game Completed!</h3>
+                        <h3 className="text-xl font-bold text-purple-800">{t('gamePage.gameArea.results.title')}</h3>
                       </div>
                       
                       {isCurrentUserWinner() ? (
                         /* Winner View */
                         <div className="space-y-3">
                           <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center">
-                            <div className="text-green-800 font-bold text-lg mb-2">🎉 Congratulations! You won!</div>
+                            <div className="text-green-800 font-bold text-lg mb-2">🎉 {t('gamePage.gameArea.results.youWon')}</div>
                             <div className="flex justify-center items-center space-x-6 text-green-700">
                               <div>
-                                <div className="text-sm font-medium">Your winning number</div>
+                                <div className="text-sm font-medium">{t('gamePage.gameArea.results.winningNumber')}</div>
                                 <div className="text-2xl font-bold">{finalGameSummary.winningNumber}</div>
                               </div>
                               <div>
-                                <div className="text-sm font-medium">Prize</div>
+                                <div className="text-sm font-medium">{t('joinRoom.roomCard.prizePool')}</div>
                                 <div className="text-2xl font-bold">{formatETH(finalGameSummary.prizePool)} ETH</div>
                               </div>
                             </div>
                           </div>
                           
                           {!hasClaimed ? (
-                            <GradientButton 
-                              onClick={handleClaimPrize} 
+                            <GradientButton
+                              onClick={handleClaimPrize}
                               disabled={isClaiming}
                               className="w-full"
                               size="lg"
@@ -993,18 +991,18 @@ const GamePage = () => {
                               {isClaiming ? (
                                 <>
                                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                  Claiming...
+                                  {t('gamePage.gameArea.results.claiming')}
                                 </>
                               ) : (
                                 <>
                                   <Wallet className="w-4 h-4 mr-2" />
-                                  Claim {formatETH(finalGameSummary.prizePool)} ETH
+                                  {t('gamePage.gameArea.results.claimPrize')} {formatETH(finalGameSummary.prizePool)} ETH
                                 </>
                               )}
                             </GradientButton>
                           ) : (
                             <div className="p-3 bg-green-100 border border-green-300 rounded-lg text-green-800 text-center font-medium">
-                              ✅ Prize claimed! Congratulations!
+                              ✅ {t('gamePage.gameArea.results.claimed')}
                             </div>
                           )}
                         </div>
@@ -1013,23 +1011,23 @@ const GamePage = () => {
                         <div className="space-y-3">
                           <div className="grid grid-cols-2 gap-3">
                             <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg text-center">
-                              <div className="text-sm text-blue-600 font-medium mb-1">Winner</div>
+                              <div className="text-sm text-blue-600 font-medium mb-1">{t('gamePage.gameArea.results.winner')}</div>
                               <div className="text-blue-800 font-bold text-lg">
                                 {formatAddress(finalGameSummary.winner)}
                               </div>
                             </div>
-                            
+
                             <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg text-center">
-                              <div className="text-sm text-purple-600 font-medium mb-1">Winning Number</div>
+                              <div className="text-sm text-purple-600 font-medium mb-1">{t('gamePage.gameArea.results.winningNumber')}</div>
                               <div className="text-purple-800 font-bold text-2xl">
                                 {finalGameSummary.winningNumber}
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="p-3 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg text-center">
                             <div className="text-orange-700 font-medium">
-                              Better luck next time! 🎯
+                              {t('gamePage.gameArea.results.youLost')} 🎯
                             </div>
                           </div>
                         </div>
@@ -1042,18 +1040,18 @@ const GamePage = () => {
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
                       <div className="text-blue-700 mb-3">
                         <Clock className="w-6 h-6 mx-auto mb-2" />
-                        <div className="font-medium">Time Expired!</div>
+                        <div className="font-medium">{t('gamePage.gameArea.timeExpiredReveal')}</div>
                         <div className="text-sm">
-                          Game ended with {finalGameSummary.playerCount} players. Anyone can reveal the winner now!
+                          {t('gamePage.gameArea.gameEndedWithPlayers', { count: finalGameSummary.playerCount })}
                         </div>
                       </div>
-                      
+
                       <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm mb-3">
-                        💡 Reveal reward: ~{formatETH(finalGameSummary.prizePool / BigInt(10))} ETH (10% of prize pool)
+                        💡 {t('gamePage.gameArea.revealReward')}: {t('gamePage.gameArea.revealRewardAmount', { amount: formatETH(finalGameSummary.prizePool / BigInt(10)) })}
                       </div>
-                      
-                      <GradientButton 
-                        onClick={handleRevealWinner} 
+
+                      <GradientButton
+                        onClick={handleRevealWinner}
                         disabled={isFinding}
                         size="sm"
                         className="w-full"
@@ -1061,11 +1059,11 @@ const GamePage = () => {
                         {isFinding ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Revealing...
+                            {t('gamePage.gameArea.revealing')}
                           </>
                         ) : (
                           <>
-                            🔍 Reveal Winner & Claim Reward
+                            🔍 {t('gamePage.gameArea.revealWinner')}
                           </>
                         )}
                       </GradientButton>
@@ -1077,10 +1075,10 @@ const GamePage = () => {
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
                       <div className="flex items-center justify-center space-x-2 text-blue-700 mb-2">
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span className="text-sm font-medium">Calculating winner...</span>
+                        <span className="text-sm font-medium">{t('gamePage.gameArea.calculating')}</span>
                       </div>
                       <div className="text-blue-600 text-xs">
-                        Please wait while the blockchain determines the winner.
+                        {t('gamePage.gameArea.calculatingDesc')}
                       </div>
                     </div>
                   )}

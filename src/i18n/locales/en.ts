@@ -200,10 +200,22 @@ export default {
       selectNumber: "Select Your Number",
       selectedNumber: "Selected Number",
       notSelected: "Not selected",
+      myChoice: "My Choice",
+      selected: "Selected",
       submitButton: "Submit Number",
       submitting: "Submitting...",
       submitted: "Number Submitted",
       waitingResults: "Waiting for Results",
+      waitingPlayers: "Number submitted successfully! Waiting for other players...",
+      noPlayersJoined: "Time expired! No players joined this game.",
+      timeExpiredReveal: "Time Expired!",
+      gameEndedWithPlayers: (count: number) => `Game ended with ${count} players. Anyone can reveal the winner now!`,
+      revealReward: "Reveal reward",
+      revealRewardAmount: (amount: string) => `~${amount} ETH (10% of prize pool)`,
+      revealWinner: "Reveal Winner & Claim Reward",
+      revealing: "Revealing...",
+      calculating: "Calculating winner...",
+      calculatingDesc: "Please wait while the blockchain determines the winner.",
 
       results: {
         title: "Game Results",
@@ -444,6 +456,78 @@ export default {
     cacheCleared: {
       title: "Cache cleared",
       description: "Leaderboard data has been refreshed."
+    },
+
+    // Game Page - Winner Info
+    winnerInfoLoaded: {
+      title: "Winner information loaded! 🎉",
+      description: "Game results are now available."
+    },
+    winnerInfoPending: {
+      title: "Winner information pending",
+      description: "Please refresh the page manually to see results."
+    },
+    fetchingWinner: {
+      title: "Fetching winner... ({{retryCount}}/{{maxRetries}})",
+      description: "Waiting for blockchain confirmation."
+    },
+    errorFetchingWinner: {
+      title: "Error fetching winner",
+      description: "Please refresh the page to see results."
+    },
+    revealFailed: {
+      title: "Reveal failed",
+      description: "Please try again."
+    },
+    gameCalculating: {
+      title: "Game calculating! 🎲",
+      description: "Automatically fetching results..."
+    },
+    resultsLoaded: {
+      title: "Results loaded! 🎉",
+      description: "Game calculation complete."
+    },
+    stillCalculating: {
+      title: "Still calculating...",
+      description: "You can manually refresh for updates."
+    },
+    checkingResults: {
+      title: "Checking results... ({{retryCount}}/{{maxRetries}})",
+      description: "Waiting for blockchain calculation."
+    },
+    autoRefreshStopped: {
+      title: "Auto-refresh stopped",
+      description: "Please refresh manually to see results."
+    },
+
+    // Game Page - Game Actions
+    gameNotAvailable: {
+      title: "Game not available",
+      description: "This game is no longer accepting submissions."
+    },
+    cannotSubmit: {
+      title: "Cannot submit",
+      description: "Please make sure you're connected and have selected a number."
+    },
+    encryptingNumber: {
+      title: "🔐 Encrypting your number...",
+      description: "This may take 10-30 seconds due to FHE encryption. Please wait..."
+    },
+    transactionSubmitted: {
+      title: "Transaction submitted",
+      description: "Please confirm the transaction in your wallet."
+    },
+    cannotReveal: {
+      title: "Cannot reveal",
+      description: "Game ID is missing."
+    },
+    revealingWinner: {
+      title: "Revealing winner...",
+      description: "Please confirm the transaction in your wallet."
+    },
+    cannotClaim: {
+      title: "Cannot claim",
+      description: "Game ID is missing."
     }
   }
 };

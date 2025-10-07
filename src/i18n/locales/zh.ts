@@ -200,10 +200,22 @@ export default {
       selectNumber: "选择您的数字",
       selectedNumber: "已选数字",
       notSelected: "未选择",
+      myChoice: "我的选择",
+      selected: "已选择",
       submitButton: "提交数字",
       submitting: "提交中...",
       submitted: "已提交数字",
       waitingResults: "等待结果",
+      waitingPlayers: "数字提交成功！等待其他玩家...",
+      noPlayersJoined: "时间已到！没有玩家加入此游戏。",
+      timeExpiredReveal: "时间已到！",
+      gameEndedWithPlayers: (count: number) => `游戏结束，共 ${count} 名玩家。任何人都可以揭晓获胜者！`,
+      revealReward: "揭晓奖励",
+      revealRewardAmount: (amount: string) => `~${amount} ETH（奖池的 10%）`,
+      revealWinner: "揭晓获胜者并领取奖励",
+      revealing: "揭晓中...",
+      calculating: "正在计算获胜者...",
+      calculatingDesc: "请稍候，区块链正在确定获胜者。",
 
       results: {
         title: "游戏结果",
@@ -444,6 +456,78 @@ export default {
     cacheCleared: {
       title: "缓存已清除",
       description: "排行榜数据已刷新。"
+    },
+
+    // 游戏页面 - 获胜者信息
+    winnerInfoLoaded: {
+      title: "获胜者信息已加载！🎉",
+      description: "游戏结果现已可用。"
+    },
+    winnerInfoPending: {
+      title: "获胜者信息待定",
+      description: "请手动刷新页面查看结果。"
+    },
+    fetchingWinner: {
+      title: "正在获取获胜者... ({{retryCount}}/{{maxRetries}})",
+      description: "等待区块链确认中。"
+    },
+    errorFetchingWinner: {
+      title: "获取获胜者失败",
+      description: "请刷新页面查看结果。"
+    },
+    revealFailed: {
+      title: "揭晓失败",
+      description: "请重试。"
+    },
+    gameCalculating: {
+      title: "游戏计算中！🎲",
+      description: "正在自动获取结果..."
+    },
+    resultsLoaded: {
+      title: "结果已加载！🎉",
+      description: "游戏计算完成。"
+    },
+    stillCalculating: {
+      title: "仍在计算中...",
+      description: "您可以手动刷新以获取更新。"
+    },
+    checkingResults: {
+      title: "正在检查结果... ({{retryCount}}/{{maxRetries}})",
+      description: "等待区块链计算中。"
+    },
+    autoRefreshStopped: {
+      title: "自动刷新已停止",
+      description: "请手动刷新查看结果。"
+    },
+
+    // 游戏页面 - 游戏操作
+    gameNotAvailable: {
+      title: "游戏不可用",
+      description: "此游戏不再接受提交。"
+    },
+    cannotSubmit: {
+      title: "无法提交",
+      description: "请确保您已连接钱包并选择了一个数字。"
+    },
+    encryptingNumber: {
+      title: "🔐 正在加密您的数字...",
+      description: "由于 FHE 加密，这可能需要 10-30 秒。请稍候..."
+    },
+    transactionSubmitted: {
+      title: "交易已提交",
+      description: "请在钱包中确认交易。"
+    },
+    cannotReveal: {
+      title: "无法揭晓",
+      description: "游戏 ID 缺失。"
+    },
+    revealingWinner: {
+      title: "正在揭晓获胜者...",
+      description: "请在钱包中确认交易。"
+    },
+    cannotClaim: {
+      title: "无法领取",
+      description: "游戏 ID 缺失。"
     }
   }
 };
