@@ -31,7 +31,7 @@ export function useWinnerCache(): UseWinnerCacheReturn {
   const isStale = cachedData ? isCacheStale(cachedData.lastUpdated) : true;
 
   const saveToCache = useCallback((newRecords: WinnerRecord[]) => {
-    const currentData = cachedData || {
+    const currentData = loadCachedData() || {
       cachedResults: [],
       lastUpdated: Date.now(),
       processedGameIds: new Set<string>(),
@@ -40,7 +40,7 @@ export function useWinnerCache(): UseWinnerCacheReturn {
 
     // Merge new records with existing cache
     const mergedRecords = mergeWithCache(newRecords, currentData);
-    
+
     // Update processed game IDs
     const processedGameIds = new Set(currentData.processedGameIds);
     for (const record of newRecords) {
@@ -57,7 +57,7 @@ export function useWinnerCache(): UseWinnerCacheReturn {
     // Save to localStorage
     saveCachedData(updatedData);
     setCachedData(updatedData);
-  }, [cachedData]);
+  }, []);
 
   const clearCache = useCallback(() => {
     clearCacheUtil();
@@ -65,23 +65,26 @@ export function useWinnerCache(): UseWinnerCacheReturn {
   }, []);
 
   const updateLastRefresh = useCallback(() => {
-    if (cachedData) {
+    const currentData = loadCachedData();
+    if (currentData) {
       const updatedData = {
-        ...cachedData,
+        ...currentData,
         lastUpdated: Date.now(),
       };
       saveCachedData(updatedData);
       setCachedData(updatedData);
     }
-  }, [cachedData]);
+  }, []);
 
   const getCachedRecords = useCallback((): WinnerRecord[] => {
-    return cachedData?.cachedResults || [];
-  }, [cachedData]);
+    const currentData = loadCachedData();
+    return currentData?.cachedResults || [];
+  }, []);
 
   const isGameProcessed = useCallback((gameId: bigint): boolean => {
-    return cachedData?.processedGameIds.has(gameId.toString()) || false;
-  }, [cachedData]);
+    const currentData = loadCachedData();
+    return currentData?.processedGameIds.has(gameId.toString()) || false;
+  }, []);
 
   return {
     cachedData,

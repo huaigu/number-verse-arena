@@ -144,7 +144,9 @@ export default {
   joinRoom: {
     title: "Join Game Room",
     activeRooms: "Active Rooms",
+    activeRoomsDesc: "Quick join available game rooms",
     allRooms: "All Rooms",
+    allRoomsDesc: "View completed games and claim rewards if you won",
     noActiveRooms: "No active game rooms available",
     noActiveRoomsDesc: "Create a new room or check back later",
     noAllRooms: "No game rooms found",
@@ -261,16 +263,18 @@ export default {
 
     topPlayers: {
       title: "Top Players",
+      description: "Ranked by total winnings",
       rank: "Rank",
       player: "Player",
       wins: "Wins",
       totalPrizes: "Total Prizes",
-      winRate: "Win Rate",
+      winRate: "Avg Prize",
       noData: "No leaderboard data available"
     },
 
     recentWinners: {
       title: "Recent Winners",
+      description: "Latest game results",
       game: "Game",
       winner: "Winner",
       prize: "Prize",

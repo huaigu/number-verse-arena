@@ -28,8 +28,8 @@ export interface CachedLeaderboardData {
 
 // Cache configuration
 export const CACHE_CONFIG = {
-  VERSION: 'v1',
-  KEY: 'leaderboard-cache-v1',
+  VERSION: 'v3', // Bumped version to fix winner address bug
+  KEY: 'leaderboard-cache-v3',
   MAX_RECORDS: 1000,
   REFRESH_INTERVAL: 30000, // 30 seconds
   STALE_THRESHOLD: 300000, // 5 minutes
@@ -63,24 +63,13 @@ export function isFinishedSummaryWithWinner(summary: GameSummary): boolean {
 
 /**
  * Convert a Game to WinnerRecord
+ * Note: Game type doesn't contain the actual winner address, only encrypted data.
+ * This function should not be used directly. Use summaryToWinnerRecord instead.
+ * @deprecated Use summaryToWinnerRecord with GameSummary instead
  */
 export function gameToWinnerRecord(game: Game): WinnerRecord | null {
-  if (!isFinishedGameWithWinner(game)) {
-    return null;
-  }
-
-  // Calculate prize (playerCount * entryFee)
-  const prize = BigInt(game.playerCount) * game.entryFee;
-
-  return {
-    gameId: game.gameId,
-    roomName: game.roomName || `Game ${game.gameId.toString()}`,
-    winner: game.encryptedWinner,
-    winningNumber: game.decryptedWinner,
-    prize,
-    timestamp: game.deadline, // Use deadline as approximation
-    status: game.status,
-  };
+  console.warn('gameToWinnerRecord is deprecated. Game type does not contain winner address. Use summaryToWinnerRecord instead.');
+  return null;
 }
 
 /**

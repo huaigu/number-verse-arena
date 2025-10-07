@@ -64,7 +64,7 @@ export default {
     },
 
     demoVideo: {
-      title: "观看工作原理",
+      title: "观看Demo视频",
       description: "观看唯一数字游戏实战，了解隐私保护游戏的工作方式"
     },
 
@@ -144,7 +144,9 @@ export default {
   joinRoom: {
     title: "加入游戏房间",
     activeRooms: "活跃房间",
+    activeRoomsDesc: "快速加入可用游戏房间",
     allRooms: "所有房间",
+    allRoomsDesc: "查看已完成的游戏，如果您获胜可领取奖励",
     noActiveRooms: "暂无活跃游戏房间",
     noActiveRoomsDesc: "创建新房间或稍后再来查看",
     noAllRooms: "未找到游戏房间",
@@ -261,16 +263,18 @@ export default {
 
     topPlayers: {
       title: "顶级玩家",
+      description: "按总奖金排名",
       rank: "排名",
       player: "玩家",
       wins: "胜场",
       totalPrizes: "总奖金",
-      winRate: "胜率",
+      winRate: "平均奖金",
       noData: "暂无排行榜数据"
     },
 
     recentWinners: {
       title: "最近获胜者",
+      description: "最新游戏结果",
       game: "游戏",
       winner: "获胜者",
       prize: "奖金",

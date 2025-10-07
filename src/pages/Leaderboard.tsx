@@ -206,9 +206,9 @@ const Leaderboard = () => {
             <Card className="shadow-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="space-y-2">
                     <CardTitle>{t('leaderboard.topPlayers.title')}</CardTitle>
-                    <CardDescription>Ranked by total winnings</CardDescription>
+                    <CardDescription>{t('leaderboard.topPlayers.description')}</CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
                     <GradientButton
@@ -377,7 +377,7 @@ const Leaderboard = () => {
                   <Clock className="w-5 h-5" />
                   <span>{t('leaderboard.recentWinners.title')}</span>
                 </CardTitle>
-                <CardDescription>Latest game results</CardDescription>
+                <CardDescription>{t('leaderboard.recentWinners.description')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoading && recentWinners.length === 0 ? (

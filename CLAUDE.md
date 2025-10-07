@@ -12,7 +12,7 @@ Number Verse Arena is a privacy-preserving multiplayer number guessing game powe
 - UI: shadcn/ui components + Tailwind CSS
 - Privacy: Zama FHE for encrypted number storage and computation
 - Blockchain: Sepolia Testnet with Zama FHEVM support
-- Contract: `0xB1fd5432362aAd52f9B71160cDB9C585A0Ea8577` (UniqueNumberGameFactory)
+- Contract: `0x6B674fDfC6A70ff1932CfED6F0C53d57e7F4F27a` (UniqueNumberGameFactory)
 
 ## Development Commands
 

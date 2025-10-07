@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useGetAllGames } from '@/hooks/contract/useGameContract';
+import { useGetWinnerHistory } from '@/hooks/contract/useStatsContract';
 import { useWinnerCache } from './useWinnerCache';
 import {
   LeaderboardEntry,
   WinnerRecord,
-  extractWinnerRecords,
   aggregateLeaderboard,
   getRecentWinners,
   findUserPosition,
@@ -40,12 +40,20 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
   const [error, setError] = useState<Error | null>(null);
 
   // Blockchain data hooks
-  const { 
-    games, 
-    isLoading: gamesLoading, 
-    isError: gamesError, 
-    refetch: refetchGames 
+  const {
+    games,
+    isLoading: gamesLoading,
+    isError: gamesError,
+    refetch: refetchGames
   } = useGetAllGames();
+
+  // Fetch winner history directly from contract (contains original prize amounts)
+  const {
+    winnerHistory,
+    isLoading: historyLoading,
+    isError: historyError,
+    refetch: refetchHistory,
+  } = useGetWinnerHistory(1000); // Get all winner history
 
   // Cache management
   const {
@@ -58,7 +66,7 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
     isGameProcessed,
   } = useWinnerCache();
 
-  const isLoading = gamesLoading;
+  const isLoading = gamesLoading || historyLoading;
   const lastUpdated = cachedData?.lastUpdated || null;
 
   /**
@@ -101,25 +109,14 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
     setError(null);
   }, [userAddress]);
 
-  /**
-   * Extract new winner records from fresh game data
-   */
-  const extractNewRecords = useCallback((gameData: typeof games): WinnerRecord[] => {
-    if (!gameData) return [];
-
-    // Filter out games that are already processed
-    const newGames = gameData.filter(game => !isGameProcessed(game.gameId));
-    
-    // Extract winner records from new games
-    return extractWinnerRecords(newGames);
-  }, [isGameProcessed]);
 
   /**
    * Manual refetch function
    */
   const refetch = useCallback(() => {
     refetchGames();
-  }, [refetchGames]);
+    refetchHistory();
+  }, [refetchGames, refetchHistory]);
 
   /**
    * Clear cache and refresh data
@@ -131,62 +128,44 @@ export function useLeaderboardData(userAddress?: string): UseLeaderboardDataRetu
 
   /**
    * Main effect - handle data loading and caching
+   * Use winnerHistory from contract which contains original prize amounts
    */
   useEffect(() => {
-    if (gamesError) {
-      setError(new Error('Failed to fetch game data from blockchain'));
-      // Fallback to cached data if available
-      if (cachedData) {
-        processData(cachedData.cachedResults);
-      }
+    if (gamesError || historyError) {
+      setError(new Error('Failed to fetch data from blockchain'));
       return;
     }
 
     if (isLoading) return;
 
     try {
-      // If we have fresh blockchain data
-      if (games) {
-        // Extract new winner records
-        const newRecords = extractNewRecords(games);
-        
-        // Get cached records
-        const cachedRecords = getCachedRecords();
+      // Use winner history directly from contract
+      if (winnerHistory && games) {
+        // Convert contract WinnerRecord to our WinnerRecord format
+        const records: WinnerRecord[] = winnerHistory.map(record => ({
+          gameId: record.gameId,
+          roomName: record.roomName,
+          winner: record.winner,
+          winningNumber: record.winningNumber,
+          prize: record.prize,
+          timestamp: record.timestamp,
+          status: 2, // Finished status
+        }));
 
-        // If we have new records, update cache
-        if (newRecords.length > 0) {
-          saveToCache(newRecords);
-          // Combine with cached records for processing
-          const allRecords = [...cachedRecords, ...newRecords];
-          processData(allRecords, games);
-        } else {
-          // No new records, but update last refresh time
-          updateLastRefresh();
-          // Process with cached data
-          processData(cachedRecords, games);
-        }
-      } else if (cachedData) {
-        // No fresh data but we have cache
-        processData(cachedData.cachedResults, games);
+        // Process all data
+        processData(records, games);
+        setError(null);
       }
     } catch (err) {
       console.error('Error processing leaderboard data:', err);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
-      
-      // Fallback to cached data
-      if (cachedData) {
-        processData(cachedData.cachedResults, games);
-      }
     }
   }, [
     games,
+    winnerHistory,
     gamesError,
+    historyError,
     isLoading,
-    cachedData,
-    extractNewRecords,
-    getCachedRecords,
-    saveToCache,
-    updateLastRefresh,
     processData,
   ]);
 

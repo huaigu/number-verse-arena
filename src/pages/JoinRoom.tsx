@@ -209,7 +209,7 @@ const JoinRoom = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>{t('joinRoom.activeRooms')}</CardTitle>
-                    <CardDescription>{t('joinRoom.quickJoin')}</CardDescription>
+                    <CardDescription>{t('joinRoom.activeRoomsDesc')}</CardDescription>
                   </div>
                   <GradientButton
                     variant="outline"
@@ -363,7 +363,7 @@ const JoinRoom = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>{t('joinRoom.allRooms')}</CardTitle>
-                    <CardDescription>View completed games and claim rewards if you won</CardDescription>
+                    <CardDescription>{t('joinRoom.allRoomsDesc')}</CardDescription>
                   </div>
                   <GradientButton
                     variant="outline"
