@@ -71,7 +71,7 @@ export default {
       },
       q2: {
         question: "What number range can I choose?",
-        answer: "You can choose any custom number range, but the difference between the maximum and minimum numbers must be less than 256 for optimal FHE performance."
+        answer: "The default number range is 1-16. Room creators can customize the range, but the difference between maximum and minimum must be less than 256 for optimal FHE performance."
       },
       q3: {
         question: "How much does it cost to play?",
@@ -82,8 +82,8 @@ export default {
         answer: "If no player chooses a unique number, 90% of the total prize pool is refunded to all participants proportionally, and 10% is collected as a platform fee."
       },
       q5: {
-        question: "How is my privacy guaranteed?",
-        answer: "Your chosen number is encrypted using ZAMA's Fully Homomorphic Encryption (FHE) technology. It remains completely hidden from all players and even the smart contract until the reveal phase."
+        question: "How is my privacy guaranteed? Can I see others' numbers?",
+        answer: "No, it's impossible to see others' numbers before the reveal! Your chosen number is encrypted using ZAMA's Fully Homomorphic Encryption (FHE) technology. All numbers remain completely hidden from all players and even the smart contract until they are revealed simultaneously when the game ends, ensuring complete fairness and privacy."
       },
       q6: {
         question: "When does the game end?",
@@ -92,10 +92,6 @@ export default {
       q7: {
         question: "How do I claim my prize?",
         answer: "If you win, you can claim your prize by clicking the 'Claim Prize' button on the game page after the game finishes. The prize will be transferred directly to your wallet."
-      },
-      q8: {
-        question: "Can I see others' numbers before the reveal?",
-        answer: "No, it's impossible! All numbers are encrypted on the blockchain using FHE. They can only be revealed simultaneously when the game ends, ensuring complete fairness."
       }
     },
 
