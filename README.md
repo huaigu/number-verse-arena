@@ -4,6 +4,12 @@ A privacy-preserving multiplayer number guessing game powered by **Zama's Fully 
 
 ![Number Verse Arena](public/uninum.png)
 
+## 🏆 Zama Developer Program Top 5 Winner
+
+This project was recognized as a **Top 5 Winner** in the [Zama Developer Program (August 2024)](https://www.zama.ai/developer-program). The original submission code is preserved in the `zama-dev-program-august-submission` branch.
+
+> ⚠️ **Note**: The submission branch uses Zama FHEVM v0.7.0 and is archived for historical reference only. It is no longer runnable due to SDK version incompatibility. Please use the `main` branch for the latest working version with Zama FHEVM v0.8.0.
+
 ## 🎯 What is Number Verse Arena?
 
 Number Verse Arena is the world's first **FHE-powered multiplayer game** where players compete by selecting unique numbers. Your choices remain completely private through encryption until the game reveals all selections simultaneously. Players who choose unique numbers win the prize pool!
@@ -15,6 +21,7 @@ Number Verse Arena is the world's first **FHE-powered multiplayer game** where p
 - 🏆 **Fair Competition**: Cryptographically verifiable results
 - 💰 **Prize Pool System**: Entry fees distributed to unique number holders
 - 📊 **Leaderboard System**: Track winners and earnings with caching
+- 🌍 **Internationalization**: Full English/Chinese (i18n) language support
 - 🎨 **Modern UI**: Built with React 18 + shadcn/ui components
 - 🔗 **Web3 Native**: Seamless wallet integration with RainbowKit
 
@@ -29,9 +36,9 @@ Number Verse Arena is the world's first **FHE-powered multiplayer game** where p
 
 ### Blockchain & Privacy
 - **Smart Contracts**: Solidity with Zama FHEVM
-- **Privacy Layer**: Zama Fully Homomorphic Encryption (FHE)
+- **Privacy Layer**: Zama Fully Homomorphic Encryption (FHE) v0.8.0
 - **Network**: Sepolia Testnet (with Zama FHE support)
-- **Contract Address**: `0xF0d12594D93950DfAe70011c4FAF04F1Cc9f9e06`
+- **Contract Address**: `0x6B674fDfC6A70ff1932CfED6F0C53d57e7F4F27a`
 
 ### Development Tools
 - **Build Tool**: Vite 5.4+
@@ -214,6 +221,40 @@ npx hardhat test
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## 📝 Changelog
+
+### v1.1.0 (Current - Main Branch)
+**Released**: January 2025
+
+**Major Updates**:
+- ⬆️ **Zama FHEVM Upgrade**: Migrated from v0.7.0 to v0.8.0
+- 🔧 **Modern FHE Integration**: Implemented FHEVM instance initialization and encrypt/decrypt operations using `@fhevm/react` hooks
+- 🌍 **Internationalization**: Added full English/Chinese (i18n) language support
+- ❓ **FAQ Section**: New comprehensive FAQ page for common questions
+- 🐛 **Bug Fixes**: Various stability improvements and optimizations
+
+**Technical Changes**:
+- Refactored FHE encryption using `@fhevm/react` hooks for better React integration
+- Updated contract integration to support new Zama SDK v0.8.0 API
+- Enhanced UI with language switcher component
+- Improved error handling and user feedback
+
+### v1.0.0 (Zama Developer Program Submission)
+**Released**: August 2024
+**Branch**: `zama-dev-program-august-submission`
+
+**Initial Features**:
+- ✅ FHE-powered multiplayer game with Zama FHEVM v0.7.0
+- ✅ Privacy-preserving number selection mechanism
+- ✅ Smart contract deployment on Sepolia testnet
+- ✅ Leaderboard system with winner tracking
+- ✅ Modern UI with shadcn/ui components
+- ✅ Web3 wallet integration with RainbowKit
+
+> 🏆 **Achievement**: Top 5 Winner in Zama Developer Program (August 2024)
+
+**⚠️ Archived**: This version is no longer maintained and cannot run with current dependencies. Use the `main` branch for the latest working version.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
@@ -232,6 +273,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Gas Costs**: FHE operations require higher gas fees than standard transactions
 - **Privacy**: While using FHE infrastructure, full encryption is still in development
 - **Educational Purpose**: This is a demonstration of FHE technology in gaming
+- **Version Management**: The `main` branch uses Zama FHEVM v0.8.0. For the original competition submission (v0.7.0), see the `zama-dev-program-august-submission` branch (archived, non-functional)
 
 ---
 
