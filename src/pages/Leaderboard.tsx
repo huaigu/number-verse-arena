@@ -2,7 +2,6 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -100,18 +99,17 @@ const Leaderboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-background p-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-page mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <GradientButton
-              variant="outline"
-              size="sm"
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2"
               onClick={() => navigate("/")}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t('common.back')}
-            </GradientButton>
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('common.back')}</span>
+            </button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">{t('leaderboard.title')}</h1>
               <p className="text-muted-foreground">Top players and recent winners</p>
@@ -125,7 +123,7 @@ const Leaderboard = () => {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
+          <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
                 <Trophy className="w-5 h-5 text-primary" />
@@ -137,7 +135,7 @@ const Leaderboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
                 <DollarSign className="w-5 h-5 text-green-500" />
@@ -149,7 +147,7 @@ const Leaderboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-blue-500" />
@@ -161,7 +159,7 @@ const Leaderboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-5 h-5 text-purple-500" />
@@ -203,7 +201,7 @@ const Leaderboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Leaderboard */}
           <div className="lg:col-span-2">
-            <Card className="shadow-card">
+            <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
@@ -211,15 +209,14 @@ const Leaderboard = () => {
                     <CardDescription>{t('leaderboard.topPlayers.description')}</CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <GradientButton
-                      variant="outline"
-                      size="sm"
+                    <button
+                      className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2 disabled:opacity-50"
                       onClick={refetch}
                       disabled={isLoading}
                     >
-                      <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                      {t('common.refresh')}
-                    </GradientButton>
+                      <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                      <span className="text-sm font-medium">{t('common.refresh')}</span>
+                    </button>
                   </div>
                 </div>
 
@@ -249,9 +246,12 @@ const Leaderboard = () => {
                     <AlertCircle className="w-12 h-12 mx-auto text-destructive mb-4" />
                     <h3 className="text-lg font-semibold mb-2">Error Loading Data</h3>
                     <p className="text-muted-foreground mb-4">{error.message}</p>
-                    <GradientButton onClick={refetch}>
+                    <button
+                      className="bg-primary text-primary-foreground px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white"
+                      onClick={refetch}
+                    >
                       {t('gamePage.actions.tryAgain')}
-                    </GradientButton>
+                    </button>
                   </div>
                 ) : isLoading && leaderboardData.length === 0 ? (
                   <div className="space-y-3">
@@ -312,13 +312,12 @@ const Leaderboard = () => {
                                 {formatETH(entry.averageWinnings)} ETH
                               </TableCell>
                               <TableCell>
-                                <GradientButton
-                                  size="sm"
-                                  variant="outline"
+                                <button
+                                  className="bg-surface-light dark:bg-surface-dark text-foreground p-2 rounded shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white"
                                   onClick={() => handleCopyAddress(entry.address)}
                                 >
                                   <Copy className="w-3 h-3" />
-                                </GradientButton>
+                                </button>
                               </TableCell>
                             </TableRow>
                           )
@@ -333,25 +332,23 @@ const Leaderboard = () => {
                           Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredLeaderboard.length)} of {filteredLeaderboard.length} players
                         </p>
                         <div className="flex items-center space-x-2">
-                          <GradientButton
-                            variant="outline"
-                            size="sm"
+                          <button
+                            className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white disabled:opacity-50"
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
                           >
                             {t('leaderboard.pagination.previous')}
-                          </GradientButton>
+                          </button>
                           <span className="text-sm">
                             {t('leaderboard.pagination.page')} {currentPage} {t('leaderboard.pagination.of')} {totalPages}
                           </span>
-                          <GradientButton
-                            variant="outline"
-                            size="sm"
+                          <button
+                            className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white disabled:opacity-50"
                             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
                           >
                             {t('leaderboard.pagination.next')}
-                          </GradientButton>
+                          </button>
                         </div>
                       </div>
                     )}
@@ -371,7 +368,7 @@ const Leaderboard = () => {
 
           {/* Recent Winners Sidebar */}
           <div>
-            <Card className="shadow-card">
+            <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Clock className="w-5 h-5" />
@@ -394,7 +391,7 @@ const Leaderboard = () => {
                     {recentWinners.slice(0, 10).map((winner) => (
                       <div
                         key={`${winner.gameId}-${winner.winner}`}
-                        className="p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="p-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button bg-surface-light dark:bg-surface-dark cursor-pointer transition-all duration-150"
                         onClick={() => handleViewGame(winner.gameId)}
                       >
                         <div className="flex items-center justify-between mb-2">

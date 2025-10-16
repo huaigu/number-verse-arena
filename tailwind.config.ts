@@ -18,6 +18,16 @@ export default {
 			}
 		},
 		extend: {
+			maxWidth: {
+				'page': '1060px',      // Standard page container width for JoinRoom/CreateRoom/Leaderboard
+				'content': '1060px',   // Alias for page content width
+			},
+			fontFamily: {
+				display: ["'Press Start 2P'", "cursive"],                          // 大标题、Logo
+				body: ["'Noto Sans SC'", "sans-serif"],                            // 正文
+				mono: ["'JetBrains Mono'", "monospace"],                           // 数字、代码
+				game: ["'Orbitron'", "'Noto Sans SC'", "sans-serif"],              // 游戏UI
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

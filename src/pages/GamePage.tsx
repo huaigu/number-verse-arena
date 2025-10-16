@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { GameCard } from "@/components/ui/game-card"
-import { GradientButton } from "@/components/ui/gradient-button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Trophy, Users, Clock, Home, RotateCcw, Wallet, Loader2, AlertCircle } from "lucide-react"
 import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useToast } from "@/hooks/use-toast"
 import { useGetGameSummary, useHasPlayerSubmitted, useSubmitNumber, useFindWinner, useClaimPrize, useHasPlayerClaimed, useCanFinalizeGame, useGetAllGames } from "@/hooks/contract/useGameContract"
-import { CONTRACT_CONFIG, formatETH, formatAddress, Game, GameSummary } from "@/contracts/config"
+import { CONTRACT_CONFIG, formatETH, formatAddress, GameSummary } from "@/contracts/config"
 import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
@@ -386,57 +384,36 @@ const GamePage = () => {
   }, [hasSubmitted, selectedNumber, isConnected, finalGameSummary])
 
   const generateNumberGrid = () => {
-    if (!finalGameSummary) return []
-    const numbers = []
-    for (let i = finalGameSummary.minNumber; i <= finalGameSummary.maxNumber; i++) {
-      numbers.push(i)
-    }
-    return numbers
+    // 始终返回1-16的固定网格
+    return Array.from({ length: 16 }, (_, i) => i + 1)
   }
 
-  const getGridColumns = () => {
-    if (!finalGameSummary) return 4
-    const totalNumbers = finalGameSummary.maxNumber - finalGameSummary.minNumber + 1
-    if (totalNumbers <= 9) return 3
-    if (totalNumbers <= 16) return 4
-    if (totalNumbers <= 25) return 5
-    if (totalNumbers <= 36) return 6
-    if (totalNumbers <= 49) return 7
-    return Math.ceil(Math.sqrt(totalNumbers))
-  }
-
-  const getGridCellSize = () => {
-    if (!finalGameSummary) return { minHeight: '120px', maxHeight: '120px' }
-    const totalNumbers = finalGameSummary.maxNumber - finalGameSummary.minNumber + 1
-    if (totalNumbers <= 9) return { minHeight: '120px', maxHeight: '150px' }
-    if (totalNumbers <= 16) return { minHeight: '100px', maxHeight: '120px' }
-    if (totalNumbers <= 25) return { minHeight: '80px', maxHeight: '100px' }
-    if (totalNumbers <= 36) return { minHeight: '70px', maxHeight: '90px' }
-    if (totalNumbers <= 49) return { minHeight: '60px', maxHeight: '80px' }
-    return { minHeight: '50px', maxHeight: '70px' }
-  }
-
-  const getNumberFontClass = (number: number) => {
-    // Use number to determine font style for consistency
-    const fontStyles = ['game-number', 'game-number-alt', 'game-number-bold']
-    return fontStyles[number % fontStyles.length]
-  }
 
   const getNumberVariant = (number: number) => {
+    // 检查是否超出房间范围（禁用状态）
+    if (!finalGameSummary || number < finalGameSummary.minNumber || number > finalGameSummary.maxNumber) {
+      return "disabled"
+    }
+
     // If user has submitted and this is their number
     if (hasSubmitted && selectedNumber === number) return "selected"
-    
+
     // If user is selecting (but not submitted yet)
     if (!hasSubmitted && selectedNumber === number) return "selected"
-    
+
     // If user hasn't submitted and this number is highlighted by animation
     if (!hasSubmitted && !selectedNumber && highlightedNumber === number) return "highlighted"
-    
+
     // Default available state
     return "available"
   }
 
   const handleNumberSelect = (number: number) => {
+    // 检查是否为禁用的数字（超出房间范围）
+    if (!finalGameSummary || number < finalGameSummary.minNumber || number > finalGameSummary.maxNumber) {
+      return // 直接返回，不处理点击
+    }
+
     if (!isConnected) {
       toast({
         title: t('toast.walletNotConnected.title'),
@@ -455,7 +432,7 @@ const GamePage = () => {
       })
       return
     }
-    
+
     // Check if game is still open
     if (!finalGameSummary || finalGameSummary.status !== CONTRACT_CONFIG.GameStatus.Open) {
       toast({
@@ -465,7 +442,7 @@ const GamePage = () => {
       })
       return
     }
-    
+
     // Allow selection of any number
     setSelectedNumber(selectedNumber === number ? null : number)
   }
@@ -577,16 +554,16 @@ const GamePage = () => {
   if (gameId === undefined) {
     return (
       <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="p-6 text-center">
-            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-            <h3 className="text-xl font-semibold mb-2">{t('gamePage.notFound')}</h3>
+        <Card className="max-w-md bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+            <h3 className="text-2xl font-bold mb-3">{t('gamePage.notFound')}</h3>
             <p className="text-muted-foreground mb-4">
               {t('gamePage.notFoundDesc')}
             </p>
-            <GradientButton onClick={() => navigate("/join-room")}>
+            <button onClick={() => navigate("/join-room")} className="bg-primary text-white px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold">
               {t('common.joinRoom')}
-            </GradientButton>
+            </button>
           </CardContent>
         </Card>
       </div>
@@ -599,11 +576,11 @@ const GamePage = () => {
   if (isLoading) {
     return (
       <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="p-6 text-center">
-            <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-            <h3 className="text-xl font-semibold mb-2">{t('gamePage.loading')}</h3>
-            <p className="text-muted-foreground">
+        <Card className="max-w-md bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+          <CardContent className="p-8 text-center">
+            <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin text-primary" />
+            <h3 className="text-2xl font-bold mb-2">{t('gamePage.loading')}</h3>
+            <p className="text-muted-foreground text-sm">
               {t('common.loading')}
             </p>
           </CardContent>
@@ -625,25 +602,25 @@ const GamePage = () => {
 
     return (
       <div className="min-h-screen bg-gradient-background p-3 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="p-6 text-center">
-            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-            <h3 className="text-xl font-semibold mb-2">{t('gamePage.notFound')}</h3>
-            <p className="text-muted-foreground mb-2">
+        <Card className="max-w-md bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+            <h3 className="text-2xl font-bold mb-3">{t('gamePage.notFound')}</h3>
+            <p className="text-muted-foreground mb-3">
               {t('gamePage.roomInfo.roomId')} #{gameId?.toString()} {t('gamePage.notFoundDesc')}
             </p>
             {(gameError || gameErrorDetails) && (
-              <div className="text-sm text-muted-foreground mb-4 p-2 bg-muted rounded">
+              <div className="text-sm text-muted-foreground mb-4 p-3 bg-muted/50 dark:bg-muted/20 rounded border-2 border-muted">
                 <strong>Error:</strong> {gameErrorDetails?.message || 'Unknown error'}
               </div>
             )}
-            <div className="space-y-2">
-              <GradientButton onClick={() => refetchGame()} className="w-full">
+            <div className="space-y-3">
+              <button onClick={() => refetchGame()} className="w-full bg-primary text-white px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold">
                 {t('gamePage.actions.tryAgain')}
-              </GradientButton>
-              <GradientButton variant="outline" onClick={() => navigate("/join-room")} className="w-full">
+              </button>
+              <button onClick={() => navigate("/join-room")} className="w-full bg-surface-light dark:bg-surface-dark text-foreground px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold">
                 {t('common.joinRoom')}
-              </GradientButton>
+              </button>
             </div>
           </CardContent>
         </Card>
@@ -654,85 +631,82 @@ const GamePage = () => {
   const timeLeft = getTimeLeft()
 
   return (
-    <div className="min-h-screen bg-gradient-background p-3">
-      <div className="max-w-6xl mx-auto flex flex-col">
+    <div className="min-h-screen bg-gradient-background p-2 md:p-3">
+      <div className="max-w-page mx-auto flex flex-col">
         {/* Compact Header */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2 md:mb-4">
           <div className="flex items-center space-x-3">
-            <GradientButton
-              variant="outline"
-              size="sm"
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2"
               onClick={() => navigate("/")}
             >
-              <Home className="w-4 h-4 mr-1" />
-              {t('common.home')}
-            </GradientButton>
-            <Badge variant="secondary" className="px-3 py-1">
+              <Home className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('common.home')}</span>
+            </button>
+            <Badge variant="secondary" className="px-3 py-1 border-2 border-black dark:border-white shadow-pixel-light dark:shadow-pixel-dark">
               {t('gamePage.roomInfo.roomId')} #{gameId.toString()}
             </Badge>
             <Badge
               variant={finalGameSummary.status === CONTRACT_CONFIG.GameStatus.Open ? "default" : "destructive"}
-              className="px-3 py-1"
+              className="px-3 py-1 border-2 border-black dark:border-white shadow-pixel-light dark:shadow-pixel-dark"
             >
               {CONTRACT_CONFIG.GameStatus.Open === finalGameSummary.status ? t('joinRoom.status.open') :
                CONTRACT_CONFIG.GameStatus.Calculating === finalGameSummary.status ? t('joinRoom.status.calculating') :
                CONTRACT_CONFIG.GameStatus.Finished === finalGameSummary.status ? t('joinRoom.status.finished') : t('joinRoom.status.claimed')}
             </Badge>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <LanguageSwitcher />
             <ConnectButton />
-            <GradientButton
-              variant="secondary"
-              size="sm"
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2"
               onClick={() => refetchGame()}
               disabled={gameLoading}
             >
-              <RotateCcw className={`w-4 h-4 mr-1 ${gameLoading ? 'animate-spin' : ''}`} />
-              {t('common.refresh')}
-            </GradientButton>
+              <RotateCcw className={`w-4 h-4 ${gameLoading ? 'animate-spin' : ''}`} />
+              <span className="text-sm font-medium">{t('common.refresh')}</span>
+            </button>
           </div>
         </div>
 
         {/* Main Game Layout - 2 Column */}
-        <div className="grid grid-cols-4 gap-4 pb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6 pb-2 md:pb-6">
           {/* Left Panel: Status & Player Slots */}
-          <div className="col-span-1 space-y-3">
+          <div className="lg:col-span-1 space-y-3 md:space-y-4">
             {/* Top Row: Timer & Prize Pool */}
-            <div className="grid grid-cols-2 gap-2">
-              <Card className="shadow-card">
-                <CardContent className="p-2 text-center">
-                  <div className="flex items-center justify-center space-x-1 mb-1">
-                    <Clock className={`w-3 h-3 ${timeLeft <= 60 && timeLeft > 0 ? 'text-destructive animate-timer-urgent' : 'text-primary'}`} />
-                    <span className={`text-sm font-mono font-bold ${
-                      timeLeft <= 60 && timeLeft > 0 ? 'animate-timer-urgent' : 
-                      timeLeft === 0 ? 'text-destructive' : 'text-primary'
-                    }`}>
-                      {formatTimeLeft(timeLeft)}
-                    </span>
+            <div className="grid grid-cols-2 gap-2 md:gap-4">
+              <Card className="bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+                <CardContent className="p-2 md:p-4 text-center">
+                  <div className="flex items-center justify-center text-red-500 dark:text-red-400 mb-2">
+                    <Clock className={`w-8 h-8 ${timeLeft <= 60 && timeLeft > 0 ? 'animate-timer-urgent' : ''}`} />
                   </div>
-                  <div className="text-xs text-muted-foreground">{t('gamePage.roomInfo.timeLeft')}</div>
+                  <p className="text-sm">{t('gamePage.roomInfo.timeLeft')}</p>
+                  <p className={`text-xl font-bold ${
+                    timeLeft <= 60 && timeLeft > 0 ? 'text-red-500 animate-timer-urgent' :
+                    timeLeft === 0 ? 'text-red-500' : 'text-red-500'
+                  }`}>
+                    {formatTimeLeft(timeLeft)}
+                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-primary shadow-card">
-                <CardContent className="p-2 text-center">
-                  <Trophy className="w-3 h-3 mx-auto mb-1 text-primary-foreground" />
-                  <div className="text-sm font-bold text-primary-foreground">
+              <Card className="bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+                <CardContent className="p-2 md:p-4 text-center">
+                  <div className="flex items-center justify-center text-primary mb-1 md:mb-2">
+                    <Trophy className="w-6 h-6 md:w-8 md:h-8" />
+                  </div>
+                  <p className="text-xs md:text-sm">{t('gamePage.roomInfo.prizePool')}</p>
+                  <p className="text-lg md:text-xl font-bold text-primary">
                     {formatETH(finalGameSummary.prizePool)} ETH
-                  </div>
-                  <div className="text-xs text-primary-foreground/80">{t('gamePage.roomInfo.prizePool')}</div>
+                  </p>
                 </CardContent>
               </Card>
-            </div>
 
-            {/* Bottom Row: My Choice & Players */}
-            <div className="grid grid-cols-2 gap-2">
-              <Card className="bg-gradient-secondary shadow-card">
-                <CardContent className="p-2 text-center">
-                  <div className="text-lg font-bold text-secondary-foreground mb-1">
-                    {selectedNumber || "?"}
+              <Card className="bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+                <CardContent className="p-2 md:p-4 text-center">
+                  <div className="flex items-center justify-center text-blue-500 dark:text-blue-400 mb-1">
+                    <span className="text-3xl md:text-5xl font-bold font-mono">{selectedNumber || "?"}</span>
                   </div>
                   {hasSubmitted && selectedNumber && (
                     <Badge variant="default" className="text-xs mb-1">{t('gamePage.gameArea.submitted')}</Badge>
@@ -743,71 +717,57 @@ const GamePage = () => {
                       {t('gamePage.gameArea.submitting')}
                     </Badge>
                   )}
-                  <div className="text-xs text-secondary-foreground/80">{t('gamePage.gameArea.myChoice')}</div>
+                  <p className="text-xs md:text-sm">{t('gamePage.gameArea.myChoice')}</p>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-card">
-                <CardContent className="p-2 text-center">
-                  <Users className="w-3 h-3 mx-auto mb-1 text-primary" />
-                  <div className="text-sm font-bold text-primary">
-                    {finalGameSummary.playerCount}/{finalGameSummary.maxPlayers}
+              <Card className="bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+                <CardContent className="p-2 md:p-4 text-center">
+                  <div className="flex items-center justify-center text-green-500 dark:text-green-400 mb-1 md:mb-2">
+                    <Users className="w-6 h-6 md:w-8 md:h-8" />
                   </div>
-                  <div className="text-xs text-muted-foreground">{t('gamePage.roomInfo.players')}</div>
+                  <p className="text-xs md:text-sm">{t('gamePage.roomInfo.players')}</p>
+                  <p className="text-lg md:text-xl font-bold text-green-500">
+                    {finalGameSummary.playerCount}/{finalGameSummary.maxPlayers}
+                  </p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Entry Fee Display */}
-            <Card className="shadow-card bg-gradient-primary">
-              <CardContent className="p-3 text-center space-y-1">
-                <div className="flex items-center justify-center space-x-2">
-                  <Wallet className="w-4 h-4 text-primary-foreground" />
-                  <span className="text-sm font-medium text-primary-foreground">{t('joinRoom.roomCard.entryFee')}</span>
-                </div>
-                <div className="text-xl font-bold text-primary-foreground">
-                  {formatETH(finalGameSummary.entryFee)} ETH
-                </div>
-              </CardContent>
-            </Card>
+            <button className="w-full bg-primary dark:bg-primary text-white p-4 md:p-6 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button flex flex-col items-center justify-center border-2 border-black dark:border-white">
+              <span className="text-xs md:text-sm mb-1">{t('joinRoom.roomCard.entryFee')}</span>
+              <span className="text-2xl md:text-3xl font-bold font-mono">{formatETH(finalGameSummary.entryFee)} ETH</span>
+            </button>
 
             {/* Game Info */}
-            <Card className="shadow-card">
-              <CardContent className="p-3">
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <h4 className="font-semibold text-sm mb-1">{finalGameSummary.roomName}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {t('gamePage.roomInfo.numberRange')}: {finalGameSummary.minNumber}-{finalGameSummary.maxNumber}
-                    </p>
-                  </div>
+            <Card className="bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+              <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
+                <h2 className="text-lg font-bold text-center">{finalGameSummary.roomName}</h2>
+                <div className="text-sm">
+                  <p>{t('gamePage.roomInfo.numberRange')}: {finalGameSummary.minNumber}-{finalGameSummary.maxNumber}</p>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="text-center p-2 bg-muted/20 rounded">
-                      <div className="font-semibold">{formatETH(finalGameSummary.entryFee)} ETH</div>
-                      <div className="text-muted-foreground">{t('joinRoom.roomCard.entryFee')}</div>
-                    </div>
-                    <div className="text-center p-2 bg-muted/20 rounded">
-                      <div className="font-semibold">
-                        {finalGameSummary.winner !== "0x0000000000000000000000000000000000000000" ?
-                          formatAddress(finalGameSummary.winner) : "TBD"}
-                      </div>
-                      <div className="text-muted-foreground">{t('gamePage.gameArea.results.winner')}</div>
-                    </div>
-                  </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span>{t('joinRoom.roomCard.entryFee')}</span>
+                  <span className="font-bold">{formatETH(finalGameSummary.entryFee)} ETH</span>
+                </div>
 
-                  {/* Player capacity bar */}
-                  <div>
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>{t('gamePage.roomInfo.players')}</span>
-                      <span>{finalGameSummary.playerCount}/{finalGameSummary.maxPlayers}</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-gradient-primary h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(finalGameSummary.playerCount / finalGameSummary.maxPlayers) * 100}%` }}
-                      />
-                    </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span>{t('gamePage.gameArea.results.winner')}</span>
+                  <span className="font-bold truncate">
+                    {finalGameSummary.winner !== "0x0000000000000000000000000000000000000000" ?
+                      formatAddress(finalGameSummary.winner) : "TBD"}
+                  </span>
+                </div>
+
+                <div>
+                  <p className="text-sm mb-1">{t('gamePage.roomInfo.players')} {finalGameSummary.playerCount}/{finalGameSummary.maxPlayers}</p>
+                  <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-4 border-2 border-black dark:border-white p-0.5">
+                    <div
+                      className="bg-green-500 h-full rounded-full"
+                      style={{ width: `${(finalGameSummary.playerCount / finalGameSummary.maxPlayers) * 100}%` }}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -815,71 +775,43 @@ const GamePage = () => {
           </div>
 
           {/* Main Game Area */}
-          <div className="col-span-3">
-            <Card className="shadow-card">
-              <CardContent className="p-3">
-                {/* Number Grid - Responsive sizing */}
-                <div className="mb-6">
-                  <div 
-                    className="grid gap-2 place-items-stretch"
-                    style={{
-                      gridTemplateColumns: `repeat(${getGridColumns()}, minmax(0, 1fr))`,
-                    }}
-                  >
-                    {generateNumberGrid().map((number) => {
-                      const cellSize = getGridCellSize();
-                      const totalNumbers = finalGameSummary.maxNumber - finalGameSummary.minNumber + 1;
-                      
-                      // Adjust font size based on grid size
-                      let fontSize = 'text-4xl';
-                      if (totalNumbers > 25) fontSize = 'text-3xl';
-                      if (totalNumbers > 36) fontSize = 'text-2xl';
-                      if (totalNumbers > 49) fontSize = 'text-xl';
-                      
-                      return (
-                        <GameCard
-                          key={number}
-                          variant={getNumberVariant(number)}
-                          className={`w-full aspect-square ${fontSize} ${getNumberFontClass(number)} transition-all hover:scale-105 ${
-                            hasSubmitted || isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer'
-                          } ${
-                            highlightedNumber === number && !hasSubmitted && !selectedNumber 
-                              ? 'animate-highlight-pulse' 
-                              : ''
-                          } ${
-                            hasSubmitted && selectedNumber === number
-                              ? 'animate-selected-glow'
-                              : ''
-                          }`}
-                          style={{ minHeight: cellSize.minHeight, maxHeight: cellSize.maxHeight }}
-                          onClick={() => handleNumberSelect(number)}
-                        >
-                          {number}
-                        </GameCard>
-                      );
-                    })}
+          <div className="lg:col-span-2">
+            <Card className="bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+              <CardContent className="p-4 md:p-6">
+                {/* Fixed 4x4 Number Grid */}
+                <div className="grid grid-cols-4 gap-3 max-w-[600px] mx-auto">
+                  {generateNumberGrid().map((number) => (
+                    <GameCard
+                      key={number}
+                      variant={getNumberVariant(number)}
+                      className={`aspect-square w-full flex items-center justify-center text-3xl md:text-4xl font-bold font-mono pixel-button ${
+                        hasSubmitted || isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer'
+                      }`}
+                      onClick={() => handleNumberSelect(number)}
+                    >
+                      {number}
+                    </GameCard>
+                  ))}
                 </div>
 
-                </div>
-                
                 {/* Bottom Section - Always visible */}
-                <div className="space-y-2">
+                <div className="space-y-3 md:space-y-4 mt-4 md:mt-6">
                   {/* Wallet Warning - Compact */}
                   {!isConnected && (
-                    <div className="p-2 bg-orange-50 border border-orange-200 rounded text-center">
-                      <div className="flex items-center justify-center space-x-2 text-orange-700">
-                        <Wallet className="w-4 h-4" />
-                        <span className="text-sm">{t('common.connectWallet')}</span>
+                    <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-500 rounded-lg text-center">
+                      <div className="flex items-center justify-center space-x-2 text-orange-700 dark:text-orange-400">
+                        <Wallet className="w-5 h-5" />
+                        <span className="text-sm font-medium">{t('common.connectWallet')}</span>
                       </div>
                     </div>
                   )}
 
                   {/* Game Status Messages */}
                   {finalGameSummary?.status !== CONTRACT_CONFIG.GameStatus.Open && !isGameDecrypted() && (
-                    <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-center">
-                      <div className="flex items-center justify-center space-x-2 text-yellow-700">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm">
+                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-500 rounded-lg text-center">
+                      <div className="flex items-center justify-center space-x-2 text-yellow-700 dark:text-yellow-400">
+                        <Clock className="w-5 h-5" />
+                        <span className="text-sm font-medium">
                           {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating ? t('gamePage.gameArea.waitingResults') :
                            finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Finished ? t('joinRoom.status.finished') :
                            t('toast.gameNotAvailable.description')}
@@ -890,9 +822,9 @@ const GamePage = () => {
 
                   {/* Status Message - Enhanced */}
                   {selectedNumber && !hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
-                    <div className="p-2 bg-accent/20 rounded text-center">
-                      <span className="text-sm text-accent-foreground">
-                        {t('gamePage.gameArea.selected')}: <span className="font-bold text-lg">{selectedNumber}</span>
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 rounded-lg text-center">
+                      <span className="text-sm text-blue-700 dark:text-blue-400">
+                        {t('gamePage.gameArea.selected')}: <span className="font-bold text-2xl">{selectedNumber}</span>
                       </span>
                     </div>
                   )}
@@ -900,16 +832,14 @@ const GamePage = () => {
                   {/* Action Buttons - Enhanced */}
                   {!hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
                     <div className="grid grid-cols-2 gap-4">
-                      <GradientButton
-                        variant="game"
-                        size="lg"
+                      <button
                         disabled={!selectedNumber || isSubmitting || timeLeft === 0}
-                        className="w-full h-12 text-base font-semibold"
+                        className="bg-primary text-white px-6 py-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={handleConfirmChoice}
                       >
                         {isSubmitting ? (
                           <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin inline" />
                             {t('gamePage.gameArea.submitting')}
                           </>
                         ) : timeLeft === 0 ? (
@@ -917,24 +847,22 @@ const GamePage = () => {
                         ) : (
                           t('common.confirm')
                         )}
-                      </GradientButton>
+                      </button>
 
-                      <GradientButton
-                        variant="outline"
-                        size="lg"
+                      <button
                         onClick={() => setSelectedNumber(null)}
-                        className="w-full h-12 text-base"
+                        className="bg-surface-light dark:bg-surface-dark text-foreground px-6 py-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={isSubmitting}
                       >
                         {t('common.cancel')}
-                      </GradientButton>
+                      </button>
                     </div>
                   )}
 
                   {/* User Already Submitted Message */}
                   {hasSubmitted && finalGameSummary?.status !== CONTRACT_CONFIG.GameStatus.PrizeClaimed && !isGameDecrypted() && (
-                    <div className="p-2 bg-green-50 border border-green-200 rounded text-center">
-                      <div className="flex items-center justify-center space-x-2 text-green-700">
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-lg text-center">
+                      <div className="flex items-center justify-center space-x-2 text-green-700 dark:text-green-400">
                         <Trophy className="w-5 h-5" />
                         <span className="text-sm font-medium">
                           {t('gamePage.gameArea.waitingPlayers')}
@@ -945,9 +873,9 @@ const GamePage = () => {
 
                   {/* Game Time Expired - No players */}
                   {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && !canFinalize && (
-                    <div className="p-2 bg-red-50 border border-red-200 rounded text-center">
-                      <div className="flex items-center justify-center space-x-2 text-red-700">
-                        <Clock className="w-4 h-4" />
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-500 rounded-lg text-center">
+                      <div className="flex items-center justify-center space-x-2 text-red-700 dark:text-red-400">
+                        <Clock className="w-5 h-5" />
                         <span className="text-sm font-medium">
                           {t('gamePage.gameArea.noPlayersJoined')}
                         </span>
@@ -960,73 +888,72 @@ const GamePage = () => {
                     <div className="space-y-4">
                       {/* Header Section */}
                       <div className="text-center">
-                        <Trophy className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-xl font-bold text-purple-800">{t('gamePage.gameArea.results.title')}</h3>
+                        <Trophy className="w-12 h-12 mx-auto mb-2 text-purple-600" />
+                        <h3 className="text-2xl font-bold text-purple-800 dark:text-purple-400">{t('gamePage.gameArea.results.title')}</h3>
                       </div>
-                      
+
                       {isCurrentUserWinner() ? (
                         /* Winner View */
-                        <div className="space-y-3">
-                          <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg text-center">
-                            <div className="text-green-800 font-bold text-lg mb-2">🎉 {t('gamePage.gameArea.results.youWon')}</div>
-                            <div className="flex justify-center items-center space-x-6 text-green-700">
+                        <div className="space-y-4">
+                          <div className="p-6 bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-lg text-center shadow-pixel-light dark:shadow-pixel-dark">
+                            <div className="text-green-800 dark:text-green-400 font-bold text-2xl mb-4">🎉 {t('gamePage.gameArea.results.youWon')}</div>
+                            <div className="flex justify-center items-center space-x-8 text-green-700 dark:text-green-400">
                               <div>
                                 <div className="text-sm font-medium">{t('gamePage.gameArea.results.winningNumber')}</div>
-                                <div className="text-2xl font-bold">{finalGameSummary.winningNumber}</div>
+                                <div className="text-4xl font-bold font-mono">{finalGameSummary.winningNumber}</div>
                               </div>
                               <div>
                                 <div className="text-sm font-medium">{t('joinRoom.roomCard.prizePool')}</div>
-                                <div className="text-2xl font-bold">{formatETH(finalGameSummary.prizePool)} ETH</div>
+                                <div className="text-4xl font-bold font-mono">{formatETH(finalGameSummary.prizePool)} ETH</div>
                               </div>
                             </div>
                           </div>
-                          
+
                           {!hasClaimed ? (
-                            <GradientButton
+                            <button
                               onClick={handleClaimPrize}
                               disabled={isClaiming}
-                              className="w-full"
-                              size="lg"
+                              className="w-full bg-primary text-white px-6 py-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold text-lg disabled:opacity-50"
                             >
                               {isClaiming ? (
                                 <>
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  <Loader2 className="w-5 h-5 mr-2 animate-spin inline" />
                                   {t('gamePage.gameArea.results.claiming')}
                                 </>
                               ) : (
                                 <>
-                                  <Wallet className="w-4 h-4 mr-2" />
+                                  <Wallet className="w-5 h-5 mr-2 inline" />
                                   {t('gamePage.gameArea.results.claimPrize')} {formatETH(finalGameSummary.prizePool)} ETH
                                 </>
                               )}
-                            </GradientButton>
+                            </button>
                           ) : (
-                            <div className="p-3 bg-green-100 border border-green-300 rounded-lg text-green-800 text-center font-medium">
+                            <div className="p-4 bg-green-100 dark:bg-green-900/30 border-2 border-green-500 rounded-lg text-green-800 dark:text-green-400 text-center font-bold shadow-pixel-light dark:shadow-pixel-dark">
                               ✅ {t('gamePage.gameArea.results.claimed')}
                             </div>
                           )}
                         </div>
                       ) : (
                         /* Non-winner View */
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg text-center">
-                              <div className="text-sm text-blue-600 font-medium mb-1">{t('gamePage.gameArea.results.winner')}</div>
-                              <div className="text-blue-800 font-bold text-lg">
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 rounded-lg text-center shadow-pixel-light dark:shadow-pixel-dark">
+                              <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">{t('gamePage.gameArea.results.winner')}</div>
+                              <div className="text-blue-800 dark:text-blue-300 font-bold text-lg">
                                 {formatAddress(finalGameSummary.winner)}
                               </div>
                             </div>
 
-                            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg text-center">
-                              <div className="text-sm text-purple-600 font-medium mb-1">{t('gamePage.gameArea.results.winningNumber')}</div>
-                              <div className="text-purple-800 font-bold text-2xl">
+                            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-500 rounded-lg text-center shadow-pixel-light dark:shadow-pixel-dark">
+                              <div className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">{t('gamePage.gameArea.results.winningNumber')}</div>
+                              <div className="text-purple-800 dark:text-purple-300 font-bold text-3xl font-mono">
                                 {finalGameSummary.winningNumber}
                               </div>
                             </div>
                           </div>
 
-                          <div className="p-3 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg text-center">
-                            <div className="text-orange-700 font-medium">
+                          <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-500 rounded-lg text-center shadow-pixel-light dark:shadow-pixel-dark">
+                            <div className="text-orange-700 dark:text-orange-400 font-bold text-lg">
                               {t('gamePage.gameArea.results.youLost')} 🎯
                             </div>
                           </div>
@@ -1037,28 +964,27 @@ const GamePage = () => {
 
                   {/* Time Expired - Manual Reveal Section */}
                   {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && getTimeLeft() === 0 && canFinalize && (
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                      <div className="text-blue-700 mb-3">
-                        <Clock className="w-6 h-6 mx-auto mb-2" />
-                        <div className="font-medium">{t('gamePage.gameArea.timeExpiredReveal')}</div>
-                        <div className="text-sm">
+                    <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 rounded-lg text-center shadow-pixel-light dark:shadow-pixel-dark">
+                      <div className="text-blue-700 dark:text-blue-400 mb-4">
+                        <Clock className="w-8 h-8 mx-auto mb-2" />
+                        <div className="font-bold text-lg">{t('gamePage.gameArea.timeExpiredReveal')}</div>
+                        <div className="text-sm mt-2">
                           {t('gamePage.gameArea.gameEndedWithPlayers', { count: finalGameSummary.playerCount })}
                         </div>
                       </div>
 
-                      <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm mb-3">
+                      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-500 rounded-lg text-yellow-800 dark:text-yellow-400 text-sm mb-4">
                         💡 {t('gamePage.gameArea.revealReward')}: {t('gamePage.gameArea.revealRewardAmount', { amount: formatETH(finalGameSummary.prizePool / BigInt(10)) })}
                       </div>
 
-                      <GradientButton
+                      <button
                         onClick={handleRevealWinner}
                         disabled={isFinding}
-                        size="sm"
-                        className="w-full"
+                        className="w-full bg-primary text-white px-6 py-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold text-base disabled:opacity-50"
                       >
                         {isFinding ? (
                           <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin inline" />
                             {t('gamePage.gameArea.revealing')}
                           </>
                         ) : (
@@ -1066,18 +992,18 @@ const GamePage = () => {
                             🔍 {t('gamePage.gameArea.revealWinner')}
                           </>
                         )}
-                      </GradientButton>
+                      </button>
                     </div>
                   )}
 
                   {/* Calculating State - Only for time-expired games */}
                   {finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Calculating && !isGameDecrypted() && (
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                      <div className="flex items-center justify-center space-x-2 text-blue-700 mb-2">
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span className="text-sm font-medium">{t('gamePage.gameArea.calculating')}</span>
+                    <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 rounded-lg text-center shadow-pixel-light dark:shadow-pixel-dark">
+                      <div className="flex items-center justify-center space-x-3 text-blue-700 dark:text-blue-400 mb-2">
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                        <span className="text-base font-bold">{t('gamePage.gameArea.calculating')}</span>
                       </div>
-                      <div className="text-blue-600 text-xs">
+                      <div className="text-blue-600 dark:text-blue-500 text-sm mt-2">
                         {t('gamePage.gameArea.calculatingDesc')}
                       </div>
                     </div>

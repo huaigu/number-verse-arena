@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
@@ -171,29 +170,27 @@ const JoinRoom = () => {
 
   return (
     <div className="min-h-screen bg-gradient-background p-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-page mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <GradientButton
-              variant="outline"
-              size="sm"
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2"
               onClick={() => navigate("/")}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t('common.back')}
-            </GradientButton>
-            <h1 className="text-xl font-bold text-foreground">{t('joinRoom.title')}</h1>
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('common.back')}</span>
+            </button>
+            <h1 className="text-2xl font-bold text-foreground">{t('joinRoom.title')}</h1>
           </div>
-          <div className="flex items-center space-x-2">
-            <GradientButton
-              variant="outline"
-              size="sm"
+          <div className="flex items-center space-x-3">
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2"
               onClick={() => navigate("/leaderboard")}
             >
-              <TrendingUp className="w-4 h-4 mr-2" />
-              {t('common.leaderboard')}
-            </GradientButton>
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('common.leaderboard')}</span>
+            </button>
             <LanguageSwitcher />
             <ConnectButton />
           </div>
@@ -204,25 +201,24 @@ const JoinRoom = () => {
         <div className="space-y-8">
           {/* Available Rooms */}
           <div>
-            <Card className="shadow-card">
+            <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>{t('joinRoom.activeRooms')}</CardTitle>
                     <CardDescription>{t('joinRoom.activeRoomsDesc')}</CardDescription>
                   </div>
-                  <GradientButton
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2 disabled:opacity-50"
                     onClick={() => {
                       refetchGames()
                       refetchAllGames()
                     }}
                     disabled={gamesLoading || allGamesLoading}
                   >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${(gamesLoading || allGamesLoading) ? 'animate-spin' : ''}`} />
-                    {t('common.refresh')}
-                  </GradientButton>
+                    <RefreshCw className={`w-4 h-4 ${(gamesLoading || allGamesLoading) ? 'animate-spin' : ''}`} />
+                    <span className="text-sm font-medium">{t('common.refresh')}</span>
+                  </button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -238,9 +234,12 @@ const JoinRoom = () => {
                     <p className="text-muted-foreground mb-4">
                       Unable to fetch game rooms from the blockchain.
                     </p>
-                    <GradientButton onClick={() => refetchGames()}>
+                    <button
+                      className="bg-primary text-primary-foreground px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white"
+                      onClick={() => refetchGames()}
+                    >
                       {t('gamePage.actions.tryAgain')}
-                    </GradientButton>
+                    </button>
                   </div>
                 ) : activeGames && activeGames.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -259,12 +258,12 @@ const JoinRoom = () => {
                         return (
                           <div
                             key={game.gameId.toString()}
-                            className={`p-4 border-2 rounded-lg transition-all duration-300 ${
-                              canJoin 
-                                ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 hover:border-green-400 hover:shadow-card cursor-pointer hover:-translate-y-1" 
+                            className={`p-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button transition-all duration-150 ${
+                              canJoin
+                                ? "bg-green-100 dark:bg-green-900 border-green-600 dark:border-green-400 cursor-pointer"
                                 : (isExpired && game.playerCount > 0) || isFull
-                                  ? "bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300 hover:border-yellow-400 hover:shadow-card cursor-pointer hover:-translate-y-1 opacity-90"
-                                  : "bg-gradient-to-br from-gray-50 to-slate-50 border-gray-300 opacity-60 cursor-not-allowed"
+                                  ? "bg-yellow-100 dark:bg-yellow-900 border-yellow-600 dark:border-yellow-400 cursor-pointer opacity-90"
+                                  : "bg-gray-100 dark:bg-gray-800 border-gray-500 dark:border-gray-600 opacity-60 cursor-not-allowed"
                             }`}
                             onClick={() => {
                               if (canJoin) {
@@ -347,9 +346,12 @@ const JoinRoom = () => {
                     <p className="text-muted-foreground mb-4">
                       {t('joinRoom.noActiveRoomsDesc')}
                     </p>
-                    <GradientButton onClick={() => navigate("/create-room")}>
+                    <button
+                      className="bg-primary text-primary-foreground px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white"
+                      onClick={() => navigate("/create-room")}
+                    >
                       {t('common.createRoom')}
-                    </GradientButton>
+                    </button>
                   </div>
                 )}
               </CardContent>
@@ -358,22 +360,21 @@ const JoinRoom = () => {
 
           {/* Finished Games */}
           <div>
-            <Card className="shadow-card">
+            <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>{t('joinRoom.allRooms')}</CardTitle>
                     <CardDescription>{t('joinRoom.allRoomsDesc')}</CardDescription>
                   </div>
-                  <GradientButton
-                    variant="outline"
-                    size="sm"
+                  <button
+                    className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2 disabled:opacity-50"
                     onClick={() => refetchAllGames()}
                     disabled={allGamesLoading}
                   >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${allGamesLoading ? 'animate-spin' : ''}`} />
-                    {t('common.refresh')}
-                  </GradientButton>
+                    <RefreshCw className={`w-4 h-4 ${allGamesLoading ? 'animate-spin' : ''}`} />
+                    <span className="text-sm font-medium">{t('common.refresh')}</span>
+                  </button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -389,9 +390,12 @@ const JoinRoom = () => {
                     <p className="text-muted-foreground mb-4">
                       Unable to fetch finished games from the blockchain.
                     </p>
-                    <GradientButton onClick={() => refetchAllGames()}>
+                    <button
+                      className="bg-primary text-primary-foreground px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white"
+                      onClick={() => refetchAllGames()}
+                    >
                       {t('gamePage.actions.tryAgain')}
-                    </GradientButton>
+                    </button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -402,10 +406,10 @@ const JoinRoom = () => {
                         return (
                           <div
                             key={game.gameId.toString()}
-                            className={`p-4 border-2 rounded-lg transition-all duration-300 cursor-pointer hover:shadow-card hover:-translate-y-1 ${
+                            className={`p-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button cursor-pointer transition-all duration-150 ${
                               game.status === CONTRACT_CONFIG.GameStatus.Calculating
-                                ? "bg-gradient-to-br from-blue-100 to-indigo-100 border-blue-400 hover:border-blue-500"
-                                : "bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-300 hover:border-purple-400"
+                                ? "bg-blue-100 dark:bg-blue-900 border-blue-600 dark:border-blue-400"
+                                : "bg-purple-100 dark:bg-purple-900 border-purple-600 dark:border-purple-400"
                             }`}
                             onClick={() => handleViewFinishedGame(game.gameId)}
                           >
@@ -451,9 +455,12 @@ const JoinRoom = () => {
                         <p className="text-muted-foreground mb-4">
                           {t('joinRoom.noAllRoomsDesc')}
                         </p>
-                        <GradientButton onClick={() => navigate("/create-room")}>
+                        <button
+                          className="bg-primary text-primary-foreground px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white"
+                          onClick={() => navigate("/create-room")}
+                        >
                           {t('common.createRoom')}
-                        </GradientButton>
+                        </button>
                       </div>
                     )}
                   </div>

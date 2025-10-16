@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -195,32 +194,30 @@ const CreateRoom = () => {
           </div>
         </div>
       )}
-      
-      <div className="max-w-6xl mx-auto">
+
+      <div className="max-w-page mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <GradientButton 
-              variant="outline" 
-              size="sm"
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2 disabled:opacity-50"
               onClick={() => navigate("/")}
               disabled={isCreating}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t('common.back')}
-            </GradientButton>
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('common.back')}</span>
+            </button>
             <h1 className="text-xl font-bold text-foreground">{t('createRoom.title')}</h1>
           </div>
           <div className="flex items-center space-x-2">
-            <GradientButton
-              variant="outline"
-              size="sm"
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2 disabled:opacity-50"
               onClick={() => navigate("/leaderboard")}
               disabled={isCreating}
             >
-              <TrendingUp className="w-4 h-4 mr-2" />
-              {t('common.leaderboard')}
-            </GradientButton>
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('common.leaderboard')}</span>
+            </button>
             <LanguageSwitcher />
             <ConnectButton />
           </div>
@@ -230,7 +227,7 @@ const CreateRoom = () => {
           {/* Left Side - Room Settings */}
           <div className="space-y-6">
             {/* Quick Presets */}
-            <Card className="shadow-card">
+            <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
               <CardHeader>
                 <CardTitle>{t('createRoom.quickSetup')}</CardTitle>
                 <CardDescription>{t('createRoom.quickSetupDesc')}</CardDescription>
@@ -239,10 +236,10 @@ const CreateRoom = () => {
                 {presets.map((preset, index) => (
                   <div
                     key={index}
-                    className={`p-4 border-2 border-border rounded-lg transition-all duration-300 ${
-                      isCreating 
-                        ? 'opacity-50 cursor-not-allowed' 
-                        : 'cursor-pointer hover:border-primary hover:shadow-card'
+                    className={`p-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button transition-all duration-150 bg-surface-light dark:bg-surface-dark ${
+                      isCreating
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'cursor-pointer'
                     }`}
                     onClick={() => !isCreating && setRoomSettings(preset.settings)}
                   >
@@ -261,7 +258,7 @@ const CreateRoom = () => {
             </Card>
 
             {/* Custom Settings */}
-            <Card className="shadow-card">
+            <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
               <CardHeader>
                 <CardTitle>{t('createRoom.customSettings')}</CardTitle>
                 <CardDescription>{t('createRoom.customSettingsDesc')}</CardDescription>
@@ -379,7 +376,7 @@ const CreateRoom = () => {
 
           {/* Right Side - Preview */}
           <div className="space-y-6">
-            <Card className="shadow-card">
+            <Card className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
               <CardHeader>
                 <CardTitle>{t('createRoom.preview.title')}</CardTitle>
                 <CardDescription>{t('createRoom.preview.description')}</CardDescription>
@@ -444,9 +441,8 @@ const CreateRoom = () => {
               </Card>
             )}
             
-            <GradientButton
-              size="xl"
-              className="w-full"
+            <button
+              className="w-full bg-primary text-primary-foreground px-6 py-4 text-lg rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white disabled:opacity-50 flex items-center justify-center"
               onClick={handleCreateRoom}
               disabled={isCreating || !isConnected}
             >
@@ -460,17 +456,15 @@ const CreateRoom = () => {
               ) : (
                 t('createRoom.buttons.createRoom')
               )}
-            </GradientButton>
+            </button>
 
-            <GradientButton
-              variant="outline"
-              size="lg"
-              className="w-full"
+            <button
+              className="w-full bg-surface-light dark:bg-surface-dark text-foreground px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white disabled:opacity-50"
               onClick={() => navigate("/join-room")}
               disabled={isCreating}
             >
               {t('createRoom.buttons.joinExisting')}
-            </GradientButton>
+            </button>
           </div>
         </div>
       </div>

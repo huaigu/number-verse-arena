@@ -1,5 +1,5 @@
 /* Import fun fonts for game numbers */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fredoka+One&family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fredoka+One&family=Righteous&family=Press+Start+2P&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -133,6 +133,7 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Noto Sans SC', sans-serif;
   }
 }
 
@@ -204,4 +205,80 @@
 .game-number-bold {
   font-family: 'Righteous', cursive;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Pixel/Retro Game Styles */
+.pixel-font {
+  font-family: 'Press Start 2P', cursive;
+}
+
+.pixel-button {
+  border: 2px solid #000;
+  transition: all 0.15s ease-in-out;
+}
+
+.dark .pixel-button {
+  border: 2px solid #fff;
+}
+
+.pixel-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none !important;
+}
+
+.shadow-pixel-light {
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.75);
+}
+
+.shadow-pixel-dark {
+  box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.2);
+}
+
+.shadow-pixel-inset-light {
+  box-shadow: inset 2px 2px 0px 0px rgba(255, 255, 255, 0.5), inset -2px -2px 0px 0px rgba(0, 0, 0, 0.25);
+}
+
+.shadow-pixel-inset-dark {
+  box-shadow: inset 2px 2px 0px 0px rgba(255, 255, 255, 0.1), inset -2px -2px 0px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Number card pixel styles */
+.number-card {
+  border: 2px solid #000;
+  background-color: #FFDDAA;
+  color: #4A4A4A;
+}
+
+.dark .number-card {
+  border: 2px solid #fff;
+  background-color: #444;
+  color: #E0E0E0;
+}
+
+.number-card.selected {
+  background-color: #FF9800;
+  color: white;
+  box-shadow: none !important;
+  transform: translate(2px, 2px);
+}
+
+.dark .number-card.selected {
+  background-color: #E65100;
+  color: white;
+}
+
+/* Disabled number card styles */
+.number-card.disabled {
+  background-color: #666;
+  color: #999;
+  border-color: #444;
+  cursor: not-allowed;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.dark .number-card.disabled {
+  background-color: #222;
+  color: #555;
+  border-color: #333;
 }

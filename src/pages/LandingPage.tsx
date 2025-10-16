@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom"
-import { GradientButton } from "@/components/ui/gradient-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Trophy, Users, Target, Gamepad2, TwitterIcon, GithubIcon, Shield, Lock } from "lucide-react"
@@ -134,24 +133,24 @@ const LandingPage = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            <span className="text-xl font-bold text-foreground">Unique Number</span>
+            <span className="text-xl font-bold text-foreground font-display">Unique Number</span>
           </div>
           <div className="flex items-center gap-4">
-            <GradientButton
-              variant="outline"
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white flex items-center space-x-2"
               onClick={() => navigate("/leaderboard")}
             >
-              <Trophy className="w-4 h-4 mr-2" />
-              {t('common.leaderboard')}
-            </GradientButton>
+              <Trophy className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('common.leaderboard')}</span>
+            </button>
 
-            <GradientButton
-              variant="outline"
+            <button
+              className="bg-surface-light dark:bg-surface-dark text-foreground px-4 py-2 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white disabled:opacity-50"
               onClick={handleQuickJoin}
               disabled={gamesLoading}
             >
-              {gamesLoading ? t('common.loading') : t('common.quickJoin')}
-            </GradientButton>
+              <span className="text-sm font-medium">{gamesLoading ? t('common.loading') : t('common.quickJoin')}</span>
+            </button>
 
             <LanguageSwitcher />
             <ConnectButton />
@@ -162,7 +161,7 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 animate-slide-in">
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 animate-slide-in font-display">
             {t('landing.title')}
             <span className="block text-2xl md:text-4xl text-primary mt-2">
               {t('landing.subtitle')}
@@ -174,20 +173,18 @@ const LandingPage = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <GradientButton
-              size="xl"
+            <button
+              className="bg-primary text-primary-foreground px-8 py-4 text-lg rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white animate-pulse-glow"
               onClick={() => navigate("/create-room")}
-              className="animate-pulse-glow"
             >
               {t('common.createRoom')}
-            </GradientButton>
-            <GradientButton
-              variant="secondary"
-              size="xl"
+            </button>
+            <button
+              className="bg-secondary text-secondary-foreground px-8 py-4 text-lg rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white"
               onClick={() => navigate("/join-room")}
             >
               {t('common.joinRoom')}
-            </GradientButton>
+            </button>
           </div>
         </div>
       </section>
@@ -195,7 +192,7 @@ const LandingPage = () => {
       {/* Demo Video */}
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-8 font-game">
             {t('landing.demoVideo.title')}
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
@@ -216,15 +213,15 @@ const LandingPage = () => {
 
       {/* Features */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center text-foreground mb-12">
+        <h2 className="text-3xl font-bold text-center text-foreground mb-12 font-game">
           {t('landing.features.title')}
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <Card 
-              key={index} 
-              className="shadow-card hover:shadow-float transition-all duration-300 hover:-translate-y-2"
+            <Card
+              key={index}
+              className="shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white"
             >
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-gradient-primary rounded-xl mx-auto mb-4 flex items-center justify-center">
@@ -245,13 +242,13 @@ const LandingPage = () => {
       {/* How to Play */}
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-foreground mb-12">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12 font-game">
             {t('landing.howToPlay.title')}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground font-mono">
                 1
               </div>
               <h3 className="text-xl font-semibold mb-2">{t('landing.howToPlay.step1.title')}</h3>
@@ -261,7 +258,7 @@ const LandingPage = () => {
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground font-mono">
                 2
               </div>
               <h3 className="text-xl font-semibold mb-2">{t('landing.howToPlay.step2.title')}</h3>
@@ -271,7 +268,7 @@ const LandingPage = () => {
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-foreground font-mono">
                 3
               </div>
               <h3 className="text-xl font-semibold mb-2">{t('landing.howToPlay.step3.title')}</h3>
@@ -286,7 +283,7 @@ const LandingPage = () => {
       {/* FAQ */}
       <section className="container mx-auto px-4 py-16 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-foreground mb-12">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12 font-game">
             {t('landing.faq.title')}
           </h2>
 

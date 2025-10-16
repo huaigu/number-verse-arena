@@ -9,17 +9,17 @@ interface GameCardProps extends React.HTMLAttributes<HTMLDivElement> {
 const GameCard = React.forwardRef<HTMLDivElement, GameCardProps>(
   ({ className, variant = "default", children, ...props }, ref) => {
     const variants = {
-      default: "bg-game-grid text-primary-foreground hover:bg-primary-hover shadow-game",
-      selected: "bg-game-selected text-primary-foreground ring-2 ring-accent shadow-float",
-      available: "bg-game-available text-foreground hover:bg-game-grid shadow-card",
-      disabled: "bg-game-disabled text-muted-foreground cursor-not-allowed opacity-60",
-      highlighted: "bg-accent text-accent-foreground shadow-card"
+      default: "number-card shadow-pixel-light dark:shadow-pixel-dark pixel-button",
+      selected: "number-card selected",
+      available: "number-card shadow-pixel-light dark:shadow-pixel-dark pixel-button hover:bg-[#FFCC88] dark:hover:bg-[#555]",
+      disabled: "number-card opacity-60 cursor-not-allowed",
+      highlighted: "number-card shadow-pixel-light dark:shadow-pixel-dark bg-accent text-accent-foreground"
     }
 
     return (
       <div
         className={cn(
-          "relative flex items-center justify-center rounded-xl font-bold text-lg transition-all duration-300 cursor-pointer select-none",
+          "relative flex items-center justify-center rounded-lg font-bold text-lg transition-all duration-150 cursor-pointer select-none",
           variants[variant],
           className
         )}

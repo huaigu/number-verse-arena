@@ -106,6 +106,10 @@ cd contracts && npx hardhat test   # Alternative test command
 - Custom components: `GameCard` (number grid), `GradientButton` (themed buttons)
 - Glass-morphism effects and gradient backgrounds
 - Responsive design (mobile-first)
+- **Page Container Width**: Use `max-w-page` (1060px) for all main pages
+  - Defined in `tailwind.config.ts` as custom maxWidth
+  - Applied to: JoinRoom, CreateRoom, Leaderboard, GamePage
+  - Alias: `max-w-content` (same 1060px value)
 
 ### Error Handling
 - Toast notifications via `sonner` library
