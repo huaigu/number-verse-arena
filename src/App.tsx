@@ -16,6 +16,7 @@ import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import { Analytics } from "@vercel/analytics/react"
 import './i18n';
+import { useTranslation } from 'react-i18next';
 
 const queryClient = new QueryClient();
 
@@ -30,31 +31,44 @@ const queryClient = new QueryClient();
  * - Instant encryption availability when users reach game pages
  * - Better user experience with preloaded encryption system
  */
-const App = () => (
-  <WagmiProvider config={config}>
-    <QueryClientProvider client={queryClient}>
-      <RainbowKitProvider>
-        <FhevmProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/game" element={<GamePage />} />
-                <Route path="/create-room" element={<CreateRoom />} />
-                <Route path="/join-room" element={<JoinRoom />} />
-                <Route path="/leaderboard" element={<Leaderboard />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-            <Analytics />
-          </TooltipProvider>
-        </FhevmProvider>
-      </RainbowKitProvider>
-    </QueryClientProvider>
-  </WagmiProvider>
-);
+const App = () => {
+  const { i18n } = useTranslation();
+
+  // Map i18n language codes to RainbowKit locale codes
+  const getRainbowKitLocale = (lang: string) => {
+    const localeMap: Record<string, string> = {
+      'en': 'en-US',
+      'zh': 'zh-CN',
+    };
+    return localeMap[lang] || 'en-US';
+  };
+
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider locale={getRainbowKitLocale(i18n.language)}>
+          <FhevmProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/game" element={<GamePage />} />
+                  <Route path="/create-room" element={<CreateRoom />} />
+                  <Route path="/join-room" element={<JoinRoom />} />
+                  <Route path="/leaderboard" element={<Leaderboard />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+              <Analytics />
+            </TooltipProvider>
+          </FhevmProvider>
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+};
 
 export default App;
