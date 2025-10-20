@@ -11,6 +11,7 @@ import { useGetGameSummary, useHasPlayerSubmitted, useSubmitNumber, useFindWinne
 import { CONTRACT_CONFIG, formatETH, formatAddress, GameSummary } from "@/contracts/config"
 import { useTranslation } from 'react-i18next'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { useFhevmContext } from '@/providers/FhevmProvider'
 
 const GamePage = () => {
   const navigate = useNavigate()
@@ -18,11 +19,14 @@ const GamePage = () => {
   const { address, isConnected } = useAccount()
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
-  
+
   // 从URL参数获取游戏ID
   const roomParam = searchParams.get('room')
   const gameId = roomParam ? BigInt(roomParam) : undefined
-  
+
+  // Use shared FHEVM instance from global provider (preloaded on app mount)
+  const { instance: fhevmInstance, status: fhevmStatus, error: fhevmError } = useFhevmContext()
+
   // 状态管理
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
   const [highlightedNumber, setHighlightedNumber] = useState<number | null>(null)
@@ -120,6 +124,18 @@ const GamePage = () => {
     refetch: refetchCanFinalize 
   } = useCanFinalizeGame(gameId)
   
+  // Handle FHEVM initialization errors
+  useEffect(() => {
+    if (fhevmError) {
+      console.error('FHEVM initialization error:', fhevmError)
+      toast({
+        title: "Encryption System Error",
+        description: "Failed to initialize encryption. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }, [fhevmError, toast])
+
   // 处理提交成功
   useEffect(() => {
     if (submitSuccess) {
@@ -456,23 +472,39 @@ const GamePage = () => {
       })
       return
     }
-    
+
+    // Check FHEVM instance is ready before submission
+    if (fhevmStatus !== 'ready' || !fhevmInstance) {
+      const statusMessages: Record<string, string> = {
+        'idle': 'Encryption system is initializing...',
+        'loading': 'Encryption system is loading...',
+        'error': 'Encryption system failed to initialize. Please refresh the page.',
+      }
+
+      toast({
+        title: "Encryption Not Ready",
+        description: statusMessages[fhevmStatus] || `Encryption system status: ${fhevmStatus}. Please wait or refresh the page.`,
+        variant: "destructive"
+      })
+      return
+    }
+
     try {
       toast({
         title: t('toast.encryptingNumber.title'),
         description: t('toast.encryptingNumber.description'),
       })
-      
+
       // 调用更新后的 submitNumber，它现在包含 FHE 加密
       await submitNumber(gameId, selectedNumber, formatETH(finalGameSummary.entryFee))
-      
+
       toast({
         title: t('toast.transactionSubmitted.title'),
         description: t('toast.transactionSubmitted.description'),
       })
     } catch (error) {
       console.error('Error submitting number:', error)
-      
+
       // 提供更详细的错误信息
       let errorMessage = "Please try again."
       if (error instanceof Error) {
@@ -484,7 +516,7 @@ const GamePage = () => {
           errorMessage = error.message
         }
       }
-      
+
       toast({
         title: t('toast.submissionFailed.title'),
         description: errorMessage,
@@ -570,9 +602,68 @@ const GamePage = () => {
     )
   }
 
+  // Wait for FHEVM initialization before showing game interface
+  if (fhevmStatus === 'loading' || fhevmStatus === 'idle') {
+    return (
+      <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
+        <Card className="max-w-md bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+          <CardContent className="p-8 text-center">
+            <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin text-blue-500 dark:text-blue-400" />
+            <h3 className="text-2xl font-bold mb-3">Initializing Encryption System</h3>
+            <p className="text-muted-foreground text-sm mb-4">
+              Loading privacy-preserving encryption...
+            </p>
+            <div className="flex items-center justify-center space-x-2 text-xs text-blue-500 dark:text-blue-400">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span>Please wait a moment</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show error screen if FHEVM initialization failed
+  if (fhevmStatus === 'error') {
+    return (
+      <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
+        <Card className="max-w-md bg-surface-light dark:bg-surface-dark shadow-pixel-light dark:shadow-pixel-dark border-2 border-black dark:border-white">
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-500 dark:text-red-400" />
+            <h3 className="text-2xl font-bold mb-3 text-red-600 dark:text-red-400">Encryption System Failed</h3>
+            <p className="text-muted-foreground text-sm mb-4">
+              Failed to initialize the privacy encryption system.
+            </p>
+            {fhevmError && (
+              <div className="text-xs text-muted-foreground mb-4 p-3 bg-muted/50 dark:bg-muted/20 rounded border-2 border-muted">
+                <strong>Error:</strong> {fhevmError.message}
+              </div>
+            )}
+            <div className="space-y-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full bg-primary text-white px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold"
+              >
+                <RotateCcw className="w-4 h-4 mr-2 inline" />
+                Refresh Page
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className="w-full bg-surface-light dark:bg-surface-dark text-foreground px-6 py-3 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold"
+              >
+                <Home className="w-4 h-4 mr-2 inline" />
+                Back to Home
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   // 加载状态 - 如果主要数据在加载，或者主要数据失败但备用数据还在加载
   const isLoading = gameLoading || hasSubmittedLoading || hasClaimedLoading || (!gameSummary && allGamesLoading)
-  
+
   if (isLoading) {
     return (
       <div className="h-screen bg-gradient-background p-3 flex items-center justify-center">
@@ -717,6 +808,29 @@ const GamePage = () => {
                       {t('gamePage.gameArea.submitting')}
                     </Badge>
                   )}
+                  {/* FHEVM Status Badge */}
+                  {isConnected && !hasSubmitted && !isSubmitting && (
+                    <>
+                      {fhevmStatus === 'loading' && (
+                        <Badge variant="outline" className="text-xs mb-1 bg-blue-50 dark:bg-blue-900/20 border-blue-500">
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Encrypting...
+                        </Badge>
+                      )}
+                      {fhevmStatus === 'ready' && selectedNumber && (
+                        <Badge variant="outline" className="text-xs mb-1 bg-green-50 dark:bg-green-900/20 border-green-500 text-green-700 dark:text-green-400">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                          Ready
+                        </Badge>
+                      )}
+                      {fhevmStatus === 'error' && (
+                        <Badge variant="outline" className="text-xs mb-1 bg-red-50 dark:bg-red-900/20 border-red-500 text-red-700 dark:text-red-400">
+                          <AlertCircle className="w-3 h-3 mr-1" />
+                          Error
+                        </Badge>
+                      )}
+                    </>
+                  )}
                   <p className="text-xs md:text-sm">{t('gamePage.gameArea.myChoice')}</p>
                 </CardContent>
               </Card>
@@ -806,6 +920,31 @@ const GamePage = () => {
                     </div>
                   )}
 
+                  {/* FHEVM Loading Status */}
+                  {isConnected && fhevmStatus === 'loading' && (
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 rounded-lg text-center">
+                      <div className="flex items-center justify-center space-x-2 text-blue-700 dark:text-blue-400">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span className="text-sm font-medium">Initializing encryption system...</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* FHEVM Error Status */}
+                  {isConnected && fhevmStatus === 'error' && (
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-500 rounded-lg text-center">
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="flex items-center space-x-2 text-red-700 dark:text-red-400">
+                          <AlertCircle className="w-5 h-5" />
+                          <span className="text-sm font-medium">Encryption system failed</span>
+                        </div>
+                        <span className="text-xs text-red-600 dark:text-red-500">
+                          {fhevmError?.message || 'Please refresh the page to retry'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Game Status Messages */}
                   {finalGameSummary?.status !== CONTRACT_CONFIG.GameStatus.Open && !isGameDecrypted() && (
                     <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-500 rounded-lg text-center">
@@ -820,8 +959,30 @@ const GamePage = () => {
                     </div>
                   )}
 
+                  {/* FHEVM Initialization Progress - Prominent Display */}
+                  {isConnected && fhevmStatus === 'loading' && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
+                    <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border-2 border-blue-500 dark:border-blue-400 rounded-lg shadow-lg">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex items-center space-x-3">
+                          <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400" />
+                          <span className="text-lg font-bold text-blue-700 dark:text-blue-300">
+                            Initializing Encryption System
+                          </span>
+                        </div>
+                        <div className="text-sm text-blue-600 dark:text-blue-400 text-center max-w-md">
+                          <p className="mb-2">🔐 Setting up secure encryption for your number...</p>
+                          <p className="text-xs opacity-80">This ensures your selection remains private until the game ends.</p>
+                        </div>
+                        <div className="flex items-center space-x-2 text-xs text-blue-500 dark:text-blue-500">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                          <span>Please wait a moment...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Status Message - Enhanced */}
-                  {selectedNumber && !hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
+                  {selectedNumber && !hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && fhevmStatus === 'ready' && (
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 rounded-lg text-center">
                       <span className="text-sm text-blue-700 dark:text-blue-400">
                         {t('gamePage.gameArea.selected')}: <span className="font-bold text-2xl">{selectedNumber}</span>
@@ -831,31 +992,74 @@ const GamePage = () => {
 
                   {/* Action Buttons - Enhanced */}
                   {!hasSubmitted && isConnected && finalGameSummary?.status === CONTRACT_CONFIG.GameStatus.Open && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <button
-                        disabled={!selectedNumber || isSubmitting || timeLeft === 0}
-                        className="bg-primary text-white px-6 py-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={handleConfirmChoice}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin inline" />
-                            {t('gamePage.gameArea.submitting')}
-                          </>
-                        ) : timeLeft === 0 ? (
-                          t('gamePage.roomInfo.expired')
-                        ) : (
-                          t('common.confirm')
-                        )}
-                      </button>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <button
+                          disabled={!selectedNumber || isSubmitting || timeLeft === 0 || fhevmStatus !== 'ready'}
+                          className="bg-primary text-white px-6 py-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={handleConfirmChoice}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin inline" />
+                              {t('gamePage.gameArea.submitting')}
+                            </>
+                          ) : fhevmStatus === 'loading' ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin inline" />
+                              Initializing...
+                            </>
+                          ) : fhevmStatus === 'error' ? (
+                            'Encryption Failed'
+                          ) : timeLeft === 0 ? (
+                            t('gamePage.roomInfo.expired')
+                          ) : (
+                            t('common.confirm')
+                          )}
+                        </button>
 
-                      <button
-                        onClick={() => setSelectedNumber(null)}
-                        className="bg-surface-light dark:bg-surface-dark text-foreground px-6 py-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={isSubmitting}
-                      >
-                        {t('common.cancel')}
-                      </button>
+                        <button
+                          onClick={() => setSelectedNumber(null)}
+                          className="bg-surface-light dark:bg-surface-dark text-foreground px-6 py-4 rounded-lg shadow-pixel-light dark:shadow-pixel-dark pixel-button border-2 border-black dark:border-white font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={isSubmitting}
+                        >
+                          {t('common.cancel')}
+                        </button>
+                      </div>
+
+                      {/* Encryption Status Helper Text */}
+                      {fhevmStatus !== 'ready' && !isSubmitting && (
+                        <div className="text-center text-xs text-muted-foreground px-4">
+                          {fhevmStatus === 'idle' && (
+                            <p className="flex items-center justify-center space-x-1">
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <span>Preparing encryption system...</span>
+                            </p>
+                          )}
+                          {fhevmStatus === 'loading' && (
+                            <p className="flex items-center justify-center space-x-1">
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <span>Loading encryption keys, please wait...</span>
+                            </p>
+                          )}
+                          {fhevmStatus === 'error' && (
+                            <p className="flex items-center justify-center space-x-1 text-red-500 dark:text-red-400">
+                              <AlertCircle className="w-3 h-3" />
+                              <span>Encryption failed. Please refresh the page to retry.</span>
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Ready Status Indicator */}
+                      {fhevmStatus === 'ready' && selectedNumber && !isSubmitting && (
+                        <div className="text-center text-xs text-green-600 dark:text-green-400 px-4">
+                          <p className="flex items-center justify-center space-x-1">
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span>✓ Encryption ready - Your number will be encrypted on-chain</span>
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 

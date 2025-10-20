@@ -40,14 +40,37 @@ export class RelayerSDKLoader {
         `script[src="${SDK_CDN_URL}"]`
       );
       if (existingScript) {
-        if (!isFhevmWindowType(window, this._trace)) {
-          reject(
-            new Error(
-              "RelayerSDKLoader: window object does not contain a valid relayerSDK object."
-            )
-          );
-        }
-        resolve();
+        console.log("[RelayerSDKLoader] Script already exists in DOM, polling for SDK...");
+
+        // Poll for relayerSDK with exponential backoff
+        const maxAttempts = 10;
+        const initialDelay = 100;
+        let attempt = 0;
+
+        const pollForSDK = () => {
+          if (isFhevmWindowType(window, this._trace)) {
+            console.log(`[RelayerSDKLoader] SDK ready after ${attempt} attempts (existing script)`);
+            resolve();
+            return;
+          }
+
+          attempt++;
+          if (attempt >= maxAttempts) {
+            console.log("[RelayerSDKLoader] existing script FAILED after max attempts...");
+            reject(
+              new Error(
+                `RelayerSDKLoader: window object does not contain a valid relayerSDK object after ${maxAttempts} attempts.`
+              )
+            );
+            return;
+          }
+
+          const delay = initialDelay * Math.pow(2, attempt - 1);
+          console.log(`[RelayerSDKLoader] Attempt ${attempt}/${maxAttempts} (existing), waiting ${delay}ms...`);
+          setTimeout(pollForSDK, delay);
+        };
+
+        pollForSDK();
         return;
       }
 
@@ -57,15 +80,40 @@ export class RelayerSDKLoader {
       script.async = true;
 
       script.onload = () => {
-        if (!isFhevmWindowType(window, this._trace)) {
-          console.log("[RelayerSDKLoader] script onload FAILED...");
-          reject(
-            new Error(
-              `RelayerSDKLoader: Relayer SDK script has been successfully loaded from ${SDK_CDN_URL}, however, the window.relayerSDK object is invalid.`
-            )
-          );
-        }
-        resolve();
+        console.log("[RelayerSDKLoader] script onload event fired, waiting for SDK to initialize...");
+
+        // Poll for relayerSDK with exponential backoff
+        // Script may need time to execute after loading
+        const maxAttempts = 10;
+        const initialDelay = 100; // Start with 100ms
+        let attempt = 0;
+
+        const pollForSDK = () => {
+          if (isFhevmWindowType(window, this._trace)) {
+            console.log(`[RelayerSDKLoader] SDK ready after ${attempt} attempts`);
+            resolve();
+            return;
+          }
+
+          attempt++;
+          if (attempt >= maxAttempts) {
+            console.log("[RelayerSDKLoader] script onload FAILED after max attempts...");
+            reject(
+              new Error(
+                `RelayerSDKLoader: Relayer SDK script has been successfully loaded from ${SDK_CDN_URL}, however, the window.relayerSDK object is invalid after ${maxAttempts} attempts.`
+              )
+            );
+            return;
+          }
+
+          // Exponential backoff: 100ms, 200ms, 400ms, 800ms, etc.
+          const delay = initialDelay * Math.pow(2, attempt - 1);
+          console.log(`[RelayerSDKLoader] Attempt ${attempt}/${maxAttempts}, waiting ${delay}ms...`);
+          setTimeout(pollForSDK, delay);
+        };
+
+        // Start polling immediately
+        pollForSDK();
       };
 
       script.onerror = () => {

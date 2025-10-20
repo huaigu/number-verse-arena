@@ -7,6 +7,7 @@ import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { config } from './config/wagmi';
+import { FhevmProvider } from './providers/FhevmProvider';
 import LandingPage from "./pages/LandingPage";
 import GamePage from "./pages/GamePage";
 import CreateRoom from "./pages/CreateRoom";
@@ -19,34 +20,38 @@ import './i18n';
 const queryClient = new QueryClient();
 
 /**
- * Main App component using @fhevm/react hooks architecture
+ * Main App component with global FHEVM initialization
  *
- * FHEVM initialization is now handled via useFhevm() hook within components,
- * rather than through a centralized Provider. This approach provides:
- * - Better control over instance lifecycle
- * - Automatic cleanup on component unmount
- * - Per-component FHEVM instance management
+ * FhevmProvider initializes the FHEVM SDK once at app startup and shares
+ * the instance across all components, eliminating delays when users navigate
+ * to game pages. This ensures:
+ * - Single SDK load on app mount (no repeated CDN fetches)
+ * - Shared FHEVM instance across all components
+ * - Instant encryption availability when users reach game pages
+ * - Better user experience with preloaded encryption system
  */
 const App = () => (
   <WagmiProvider config={config}>
     <QueryClientProvider client={queryClient}>
       <RainbowKitProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/game" element={<GamePage />} />
-              <Route path="/create-room" element={<CreateRoom />} />
-              <Route path="/join-room" element={<JoinRoom />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-          <Analytics />
-        </TooltipProvider>
+        <FhevmProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/game" element={<GamePage />} />
+                <Route path="/create-room" element={<CreateRoom />} />
+                <Route path="/join-room" element={<JoinRoom />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+            <Analytics />
+          </TooltipProvider>
+        </FhevmProvider>
       </RainbowKitProvider>
     </QueryClientProvider>
   </WagmiProvider>
