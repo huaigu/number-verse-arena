@@ -282,6 +282,7 @@ export default {
   // 排行榜页面
   leaderboard: {
     title: "排行榜",
+    subtitle: "顶级玩家和最近获胜者",
     stats: {
       totalGames: "总游戏数",
       totalPlayers: "总玩家数",

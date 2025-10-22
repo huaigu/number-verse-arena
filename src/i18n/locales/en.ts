@@ -282,6 +282,7 @@ export default {
   // Leaderboard Page
   leaderboard: {
     title: "Leaderboard",
+    subtitle: "Top players and recent winners",
     stats: {
       totalGames: "Total Games",
       totalPlayers: "Total Players",

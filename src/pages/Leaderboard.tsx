@@ -112,7 +112,7 @@ const Leaderboard = () => {
             </button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">{t('leaderboard.title')}</h1>
-              <p className="text-muted-foreground">Top players and recent winners</p>
+              <p className="text-muted-foreground">{t('leaderboard.subtitle')}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
