@@ -15,7 +15,7 @@ export const CONTRACT_CONFIG = {
     sepolia: {
       chainId: 11155111,
       name: 'Sepolia Testnet',
-      rpcUrl: 'https://eth-sepolia.public.blastapi.io'
+      rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
     }
   }
 } as const;
